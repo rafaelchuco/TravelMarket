@@ -22,4 +22,4 @@ local_settings.py
 
 # OS
 .DS_Store
-Thumbs.db
+Thumbs.db.env
