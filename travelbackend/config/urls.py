@@ -1,30 +1,41 @@
 from django.contrib import admin
 from django.urls import path, include
-from django.conf import settings
-from django.conf.urls.static import static
+from rest_framework import permissions
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
 
-# Personalizar Admin
-admin.site.site_header = "Agencia de Turismo - Admin"
-admin.site.site_title = "Admin Agencia"
-admin.site.index_title = "Panel de Administración"
+schema_view = get_schema_view(
+    openapi.Info(
+        title="Agencia de Turismo API",
+        default_version='v1',
+        description="Documentación de la API de Agencia de Turismo",
+        terms_of_service="https://www.google.com/policies/terms/",
+        contact=openapi.Contact(email="contacto@agencia.com"),
+        license=openapi.License(name="MIT License"),
+    ),
+    public=True,
+    permission_classes=(permissions.AllowAny,),
+)
 
 urlpatterns = [
-    # Django Admin (solo para administradores)
-    path('admin/', admin.site.urls),
-    
-    # API v1
-    #path('api/v1/auth/', include('apps.authentication.urls')),
-    #path('api/v1/destinations/', include('apps.destinations.urls')),
-    #path('api/v1/packages/', include('apps.packages.urls')),
-    #path('api/v1/hotels/', include('apps.hotels.urls')),
-    #path('api/v1/flights/', include('apps.flights.urls')),
-    #path('api/v1/activities/', include('apps.activities.urls')),
-    #path('api/v1/bookings/', include('apps.bookings.urls')),
-    #path('api/v1/reviews/', include('apps.reviews.urls')),
-    #path('api/v1/promotions/', include('apps.promotions.urls')),
-    #path('api/v1/inquiries/', include('apps.inquiries.urls')),
-]
+     # Grappelli primero
+    path('grappelli/', include('grappelli.urls')),
 
-# Media files en desarrollo
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    # Admin de Django
+    path('admin/', admin.site.urls),
+    path('api/auth/', include('applications.authentication.urls')),
+    path('api/destinations/', include('applications.destinations.urls')),
+    path('api/packages/', include('applications.packages.urls')),
+    path('api/hotels/', include('applications.hotels.urls')),
+    path('api/flights/', include('applications.flights.urls')),
+    path('api/activities/', include('applications.activities.urls')),
+    path('api/bookings/', include('applications.bookings.urls')),
+    path('api/reviews/', include('applications.reviews.urls')),
+    path('api/promotions/', include('applications.promotions.urls')),
+    path('api/inquiries/', include('applications.inquiries.urls')),
+
+    # Swagger/OpenAPI
+    path('swagger.json/', schema_view.without_ui(cache_timeout=0), name='schema-json'),
+    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+]

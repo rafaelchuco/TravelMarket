@@ -4,3 +4,7 @@ from django.apps import AppConfig
 class PromotionsConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'applications.promotions'
+    verbose_name = 'Promociones'
+    
+    def ready(self):
+        pass
