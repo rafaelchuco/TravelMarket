@@ -1,0 +1,28 @@
+# Git ignore for Android + Kotlin projects
+# Android Studio / IntelliJ
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Gradle
+.gradle/
+build/
+*/build/
+local.properties
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Kotlin specific
+*.class
+*.jar
+*.war
+*.ear
+
+# Misc
+captures/
