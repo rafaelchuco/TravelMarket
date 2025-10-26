@@ -869,12 +869,12 @@ fun BookingStep3(
                         text = "S/ ${String.format("%.2f", subtotal)}",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Medium,
-                        color = Color.Black
-                    )
+                    color = Color.Black
+                )
                 }
                 
                 if (discount > 0) {
-                    Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(8.dp))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween

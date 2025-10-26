@@ -31,7 +31,7 @@ class MainActivity : ComponentActivity() {
             TravelMarketTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     // Cambia esta línea para ver diferentes pantallas
-                    ProfileScreen()
+                    WishlistScreen()
                 }
             }
         }
