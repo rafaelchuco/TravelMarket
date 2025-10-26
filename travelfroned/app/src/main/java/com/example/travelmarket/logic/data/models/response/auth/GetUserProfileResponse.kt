@@ -2,13 +2,13 @@ package com.example.travelmarket.logic.data.models.response.auth
 
 import com.google.gson.annotations.SerializedName
 
-data class UpdateProfileResponse(
-    @SerializedName("exito")  // ✅ AGREGAR
+data class GetUserProfileResponse(
+    @SerializedName("exito")
     val success: Boolean,
 
-    @SerializedName("mensaje")  // ✅ AGREGAR
+    @SerializedName("mensaje")
     val message: String,
 
-    @SerializedName("usuario")  // ✅ Cambiar de "user" a "usuario"
+    @SerializedName("usuario")
     val user: UserResponse
 )
