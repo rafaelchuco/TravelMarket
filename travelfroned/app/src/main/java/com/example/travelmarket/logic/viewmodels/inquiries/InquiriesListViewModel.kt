@@ -32,10 +32,15 @@ class InquiriesListViewModel @Inject constructor(
                     _state.value = InquiriesListState.Success(result.data)
                 }
                 is NetworkResult.Error -> {
-                    _state.value = InquiriesListState.Error(result.message ?: "Error desconocido")
+                    // ✅ CONVERSIÓN SEGURA A STRING
+                    val errorMessage = (result.message as? String)
+                        ?: result.message?.toString()
+                        ?: "Error al cargar consultas"
+                    _state.value = InquiriesListState.Error(errorMessage)
                 }
-                // ✅ NO INCLUIR NetworkResult.Loading
-                NetworkResult.Loading -> TODO()
+                NetworkResult.Loading -> {
+                    _state.value = InquiriesListState.Loading
+                }
             }
         }
     }
@@ -44,5 +49,5 @@ class InquiriesListViewModel @Inject constructor(
 sealed class InquiriesListState {
     data object Loading : InquiriesListState()
     data class Success(val inquiries: List<Inquiry>) : InquiriesListState()
-    data class Error(val message: String) : InquiriesListState()
+    data class Error(val message: String) : InquiriesListState()  // ✅ String, NO Any
 }

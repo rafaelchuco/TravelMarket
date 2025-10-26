@@ -19,10 +19,10 @@ class PackagesRepositoryImpl @Inject constructor(
                 val packages = response.body()!!.results?.mapNotNull { PackageMapper.toDomain(it) } ?: emptyList()
                 NetworkResult.Success(packages)
             } else {
-                NetworkResult.Error(response.code(), response.message())
+                NetworkResult.Error(response.message() ?: "Unknown error", response.code())
             }
         } catch (e: Exception) {
-            NetworkResult.Error(null, e.message ?: "Unknown error")
+            NetworkResult.Error(e.message ?: "Unknown error")
         }
     }
 
@@ -34,13 +34,13 @@ class PackagesRepositoryImpl @Inject constructor(
                 if (packageData != null) {
                     NetworkResult.Success(packageData)
                 } else {
-                    NetworkResult.Error(null, "Invalid package data")
+                    NetworkResult.Error("Invalid package data")
                 }
             } else {
-                NetworkResult.Error(response.code(), response.message())
+                NetworkResult.Error(response.message() ?: "Unknown error", response.code())
             }
         } catch (e: Exception) {
-            NetworkResult.Error(null, e.message ?: "Unknown error")
+            NetworkResult.Error(e.message ?: "Unknown error")
         }
     }
 
@@ -52,13 +52,13 @@ class PackagesRepositoryImpl @Inject constructor(
                 if (packageData != null) {
                     NetworkResult.Success(packageData)
                 } else {
-                    NetworkResult.Error(null, "Invalid package data")
+                    NetworkResult.Error("Invalid package data")
                 }
             } else {
-                NetworkResult.Error(response.code(), response.message())
+                NetworkResult.Error(response.message() ?: "Unknown error", response.code())
             }
         } catch (e: Exception) {
-            NetworkResult.Error(null, e.message ?: "Unknown error")
+            NetworkResult.Error(e.message ?: "Unknown error")
         }
     }
 
@@ -70,13 +70,13 @@ class PackagesRepositoryImpl @Inject constructor(
                 if (packageData != null) {
                     NetworkResult.Success(packageData)
                 } else {
-                    NetworkResult.Error(null, "Invalid package data")
+                    NetworkResult.Error("Invalid package data")
                 }
             } else {
-                NetworkResult.Error(response.code(), response.message())
+                NetworkResult.Error(response.message() ?: "Unknown error", response.code())
             }
         } catch (e: Exception) {
-            NetworkResult.Error(null, e.message ?: "Unknown error")
+            NetworkResult.Error(e.message ?: "Unknown error")
         }
     }
 
@@ -86,10 +86,10 @@ class PackagesRepositoryImpl @Inject constructor(
             if (response.isSuccessful) {
                 NetworkResult.Success(Unit)
             } else {
-                NetworkResult.Error(response.code(), response.message())
+                NetworkResult.Error(response.message() ?: "Unknown error", response.code())
             }
         } catch (e: Exception) {
-            NetworkResult.Error(null, e.message ?: "Unknown error")
+            NetworkResult.Error(e.message ?: "Unknown error")
         }
     }
 
@@ -100,10 +100,10 @@ class PackagesRepositoryImpl @Inject constructor(
                 val categories = response.body()!!.results?.map { PackageMapper.categoryToDomain(it) } ?: emptyList()
                 NetworkResult.Success(categories)
             } else {
-                NetworkResult.Error(response.code(), response.message())
+                NetworkResult.Error(response.message() ?: "Unknown error", response.code())
             }
         } catch (e: Exception) {
-            NetworkResult.Error(null, e.message ?: "Unknown error")
+            NetworkResult.Error(e.message ?: "Unknown error")
         }
     }
 
@@ -113,10 +113,10 @@ class PackagesRepositoryImpl @Inject constructor(
             if (response.isSuccessful && response.body() != null) {
                 NetworkResult.Success(PackageMapper.categoryToDomain(response.body()!!))
             } else {
-                NetworkResult.Error(response.code(), response.message())
+                NetworkResult.Error(response.message() ?: "Unknown error", response.code())
             }
         } catch (e: Exception) {
-            NetworkResult.Error(null, e.message ?: "Unknown error")
+            NetworkResult.Error(e.message ?: "Unknown error")
         }
     }
 
@@ -126,10 +126,10 @@ class PackagesRepositoryImpl @Inject constructor(
             if (response.isSuccessful) {
                 NetworkResult.Success(Unit)
             } else {
-                NetworkResult.Error(response.code(), response.message())
+                NetworkResult.Error(response.message() ?: "Unknown error", response.code())
             }
         } catch (e: Exception) {
-            NetworkResult.Error(null, e.message ?: "Unknown error")
+            NetworkResult.Error(e.message ?: "Unknown error")
         }
     }
 }

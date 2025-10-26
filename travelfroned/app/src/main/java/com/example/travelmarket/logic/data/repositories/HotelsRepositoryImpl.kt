@@ -16,14 +16,13 @@ class HotelsRepositoryImpl @Inject constructor(
         return try {
             val response = api.list()
             if (response.isSuccessful && response.body() != null) {
-                // ✅ CAMBIADO: .data?.map → .results?.map
                 val hotels = response.body()!!.results?.map { HotelMapper.toDomain(it) } ?: emptyList()
                 NetworkResult.Success(hotels)
             } else {
-                NetworkResult.Error(response.code(), response.message())
+                NetworkResult.Error(response.message() ?: "Unknown error", response.code())
             }
         } catch (e: Exception) {
-            NetworkResult.Error(null, e.message ?: "Unknown error")
+            NetworkResult.Error(e.message ?: "Unknown error")
         }
     }
 
@@ -33,10 +32,10 @@ class HotelsRepositoryImpl @Inject constructor(
             if (response.isSuccessful && response.body() != null) {
                 NetworkResult.Success(HotelMapper.toDomain(response.body()!!))
             } else {
-                NetworkResult.Error(response.code(), response.message())
+                NetworkResult.Error(response.message() ?: "Unknown error", response.code())
             }
         } catch (e: Exception) {
-            NetworkResult.Error(null, e.message ?: "Unknown error")
+            NetworkResult.Error(e.message ?: "Unknown error")
         }
     }
 
@@ -46,10 +45,10 @@ class HotelsRepositoryImpl @Inject constructor(
             if (response.isSuccessful && response.body() != null) {
                 NetworkResult.Success(HotelMapper.toDomain(response.body()!!))
             } else {
-                NetworkResult.Error(response.code(), response.message())
+                NetworkResult.Error(response.message() ?: "Unknown error", response.code())
             }
         } catch (e: Exception) {
-            NetworkResult.Error(null, e.message ?: "Unknown error")
+            NetworkResult.Error(e.message ?: "Unknown error")
         }
     }
 
@@ -59,10 +58,10 @@ class HotelsRepositoryImpl @Inject constructor(
             if (response.isSuccessful && response.body() != null) {
                 NetworkResult.Success(HotelMapper.toDomain(response.body()!!))
             } else {
-                NetworkResult.Error(response.code(), response.message())
+                NetworkResult.Error(response.message() ?: "Unknown error", response.code())
             }
         } catch (e: Exception) {
-            NetworkResult.Error(null, e.message ?: "Unknown error")
+            NetworkResult.Error(e.message ?: "Unknown error")
         }
     }
 
@@ -72,10 +71,10 @@ class HotelsRepositoryImpl @Inject constructor(
             if (response.isSuccessful) {
                 NetworkResult.Success(Unit)
             } else {
-                NetworkResult.Error(response.code(), response.message())
+                NetworkResult.Error(response.message() ?: "Unknown error", response.code())
             }
         } catch (e: Exception) {
-            NetworkResult.Error(null, e.message ?: "Unknown error")
+            NetworkResult.Error(e.message ?: "Unknown error")
         }
     }
 }

@@ -34,7 +34,7 @@ class PackagesListViewModel @Inject constructor(
                     _error.value = null
                 }
                 is NetworkResult.Error -> {
-                    _error.value = result.message
+                    _error.value = result.message as String?
                 }
                 is NetworkResult.Loading -> {
                     _loading.value = true

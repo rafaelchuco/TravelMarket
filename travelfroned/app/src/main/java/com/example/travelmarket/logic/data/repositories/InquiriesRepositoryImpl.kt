@@ -17,14 +17,13 @@ class InquiriesRepositoryImpl @Inject constructor(
         return try {
             val response = api.list()
             if (response.isSuccessful && response.body() != null) {
-                // ✅ CAMBIADO: usar .results
                 val inquiries = response.body()!!.results?.map { InquiryMapper.toDomain(it) } ?: emptyList()
                 NetworkResult.Success(inquiries)
             } else {
-                NetworkResult.Error(response.code(), response.message())
+                NetworkResult.Error(response.message() ?: "Unknown error", response.code())
             }
         } catch (e: Exception) {
-            NetworkResult.Error(null, e.message ?: "Unknown error")
+            NetworkResult.Error(e.message ?: "Unknown error")
         }
     }
 
@@ -34,10 +33,10 @@ class InquiriesRepositoryImpl @Inject constructor(
             if (response.isSuccessful && response.body() != null) {
                 NetworkResult.Success(InquiryMapper.toDomain(response.body()!!))
             } else {
-                NetworkResult.Error(response.code(), response.message())
+                NetworkResult.Error(response.message() ?: "Unknown error", response.code())
             }
         } catch (e: Exception) {
-            NetworkResult.Error(null, e.message ?: "Unknown error")
+            NetworkResult.Error(e.message ?: "Unknown error")
         }
     }
 
@@ -47,10 +46,10 @@ class InquiriesRepositoryImpl @Inject constructor(
             if (response.isSuccessful && response.body() != null) {
                 NetworkResult.Success(InquiryMapper.toDomain(response.body()!!))
             } else {
-                NetworkResult.Error(response.code(), response.message())
+                NetworkResult.Error(response.message() ?: "Unknown error", response.code())
             }
         } catch (e: Exception) {
-            NetworkResult.Error(null, e.message ?: "Unknown error")
+            NetworkResult.Error(e.message ?: "Unknown error")
         }
     }
 
@@ -60,10 +59,10 @@ class InquiriesRepositoryImpl @Inject constructor(
             if (response.isSuccessful && response.body() != null) {
                 NetworkResult.Success(InquiryMapper.toDomain(response.body()!!))
             } else {
-                NetworkResult.Error(response.code(), response.message())
+                NetworkResult.Error(response.message() ?: "Unknown error", response.code())
             }
         } catch (e: Exception) {
-            NetworkResult.Error(null, e.message ?: "Unknown error")
+            NetworkResult.Error(e.message ?: "Unknown error")
         }
     }
 
@@ -73,10 +72,10 @@ class InquiriesRepositoryImpl @Inject constructor(
             if (response.isSuccessful) {
                 NetworkResult.Success(Unit)
             } else {
-                NetworkResult.Error(response.code(), response.message())
+                NetworkResult.Error(response.message() ?: "Unknown error", response.code())
             }
         } catch (e: Exception) {
-            NetworkResult.Error(null, e.message ?: "Unknown error")
+            NetworkResult.Error(e.message ?: "Unknown error")
         }
     }
 }

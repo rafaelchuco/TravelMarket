@@ -31,7 +31,9 @@ class CreateDestinationViewModel @Inject constructor(
                 is NetworkResult.Error -> {
                     _state.value = CreateDestinationState.Error(result.message)
                 }
-                else -> {}
+                NetworkResult.Loading -> {
+                    _state.value = CreateDestinationState.Loading
+                }
             }
         }
     }
@@ -45,5 +47,5 @@ sealed class CreateDestinationState {
     data object Idle : CreateDestinationState()
     data object Loading : CreateDestinationState()
     data class Success(val destination: Destination) : CreateDestinationState()
-    data class Error(val message: String) : CreateDestinationState()
+    data class Error(val message: String) : CreateDestinationState()  // ✅ CAMBIADO
 }

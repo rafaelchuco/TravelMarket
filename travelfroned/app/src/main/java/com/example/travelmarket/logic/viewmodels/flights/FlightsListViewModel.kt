@@ -32,9 +32,15 @@ class FlightsListViewModel @Inject constructor(
                     _state.value = FlightsListState.Success(result.data)
                 }
                 is NetworkResult.Error -> {
-                    _state.value = FlightsListState.Error(result.message)
+                    // ✅ CONVERSIÓN SEGURA A STRING
+                    val errorMessage = (result.message as? String)
+                        ?: result.message?.toString()
+                        ?: "Error al cargar vuelos"
+                    _state.value = FlightsListState.Error(errorMessage)
                 }
-                else -> {}
+                NetworkResult.Loading -> {
+                    _state.value = FlightsListState.Loading
+                }
             }
         }
     }
@@ -43,5 +49,5 @@ class FlightsListViewModel @Inject constructor(
 sealed class FlightsListState {
     data object Loading : FlightsListState()
     data class Success(val flights: List<Flight>) : FlightsListState()
-    data class Error(val message: String) : FlightsListState()
+    data class Error(val message: String) : FlightsListState()  // ✅ String, NO Int?
 }

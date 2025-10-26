@@ -17,14 +17,15 @@ class DestinationsRepositoryImpl @Inject constructor(
         return try {
             val response = api.list()
             if (response.isSuccessful && response.body() != null) {
-                // ✅ CAMBIADO: .results?.map → usa DestinationMapper
                 val destinations = response.body()!!.results?.map { DestinationMapper.toDomain(it) } ?: emptyList()
                 NetworkResult.Success(destinations)
             } else {
-                NetworkResult.Error(response.code(), response.message())
+                // ✅ CORREGIDO: message primero, luego code
+                NetworkResult.Error(response.message() ?: "Unknown error", response.code())
             }
         } catch (e: Exception) {
-            NetworkResult.Error(null, e.message ?: "Unknown error")
+            // ✅ CORREGIDO: solo message (sin null)
+            NetworkResult.Error(e.message ?: "Unknown error")
         }
     }
 
@@ -34,10 +35,12 @@ class DestinationsRepositoryImpl @Inject constructor(
             if (response.isSuccessful && response.body() != null) {
                 NetworkResult.Success(DestinationMapper.toDomain(response.body()!!))
             } else {
-                NetworkResult.Error(response.code(), response.message())
+                // ✅ CORREGIDO
+                NetworkResult.Error(response.message() ?: "Unknown error", response.code())
             }
         } catch (e: Exception) {
-            NetworkResult.Error(null, e.message ?: "Unknown error")
+            // ✅ CORREGIDO
+            NetworkResult.Error(e.message ?: "Unknown error")
         }
     }
 
@@ -47,10 +50,12 @@ class DestinationsRepositoryImpl @Inject constructor(
             if (response.isSuccessful && response.body() != null) {
                 NetworkResult.Success(DestinationMapper.toDomain(response.body()!!))
             } else {
-                NetworkResult.Error(response.code(), response.message())
+                // ✅ CORREGIDO
+                NetworkResult.Error(response.message() ?: "Unknown error", response.code())
             }
         } catch (e: Exception) {
-            NetworkResult.Error(null, e.message ?: "Unknown error")
+            // ✅ CORREGIDO
+            NetworkResult.Error(e.message ?: "Unknown error")
         }
     }
 
@@ -60,10 +65,12 @@ class DestinationsRepositoryImpl @Inject constructor(
             if (response.isSuccessful && response.body() != null) {
                 NetworkResult.Success(DestinationMapper.toDomain(response.body()!!))
             } else {
-                NetworkResult.Error(response.code(), response.message())
+                // ✅ CORREGIDO
+                NetworkResult.Error(response.message() ?: "Unknown error", response.code())
             }
         } catch (e: Exception) {
-            NetworkResult.Error(null, e.message ?: "Unknown error")
+            // ✅ CORREGIDO
+            NetworkResult.Error(e.message ?: "Unknown error")
         }
     }
 
@@ -73,10 +80,12 @@ class DestinationsRepositoryImpl @Inject constructor(
             if (response.isSuccessful) {
                 NetworkResult.Success(Unit)
             } else {
-                NetworkResult.Error(response.code(), response.message())
+                // ✅ CORREGIDO
+                NetworkResult.Error(response.message() ?: "Unknown error", response.code())
             }
         } catch (e: Exception) {
-            NetworkResult.Error(null, e.message ?: "Unknown error")
+            // ✅ CORREGIDO
+            NetworkResult.Error(e.message ?: "Unknown error")
         }
     }
 }

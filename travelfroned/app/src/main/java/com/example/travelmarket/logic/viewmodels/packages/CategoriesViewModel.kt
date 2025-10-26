@@ -32,10 +32,13 @@ class CategoriesViewModel @Inject constructor(
                     _state.value = CategoriesState.Success(result.data)
                 }
                 is NetworkResult.Error -> {
-                    _state.value = CategoriesState.Error(result.message ?: "Error desconocido")
+                    // ✅ FORZAR CONVERSIÓN A STRING
+                    val errorMessage = (result.message as? String) ?: result.message?.toString() ?: "Error desconocido"
+                    _state.value = CategoriesState.Error(errorMessage)
                 }
-
-                NetworkResult.Loading -> TODO()
+                NetworkResult.Loading -> {
+                    _state.value = CategoriesState.Loading
+                }
             }
         }
     }
@@ -44,5 +47,5 @@ class CategoriesViewModel @Inject constructor(
 sealed class CategoriesState {
     data object Loading : CategoriesState()
     data class Success(val categories: List<PackageCategory>) : CategoriesState()
-    data class Error(val message: String) : CategoriesState()
+    data class Error(val message: String) : CategoriesState()  // ✅ String
 }

@@ -32,10 +32,15 @@ class DestinationsListViewModel @Inject constructor(
                     _state.value = DestinationsListState.Success(result.data)
                 }
                 is NetworkResult.Error -> {
-                    _state.value = DestinationsListState.Error(result.message ?: "Error desconocido")
+                    // ✅ CONVERSIÓN SEGURA A STRING
+                    val errorMessage = (result.message as? String)
+                        ?: result.message?.toString()
+                        ?: "Error al cargar destinos"
+                    _state.value = DestinationsListState.Error(errorMessage)
                 }
-                // ✅ ELIMINADO: NetworkResult.Loading -> TODO()
-                NetworkResult.Loading -> TODO()
+                NetworkResult.Loading -> {
+                    _state.value = DestinationsListState.Loading
+                }
             }
         }
     }
@@ -44,5 +49,5 @@ class DestinationsListViewModel @Inject constructor(
 sealed class DestinationsListState {
     data object Loading : DestinationsListState()
     data class Success(val destinations: List<Destination>) : DestinationsListState()
-    data class Error(val message: String) : DestinationsListState()
+    data class Error(val message: String) : DestinationsListState()  // ✅ String, NO Any
 }

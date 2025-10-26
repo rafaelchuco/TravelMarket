@@ -4,7 +4,8 @@ EQUIPO X: Agregar las rutas aquí
 """
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import RegisterView, ProfileView, UserViewSet
+from .views import RegisterView, UserViewSet,LoginView
+from rest_framework_simplejwt.views import TokenRefreshView
 
 router = DefaultRouter()
 router.register('users', UserViewSet, basename='user')
@@ -12,5 +13,6 @@ router.register('users', UserViewSet, basename='user')
 urlpatterns = [
     path('', include(router.urls)),
     path('register/', RegisterView.as_view(), name='register'),
-    path('profile/', ProfileView.as_view(), name='profile-detail')
+    path('login/', LoginView.as_view(), name='login'),
+    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ]

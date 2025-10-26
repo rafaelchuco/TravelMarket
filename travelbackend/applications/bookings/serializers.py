@@ -116,6 +116,7 @@ class BookingCreateSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'booking_date', 'updated_at']
         extra_kwargs = {
             'booking_number': {'required': False, 'allow_blank': True},
+            'customer_id': {'required': False},  # ✅ AGREGADO
         }
 
     def validate(self, attrs):
@@ -125,6 +126,9 @@ class BookingCreateSerializer(serializers.ModelSerializer):
         passengers_data = validated_data.pop('passengers', [])
         hotel_bookings_data = validated_data.pop('hotel_bookings', [])
         flight_bookings_data = validated_data.pop('flight_bookings', [])
+
+        # ✅ ASIGNAR CUSTOMER DEL REQUEST
+        validated_data['customer_id'] = self.context['request'].user.id
 
         if not validated_data.get('booking_number'):
             validated_data['booking_number'] = uuid4().hex[:12].upper()

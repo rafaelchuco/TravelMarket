@@ -1,20 +1,35 @@
 package com.example.travelmarket.core.network
 
+import android.util.Log
+import com.example.travelmarket.core.storage.TokenManager
 import okhttp3.Interceptor
 import okhttp3.Response
 
-class NetworkInterceptor : Interceptor {
+class NetworkInterceptor(
+    private val tokenManager: TokenManager
+) : Interceptor {
+
     override fun intercept(chain: Interceptor.Chain): Response {
-        val original = chain.request()
-        val builder = original.newBuilder()
-            .header("Accept", "application/json")
-            .header("Content-Type", "application/json")
+        val originalRequest = chain.request()
 
-        // Si usas JWT, añadir token aquí
-        // TokenManager.getToken()?.let { token ->
-        //     builder.header("Authorization", "Bearer $token")
-        // }
+        val requestBuilder = originalRequest.newBuilder()
 
-        return chain.proceed(builder.build())
+        val token = tokenManager.getAccessToken()
+        if (token != null) {
+            requestBuilder.addHeader("Authorization", "Bearer $token")
+        }
+
+        val request = requestBuilder.build()
+
+        Log.d("API_REQUEST", "URL: ${request.url}")
+        Log.d("API_REQUEST", "Method: ${request.method}")
+        Log.d("API_REQUEST", "Headers: ${request.headers}")
+
+        val response = chain.proceed(request)
+
+        Log.d("API_RESPONSE", "Code: ${response.code}")
+        Log.d("API_RESPONSE", "Message: ${response.message}")
+
+        return response
     }
 }
