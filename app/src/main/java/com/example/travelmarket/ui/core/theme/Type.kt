@@ -1,4 +1,4 @@
-package com.example.travelmarket.ui.theme
+package com.example.travelmarket.ui.core.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
