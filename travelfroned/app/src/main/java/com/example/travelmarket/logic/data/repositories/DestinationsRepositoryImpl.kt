@@ -24,7 +24,7 @@ class DestinationsRepositoryImpl @Inject constructor(
                 val paginatedResponse = response.body()!!
 
                 val destinationResponses: List<DestinationResponse> = try {
-                    val items = paginatedResponse.getItems()
+                    val items = paginatedResponse.results
 
                     if (items.isNotEmpty() && items.first() is Map<*, *>) {
                         val gson = Gson()

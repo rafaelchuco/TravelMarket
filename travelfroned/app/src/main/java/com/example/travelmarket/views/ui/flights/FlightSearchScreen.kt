@@ -1,6 +1,5 @@
-package com.example.travelmarket.views.ui.flight_search // <-- PAQUETE CORRECTO
+package com.example.travelmarket.views.ui.flights
 
-// --- IMPORTS NECESARIOS ---
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -22,17 +21,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-// import androidx.hilt.navigation.compose.hiltViewModel // TODO: Importar cuando exista ViewModel
-// import com.example.travelmarket.logic.viewmodels.flights.FlightSearchViewModel // TODO: Importar
 import com.example.travelmarket.ui.theme.RedMain
 import com.example.travelmarket.ui.theme.TravelMarketTheme
-import com.example.travelmarket.ui.theme.WhitePure
 import com.example.travelmarket.views.ui.home.components.AppBottomNavigation
-// --- FIN IMPORTS ---
 
-
-// --- Placeholder Data ---
-// TODO: Borrar cuando se conecte al ViewModel
 data class FlightResult(
     val id: String,
     val airline: String,
@@ -47,8 +39,6 @@ val flightResults = listOf(
     FlightResult("fl2", "Sky Airline", "11:00", "12:20", "1h 20m", "Directo", 155.00),
     FlightResult("fl3", "LATAM", "15:45", "17:15", "1h 30m", "Directo", 195.70)
 )
-// --- Fin Placeholder ---
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,17 +49,12 @@ fun FlightSearchScreen(
     onNavigateToPackages: () -> Unit,
     onNavigateToBookings: () -> Unit,
     onNavigateToProfile: () -> Unit
-    // TODO: viewModel: FlightSearchViewModel = hiltViewModel()
 ) {
-    // TODO: val state by viewModel.state.collectAsState()
-
-    // --- Estado local de UI ---
     var origin by remember { mutableStateOf("") }
     var destination by remember { mutableStateOf("") }
     var departureDate by remember { mutableStateOf("") }
     var returnDate by remember { mutableStateOf("") }
     var passengers by remember { mutableStateOf(1) }
-    // ---
 
     Scaffold(
         topBar = {
@@ -105,7 +90,6 @@ fun FlightSearchScreen(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // --- Formulario de Búsqueda ---
             item {
                 Card(
                     shape = RoundedCornerShape(16.dp),
@@ -148,7 +132,7 @@ fun FlightSearchScreen(
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Button(
-                            onClick = { /* TODO: viewModel.searchFlights(...) */ },
+                            onClick = { /* TODO: Implement search logic */ },
                             modifier = Modifier.fillMaxWidth().height(48.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = RedMain),
                             shape = RoundedCornerShape(12.dp)
@@ -159,8 +143,6 @@ fun FlightSearchScreen(
                 }
             }
 
-            // --- Resultados (Placeholder) ---
-            // TODO: Reemplazar con lógica del ViewModel (Loading, Error, Success)
             if (flightResults.isNotEmpty()) { // Simula que hay resultados
                 item {
                     Text(
@@ -252,7 +234,7 @@ fun PassengerSelector(count: Int, onCountChange: (Int) -> Unit) {
                 text = count.toString(),
                 fontWeight = FontWeight.Bold,
                 fontSize = 18.sp,
-                modifier = Modifier.padding(horizontal = 16.dp).widthIn(min=24.dp), // Ancho mínimo
+                modifier = Modifier.padding(horizontal = 16.dp).widthIn(min=24.dp),
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
             )
             SmallCircleButton(icon = Icons.Default.Add) { onCountChange(count + 1) }
@@ -274,7 +256,6 @@ fun SmallCircleButton(icon: ImageVector, enabled: Boolean = true, onClick: () ->
     }
 }
 
-// --- Componente para Mostrar Resultados ---
 @Composable
 fun FlightResultCard(flight: FlightResult, onSelectClick: () -> Unit) {
     Card(
@@ -285,7 +266,6 @@ fun FlightResultCard(flight: FlightResult, onSelectClick: () -> Unit) {
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                // TODO: Mostrar logo de aerolínea
                 Text(flight.airline, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
                 Text(
                     text = "S/. ${flight.price}",
@@ -300,9 +280,9 @@ fun FlightResultCard(flight: FlightResult, onSelectClick: () -> Unit) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                TimeColumn(time = flight.departureTime, label = "SAL") // TODO: Usar código aeropuerto
+                TimeColumn(time = flight.departureTime, label = "SAL")
                 DurationColumn(duration = flight.duration, stops = flight.stops)
-                TimeColumn(time = flight.arrivalTime, label = "LLE") // TODO: Usar código aeropuerto
+                TimeColumn(time = flight.arrivalTime, label = "LLE")
             }
             Spacer(modifier = Modifier.height(16.dp))
             Button(

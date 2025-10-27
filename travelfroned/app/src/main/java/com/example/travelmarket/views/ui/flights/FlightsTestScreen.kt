@@ -1,4 +1,4 @@
-package com.example.travelmarket.views.ui.test
+package com.example.travelmarket.views.ui.flights
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -129,7 +129,7 @@ private fun FlightItemCard(flight: Flight) {
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                "${flight.originCity ?: "N/A"} → ${flight.destinationCity ?: "N/A"}",
+                "${flight.origin} → ${flight.destination}",
                 style = MaterialTheme.typography.bodyMedium
             )
             Spacer(modifier = Modifier.height(4.dp))
@@ -138,12 +138,12 @@ private fun FlightItemCard(flight: Flight) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = flight.airlineName ?: "Aerolínea desconocida",
+                    text = flight.airline,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    text = "S/. ${flight.price ?: "--"}",
+                    text = "S/. ${flight.price}",
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = androidx.compose.ui.text.font.FontWeight.Bold // Hacer precio más visible
                 )

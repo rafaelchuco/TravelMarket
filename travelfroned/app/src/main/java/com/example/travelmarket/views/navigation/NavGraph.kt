@@ -10,9 +10,8 @@ import androidx.navigation.compose.rememberNavController
 // --- Tus Imports de Pantallas (Asegúrate que las rutas sean correctas) ---
 import com.example.travelmarket.views.ui.activities.list.ActivityListScreen
 import com.example.travelmarket.views.ui.auth.AuthContainerScreen
-import com.example.travelmarket.views.ui.coupons.CouponListScreen
-// import com.example.travelmarket.views.ui.flights.FlightSearchScreen // <-- INCORRECTO
-import com.example.travelmarket.views.ui.flight_search.FlightSearchScreen // <-- CORREGIDO
+import com.example.travelmarket.views.ui.coupon_list.CouponListScreen
+import com.example.travelmarket.views.ui.flights.FlightSearchScreen
 import com.example.travelmarket.views.ui.home.HomeScreen
 import com.example.travelmarket.views.ui.packages.PackageDetailScreen
 import com.example.travelmarket.views.ui.packages.PackageListScreen
@@ -30,10 +29,9 @@ import com.example.travelmarket.views.ui.bookings.list.BookingsListScreen
 import com.example.travelmarket.views.ui.bookings.myBookings.MyBookingsScreen
 import com.example.travelmarket.views.ui.bookings.update.UpdateBookingScreen
 import com.example.travelmarket.views.ui.categories.CategoriesTestScreen
-import com.example.travelmarket.views.ui.destinations.DestinationListScreen // Corregido
-import com.example.travelmarket.views.ui.flights.CouponListScreen
+import com.example.travelmarket.views.ui.destinations.list.DestinationListScreen
+import com.example.travelmarket.views.ui.flights.FlightsTestScreen
 import com.example.travelmarket.views.ui.test.DestinationsTestScreen
-import com.example.travelmarket.views.ui.test.FlightsTestScreen
 import com.example.travelmarket.views.ui.test.HotelsTestScreen
 import com.example.travelmarket.views.ui.test.InquiriesTestScreen
 import com.example.travelmarket.views.ui.test.PackagesTestScreen
@@ -51,13 +49,11 @@ fun NavGraph(
     ) {
         // --- Tus Pantallas Públicas ---
         composable(Routes.Welcome.route) {
-            WelcomeScreen(
-                onStartClick = {
-                    navController.navigate(Routes.AuthContainer.route) {
-                        popUpTo(Routes.Welcome.route) { inclusive = true }
-                    }
+            WelcomeScreen(onStartClick = {
+                navController.navigate(Routes.AuthContainer.route) {
+                    popUpTo(Routes.Welcome.route) { inclusive = true }
                 }
-            )
+            })
         }
 
         composable(Routes.AuthContainer.route) {
@@ -76,18 +72,7 @@ fun NavGraph(
         }
 
         composable(Routes.Home.route) {
-            HomeScreen(
-                onNavigateToDestinations = { navController.navigate(Routes.DestinationList.route) },
-                onNavigateToPackages = { navController.navigate(Routes.PackageList.createRoute("all")) },
-                onNavigateToBookings = { navController.navigate(Routes.MyBookings.route) },
-                onNavigateToProfile = { navController.navigate(Routes.Profile.route) },
-                onNavigateToCategoryPackages = { categoryName -> navController.navigate(Routes.PackageList.createRoute(categoryName)) },
-                onNavigateToFlights = { navController.navigate(Routes.FlightSearch.route) },
-                onNavigateToCoupons = { navController.navigate(Routes.CouponList.route) },
-                onNavigateToDestinationList = { navController.navigate(Routes.DestinationList.route) },
-                onNavigateToPackageList = { navController.navigate(Routes.PackageList.createRoute("all")) },
-                onNavigateToActivities = { navController.navigate(Routes.ActivitiesList.route) }
-            )
+            HomeScreen(navController = navController)
         }
 
         composable(Routes.DestinationList.route) {
@@ -143,9 +128,7 @@ fun NavGraph(
         }
 
         composable(Routes.CouponList.route) {
-            CouponListScreen(
-                onNavigateBack = { navController.popBackStack() }
-            )
+            CouponListScreen(onNavigateBack = { navController.popBackStack() })
         }
 
         // --- Pantallas de Compañeros ---

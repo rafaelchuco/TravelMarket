@@ -36,7 +36,7 @@ class BookingsRepositoryImpl(
             is NetworkResult.Success -> {
                 // ✅ Parsear manualmente
                 val bookingResponses: List<BookingResponse> = try {
-                    val items = result.data.getItems()
+                    val items = result.data.results
 
                     if (items.isNotEmpty() && items.first() is Map<*, *>) {
                         val gson = Gson()
@@ -111,7 +111,7 @@ class BookingsRepositoryImpl(
             is NetworkResult.Success -> {
                 // ✅ Parsear manualmente
                 val bookingDetailResponses: List<BookingDetailResponse> = try {
-                    val items = result.data.getItems()
+                    val items = result.data.results
 
                     if (items.isNotEmpty() && items.first() is Map<*, *>) {
                         val gson = Gson()

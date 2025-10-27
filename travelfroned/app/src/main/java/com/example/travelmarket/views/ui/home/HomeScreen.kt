@@ -38,7 +38,7 @@ fun HomeScreen(
                 onNavigateToHotels = { },
                 onNavigateToFlights = {
                     scope.launch { drawerState.close() }
-                    navController.navigate(Routes.FlightsSearch.route)
+                    navController.navigate(Routes.FlightSearch.route)
                 },
                 onNavigateToActivities = {
                     scope.launch { drawerState.close() }
@@ -46,7 +46,7 @@ fun HomeScreen(
                 },
                 onNavigateToCoupons = {
                     scope.launch { drawerState.close() }
-                    navController.navigate(Routes.CouponsList.route)
+                    navController.navigate(Routes.CouponList.route)
                 },
                 onNavigateToMessages = {  },
                 onNavigateToPeruInfo = {  },
@@ -61,8 +61,8 @@ fun HomeScreen(
                 AppBottomNavigation(
                     selectedIndex = 0,
                     onInicioClick = { },
-                    onDestinosClick = { navController.navigate(Routes.DestinationsList.route) },
-                    onPaquetesClick = { navController.navigate(Routes.PackagesList.route) },
+                    onDestinosClick = { navController.navigate(Routes.DestinationList.route) },
+                    onPaquetesClick = { navController.navigate(Routes.PackageList.createRoute("all")) },
                     onReservasClick = { navController.navigate(Routes.BookingsList.route) },
                     onPerfilClick = { navController.navigate(Routes.Profile.route) }
                 )
@@ -84,7 +84,7 @@ fun HomeScreen(
                 item {
                     QuickLinks(
                         onHotelesClick = { },
-                        onVuelosClick = { navController.navigate(Routes.FlightsSearch.route) },
+                        onVuelosClick = { navController.navigate(Routes.FlightSearch.route) },
                         onActividadesClick = { navController.navigate(Routes.ActivitiesList.route) }
                     )
                 }
@@ -96,13 +96,13 @@ fun HomeScreen(
                 }
                 item {
                     CategoryGrid(onCategoryClick = { categoryId ->
-                        navController.navigate(Routes.PackagesList.route)
+                        navController.navigate(Routes.PackageList.createRoute(categoryId))
                     })
                 }
                 item {
                     SectionHeader(
                         title = "Destinos Destacados",
-                        onVerTodosClick = { navController.navigate(Routes.DestinationsList.route) }
+                        onVerTodosClick = { navController.navigate(Routes.DestinationList.route) }
                     )
                 }
                 items(3) { index ->
@@ -117,7 +117,7 @@ fun HomeScreen(
                 item {
                     SectionHeader(
                         title = "Paquetes Populares",
-                        onVerTodosClick = { navController.navigate(Routes.PackagesList.route) }
+                        onVerTodosClick = { navController.navigate(Routes.PackageList.createRoute("all")) }
                     )
                 }
                 item {

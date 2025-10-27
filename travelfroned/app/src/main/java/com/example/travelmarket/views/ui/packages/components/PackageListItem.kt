@@ -69,7 +69,7 @@ fun PackageListItem(
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.ic_launcher_foreground),
-                    contentDescription = pkg.name,
+                    contentDescription = pkg.title,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )
@@ -81,7 +81,7 @@ fun PackageListItem(
                     shape = RoundedCornerShape(50)
                 ) {
                     Text(
-                        text = "${pkg.durationDays} días / ${pkg.durationNights} noches",
+                        text = "${pkg.durationDays} días",
                         color = WhitePure,
                         fontSize = 12.sp,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
@@ -107,13 +107,13 @@ fun PackageListItem(
                     .padding(16.dp)
             ) {
                 Text(
-                    text = pkg.name ?: "Paquete sin nombre",
+                    text = pkg.title ?: "Paquete sin nombre",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.Black
                 )
                 Text(
-                    text = pkg.destinationName ?: "Destino no especificado",
+                    text = "Destino ID: ${pkg.destinationId}",
                     fontSize = 14.sp,
                     color = Color.Gray
                 )
@@ -143,7 +143,7 @@ fun PackageListItem(
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "S/. ${pkg.priceAdult ?: 0}",
+                        text = "S/. ${pkg.price ?: 0}",
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
                         color = RedMain

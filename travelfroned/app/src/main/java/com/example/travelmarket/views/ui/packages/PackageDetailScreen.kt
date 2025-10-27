@@ -54,13 +54,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.travelmarket.R
+import com.example.travelmarket.logic.domain.models.Package
 import com.example.travelmarket.ui.theme.RedMain
 import com.example.travelmarket.ui.theme.TravelMarketTheme
 import com.example.travelmarket.ui.theme.WhitePure
 import com.example.travelmarket.views.ui.packages.components.ItineraryTab
 import com.example.travelmarket.views.ui.packages.components.ReviewsTab
 
-val packageDetailPlaceholder = packages.firstOrNull() ?: Package("pkg_error", "Error", "N/A", "N/A", 0.0, 0, 0.0)
+val packageDetailPlaceholder = Package(0L, "Error", "N/A", 0.0, 0, 0, 0, "")
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -144,9 +145,9 @@ fun PackageDetailScreen(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        InfoChip(Icons.Default.LocationOn, packageDetailPlaceholder.location)
+                        InfoChip(Icons.Default.LocationOn, "Destino no especificado")
                         Spacer(modifier = Modifier.width(8.dp))
-                        InfoChip(Icons.Default.Star, "${packageDetailPlaceholder.rating} (${packageDetailPlaceholder.reviews} reseñas)")
+                        InfoChip(Icons.Default.Star, "4.5 (120) reseñas")
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                     InfoChip(Icons.Default.Person, "Máx. 12 personas")
