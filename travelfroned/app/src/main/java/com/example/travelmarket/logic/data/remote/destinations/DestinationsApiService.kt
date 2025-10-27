@@ -1,15 +1,15 @@
 package com.example.travelmarket.logic.data.remote.destinations
 
+import com.example.travelmarket.core.network.PaginatedResponse  // ✅ IMPORTAR
 import com.example.travelmarket.logic.data.models.request.destinations.CreateDestinationRequest
 import com.example.travelmarket.logic.data.models.request.destinations.UpdateDestinationRequest
 import com.example.travelmarket.logic.data.models.response.destinations.DestinationResponse
-import com.example.travelmarket.logic.data.models.response.destinations.DestinationsApiResponse  // ✅ IMPORTAR
 import retrofit2.Response
 import retrofit2.http.*
 
 interface DestinationsApiService {
     @GET("destinations/")
-    suspend fun list(): Response<DestinationsApiResponse>  // ✅ CAMBIADO
+    suspend fun list(): Response<PaginatedResponse<DestinationResponse>>  // ✅ Usar genérico
 
     @POST("destinations/")
     suspend fun create(@Body body: CreateDestinationRequest): Response<DestinationResponse>

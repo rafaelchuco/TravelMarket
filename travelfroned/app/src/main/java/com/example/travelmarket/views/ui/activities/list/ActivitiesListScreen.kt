@@ -11,13 +11,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.travelmarket.core.network.NetworkResult
+import com.example.travelmarket.logic.domain.models.Activity
 import com.example.travelmarket.logic.viewmodels.activities.ActivitiesListViewModel
 import com.example.travelmarket.views.navigation.Routes
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun ActivitiesListScreen(
-    navController: NavHostController,  // ✅ AGREGADO
+    navController: NavHostController,
     modifier: Modifier = Modifier,
     viewModel: ActivitiesListViewModel = koinViewModel()
 ) {
@@ -49,7 +50,8 @@ fun ActivitiesListScreen(
             }
 
             is NetworkResult.Success -> {
-                val activities = state.data.results
+                // ✅ CAMBIAR ESTA LÍNEA (línea 52)
+                val activities = state.data.results as? List<Activity> ?: emptyList()
 
                 Text(
                     text = "Total: ${state.data.count} actividades",
@@ -64,7 +66,7 @@ fun ActivitiesListScreen(
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clickable {  // ✅ AGREGADO
+                                .clickable {
                                     navController.navigate(Routes.ActivityDetail.createRoute(activity.id))
                                 },
                             elevation = CardDefaults.cardElevation(4.dp)
