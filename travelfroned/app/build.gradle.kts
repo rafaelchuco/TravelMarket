@@ -102,6 +102,7 @@ dependencies {
     implementation("com.squareup.moshi:moshi:1.15.2")
     implementation("com.squareup.moshi:moshi-kotlin:1.15.2")
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.ui)
     kapt("com.squareup.moshi:moshi-kotlin-codegen:1.15.2")
     implementation("com.squareup.retrofit2:converter-gson:2.11.0")
     implementation("com.google.code.gson:gson:2.11.0")

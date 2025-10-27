@@ -24,6 +24,7 @@ gson = "2.11.0"
 koin = "4.0.0"
 firebaseAppdistribution = "5.0.0"
 material3 = "1.4.0"
+ui = "1.9.4"
 
 [libraries]
 # Librerías existentes de tu amigo
@@ -78,6 +79,7 @@ koin-androidx-compose = { group = "io.insert-koin", name = "koin-androidx-compos
 
 firebase-appdistribution-gradle = { group = "com.google.firebase", name = "firebase-appdistribution-gradle", version.ref = "firebaseAppdistribution" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
+androidx-ui = { group = "androidx.compose.ui", name = "ui", version.ref = "ui" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -1,21 +1,16 @@
-package com.example.travelmarket.views.ui.flights
+package com.example.travelmarket.views.ui.flight_search // <-- PAQUETE CORRECTO
 
-import androidx.compose.foundation.shape.CircleShape
+// --- IMPORTS NECESARIOS ---
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.CheckCircleOutline
-import androidx.compose.material.icons.filled.ConfirmationNumber
-import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.ErrorOutline
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -24,61 +19,81 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+// import androidx.hilt.navigation.compose.hiltViewModel // TODO: Importar cuando exista ViewModel
+// import com.example.travelmarket.logic.viewmodels.flights.FlightSearchViewModel // TODO: Importar
 import com.example.travelmarket.ui.theme.RedMain
 import com.example.travelmarket.ui.theme.TravelMarketTheme
 import com.example.travelmarket.ui.theme.WhitePure
-import com.example.travelmarket.logic.viewmodels.flights.FlightsListViewModel
-import org.koin.androidx.compose.koinViewModel
+import com.example.travelmarket.views.ui.home.components.AppBottomNavigation
+// --- FIN IMPORTS ---
 
-data class Coupon(
+
+// --- Placeholder Data ---
+// TODO: Borrar cuando se conecte al ViewModel
+data class FlightResult(
     val id: String,
-    val title: String,
-    val description: String,
-    val discount: String,
-    val code: String,
-    val expiry: String,
-    val minPurchase: String,
-    val active: Boolean,
-    val color: Color
+    val airline: String,
+    val departureTime: String,
+    val arrivalTime: String,
+    val duration: String,
+    val stops: String,
+    val price: Double
 )
-
-val coupons = listOf(
-    Coupon("1", "Fiestas Patrias", "Celebra el Perú con descuentos especiales", "15% OFF", "FIESTASP2024", "30 de julio de 2024", "S/. 500", true, Color(0xFFFFF9E0)),
-    Coupon("2", "Verano Perú", "Descuento para tus vacaciones de verano", "10% OFF", "VERANO2024", "30 de marzo de 2025", "S/. 300", true, Color(0xFFFFF9E0)),
-    Coupon("3", "Primera Compra", "Bienvenido a Travel Marketplace", "20% OFF", "PRIMERACOMPRA", "30 de diciembre de 2025", "S/. 400", true, Color(0xFFE8F5E9)),
-    Coupon("4", "Semana Santa", "Viaja en Semana Santa con descuento", "12% OFF", "SEMANASANTA", "19 de abril de 2025", "S/. 400", true, Color(0xFFFFF9E0)),
-    Coupon("5", "Aniversario", "Celebramos contigo", "25% OFF", "ANIVERSARIO", "29 de setiembre de 2024", "S/. 800", false, Color(0xFFFCE4EC))
+val flightResults = listOf(
+    FlightResult("fl1", "LATAM", "08:30", "10:00", "1h 30m", "Directo", 180.50),
+    FlightResult("fl2", "Sky Airline", "11:00", "12:20", "1h 20m", "Directo", 155.00),
+    FlightResult("fl3", "LATAM", "15:45", "17:15", "1h 30m", "Directo", 195.70)
 )
+// --- Fin Placeholder ---
 
-val activeCoupons = coupons.filter { it.active }
-val expiredCoupons = coupons.filter { !it.active }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CouponListScreen(
-    onNavigateBack: () -> Unit
+fun FlightSearchScreen(
+    onNavigateBack: () -> Unit,
+    onNavigateToHome: () -> Unit,
+    onNavigateToDestinations: () -> Unit,
+    onNavigateToPackages: () -> Unit,
+    onNavigateToBookings: () -> Unit,
+    onNavigateToProfile: () -> Unit
+    // TODO: viewModel: FlightSearchViewModel = hiltViewModel()
 ) {
-    var selectedTabIndex by remember { mutableStateOf(0) }
-    val tabs = listOf("Activos (${activeCoupons.size})", "Expirados (${expiredCoupons.size})")
-    val currentList = if (selectedTabIndex == 0) activeCoupons else expiredCoupons
+    // TODO: val state by viewModel.state.collectAsState()
+
+    // --- Estado local de UI ---
+    var origin by remember { mutableStateOf("") }
+    var destination by remember { mutableStateOf("") }
+    var departureDate by remember { mutableStateOf("") }
+    var returnDate by remember { mutableStateOf("") }
+    var passengers by remember { mutableStateOf(1) }
+    // ---
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {  },
+                title = { Text("Buscar Vuelos") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver", tint = WhitePure)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFFFFB300),
-                    navigationIconContentColor = WhitePure
+                    containerColor = Color.White,
+                    titleContentColor = Color.Black
                 )
+            )
+        },
+        bottomBar = {
+            AppBottomNavigation(
+                selectedIndex = -1, // Ninguno seleccionado
+                onInicioClick = onNavigateToHome,
+                onDestinosClick = onNavigateToDestinations,
+                onPaquetesClick = onNavigateToPackages,
+                onReservasClick = onNavigateToBookings,
+                onPerfilClick = onNavigateToProfile
             )
         }
     ) { paddingValues ->
@@ -87,215 +102,243 @@ fun CouponListScreen(
                 .fillMaxSize()
                 .background(Color(0xFFF5F5F5))
                 .padding(paddingValues),
-            contentPadding = PaddingValues(bottom = 16.dp)
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            item { CouponHeader(activeCount = activeCoupons.size) }
-
+            // --- Formulario de Búsqueda ---
             item {
-                CouponTabs(
-                    tabs = tabs,
-                    selectedTabIndex = selectedTabIndex,
-                    onTabSelected = { selectedTabIndex = it }
-                )
-            }
-
-            items(currentList) { coupon ->
-                CouponCard(coupon = coupon, isActive = selectedTabIndex == 0)
-            }
-
-            item { HowToUseSection() }
-        }
-    }
-}
-
-@Composable
-fun CouponHeader(activeCount: Int) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(
-                color = Color(0xFFFFB300),
-                shape = RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp)
-            )
-            .padding(16.dp)
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                Icons.Default.ConfirmationNumber,
-                contentDescription = null,
-                tint = WhitePure,
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .background(WhitePure.copy(alpha = 0.2f))
-                    .padding(8.dp)
-            )
-            Spacer(modifier = Modifier.width(16.dp))
-            Column {
-                Text(
-                    text = "Cupones",
-                    color = WhitePure,
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = "$activeCount cupones activos",
-                    color = WhitePure.copy(alpha = 0.9f),
-                    fontSize = 14.sp
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun CouponTabs(tabs: List<String>, selectedTabIndex: Int, onTabSelected: (Int) -> Unit) {
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 16.dp)
-            .offset(y = (-20).dp),
-        shape = RoundedCornerShape(50),
-        color = Color(0xFFE0E0E0),
-        shadowElevation = 4.dp
-    ) {
-        TabRow(
-            selectedTabIndex = selectedTabIndex,
-            containerColor = Color.Transparent,
-            contentColor = RedMain,
-            indicator = { },
-            divider = { },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(48.dp)
-                .clip(RoundedCornerShape(50))
-        ) {
-            tabs.forEachIndexed { index, title ->
-                Tab(
-                    selected = selectedTabIndex == index,
-                    onClick = { onTabSelected(index) },
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .padding(4.dp)
-                        .clip(RoundedCornerShape(50))
-                        .background(if (selectedTabIndex == index) Color.White else Color.Transparent)
+                Card(
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(2.dp)
                 ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        FlightTextField(
+                            value = origin,
+                            onValueChange = { origin = it },
+                            label = "Origen",
+                            icon = Icons.Default.FlightTakeoff
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        FlightTextField(
+                            value = destination,
+                            onValueChange = { destination = it },
+                            label = "Destino",
+                            icon = Icons.Default.FlightLand
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            FlightDateField(
+                                value = departureDate,
+                                onValueChange = { departureDate = it },
+                                label = "Ida",
+                                modifier = Modifier.weight(1f)
+                            )
+                            FlightDateField(
+                                value = returnDate,
+                                onValueChange = { returnDate = it },
+                                label = "Vuelta (Opcional)",
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        PassengerSelector(
+                            count = passengers,
+                            onCountChange = { passengers = it }
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Button(
+                            onClick = { /* TODO: viewModel.searchFlights(...) */ },
+                            modifier = Modifier.fillMaxWidth().height(48.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = RedMain),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text("Buscar Vuelos", fontWeight = FontWeight.SemiBold)
+                        }
+                    }
+                }
+            }
+
+            // --- Resultados (Placeholder) ---
+            // TODO: Reemplazar con lógica del ViewModel (Loading, Error, Success)
+            if (flightResults.isNotEmpty()) { // Simula que hay resultados
+                item {
                     Text(
-                        text = title,
-                        fontWeight = FontWeight.SemiBold,
-                        color = if (selectedTabIndex == index) RedMain else Color.DarkGray
+                        text = "${flightResults.size} vuelos encontrados",
+                        fontSize = 14.sp,
+                        color = Color.DarkGray,
+                        modifier = Modifier.padding(bottom = 8.dp, top = 16.dp)
                     )
+                }
+                items(flightResults) { flight ->
+                    FlightResultCard(flight = flight, onSelectClick = {})
                 }
             }
         }
     }
 }
 
+
 @Composable
-fun CouponCard(coupon: Coupon, isActive: Boolean) {
-    Card(
+fun FlightTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    icon: ImageVector,
+    modifier: Modifier = Modifier
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        modifier = modifier.fillMaxWidth(),
+        label = { Text(label) },
+        leadingIcon = { Icon(icon, contentDescription = label) },
+        shape = RoundedCornerShape(12.dp),
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedContainerColor = Color(0xFFF0F0F0),
+            unfocusedContainerColor = Color(0xFFF0F0F0),
+            focusedBorderColor = RedMain,
+            unfocusedBorderColor = Color.LightGray
+        ),
+        singleLine = true
+    )
+}
+
+@Composable
+fun FlightDateField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    modifier: Modifier = Modifier
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        modifier = modifier,
+        label = { Text(label) },
+        leadingIcon = { Icon(Icons.Default.CalendarToday, contentDescription = label) },
+        shape = RoundedCornerShape(12.dp),
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedContainerColor = Color(0xFFF0F0F0),
+            unfocusedContainerColor = Color(0xFFF0F0F0),
+            focusedBorderColor = RedMain,
+            unfocusedBorderColor = Color.LightGray
+        ),
+        singleLine = true,
+        readOnly = true,
+        interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+            .also { interactionSource ->
+                LaunchedEffect(interactionSource) {
+                    interactionSource.interactions.collect {
+                        if (it is androidx.compose.foundation.interaction.PressInteraction.Release) {
+                        }
+                    }
+                }
+            }
+    )
+}
+
+@Composable
+fun PassengerSelector(count: Int, onCountChange: (Int) -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text("Pasajeros", fontWeight = FontWeight.SemiBold)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            SmallCircleButton(icon = Icons.Default.Remove) { if (count > 1) onCountChange(count - 1) }
+            Text(
+                text = count.toString(),
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
+                modifier = Modifier.padding(horizontal = 16.dp).widthIn(min=24.dp), // Ancho mínimo
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            )
+            SmallCircleButton(icon = Icons.Default.Add) { onCountChange(count + 1) }
+        }
+    }
+}
+
+@Composable
+fun SmallCircleButton(icon: ImageVector, enabled: Boolean = true, onClick: () -> Unit) {
+    IconButton(
+        onClick = onClick,
+        enabled = enabled,
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .size(32.dp)
+            .clip(CircleShape)
+            .background(if (enabled) RedMain.copy(alpha = 0.1f) else Color.LightGray.copy(alpha = 0.5f))
+    ) {
+        Icon(icon, contentDescription = null, tint = if (enabled) RedMain else Color.Gray)
+    }
+}
+
+// --- Componente para Mostrar Resultados ---
+@Composable
+fun FlightResultCard(flight: FlightResult, onSelectClick: () -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(2.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    Icons.Default.ConfirmationNumber,
-                    contentDescription = null,
-                    tint = RedMain,
-                    modifier = Modifier
-                        .size(32.dp)
-                        .clip(CircleShape)
-                        .background(coupon.color)
-                        .padding(6.dp)
+                // TODO: Mostrar logo de aerolínea
+                Text(flight.airline, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                Text(
+                    text = "S/. ${flight.price}",
+                    color = RedMain,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp
                 )
-                Spacer(modifier = Modifier.width(12.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(coupon.title, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                    Text(coupon.description, fontSize = 13.sp, color = Color.Gray)
-                }
-                Surface(
-                    shape = RoundedCornerShape(8.dp),
-                    color = if (isActive) Color(0xFF4CAF50).copy(alpha = 0.8f) else Color.Gray.copy(alpha = 0.5f),
-                ) {
-                    Text(
-                        text = coupon.discount,
-                        color = WhitePure,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                    )
-                }
             }
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .border(1.dp, Color.LightGray, RoundedCornerShape(8.dp))
-                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text("Código de cupón", fontSize = 13.sp, color = Color.Gray)
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(coupon.code, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Icon(Icons.Default.ContentCopy, contentDescription = "Copiar", tint = Color.Gray, modifier = Modifier.size(18.dp).clickable { /* TODO: Copy logic */ })
-                }
+                TimeColumn(time = flight.departureTime, label = "SAL") // TODO: Usar código aeropuerto
+                DurationColumn(duration = flight.duration, stops = flight.stops)
+                TimeColumn(time = flight.arrivalTime, label = "LLE") // TODO: Usar código aeropuerto
             }
-            Spacer(modifier = Modifier.height(12.dp))
-            InfoRow(icon = Icons.Default.Schedule, text = "Válido hasta ${coupon.expiry}", active = isActive)
-            InfoRow(icon = Icons.Default.CheckCircleOutline, text = "Compra mínima: ${coupon.minPurchase}", active = isActive)
-
-            if (isActive) {
-                Spacer(modifier = Modifier.height(16.dp))
-                Button(
-                    onClick = { /* TODO: Apply coupon */ },
-                    modifier = Modifier.fillMaxWidth().height(44.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = RedMain),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Text("Usar cupón", fontWeight = FontWeight.SemiBold)
-                }
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(
+                onClick = onSelectClick,
+                modifier = Modifier.align(Alignment.End),
+                colors = ButtonDefaults.buttonColors(containerColor = RedMain.copy(alpha = 0.1f), contentColor = RedMain),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+            ) {
+                Text("Seleccionar", fontWeight = FontWeight.SemiBold)
             }
         }
     }
 }
 
 @Composable
-fun InfoRow(icon: ImageVector, text: String, active: Boolean) {
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
-        Icon(icon, contentDescription = null, tint = if(active) Color.Gray else Color.LightGray, modifier = Modifier.size(16.dp))
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(text, fontSize = 13.sp, color = if(active) Color.DarkGray else Color.LightGray)
+fun TimeColumn(time: String, label: String) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(time, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+        Text(label, fontSize = 12.sp, color = Color.Gray)
     }
 }
 
 @Composable
-fun HowToUseSection() {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 16.dp),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = RedMain.copy(alpha = 0.08f)),
-        elevation = CardDefaults.cardElevation(0.dp)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.Info, contentDescription = null, tint = RedMain)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Cómo usar los cupones", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            Text("• Copia el código del cupón", fontSize = 14.sp, color = Color.DarkGray)
-            Text("• Selecciona tu paquete turístico", fontSize = 14.sp, color = Color.DarkGray)
-            Text("• Pégalo en el campo de cupón al reservar", fontSize = 14.sp, color = Color.DarkGray)
-            Text("• El descuento se aplicará automáticamente", fontSize = 14.sp, color = Color.DarkGray)
-        }
+fun DurationColumn(duration: String, stops: String) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(duration, fontSize = 12.sp, color = Color.Gray)
+        Divider(modifier = Modifier.width(60.dp).padding(vertical = 2.dp), color = Color.LightGray)
+        Text(stops, fontSize = 12.sp, color = Color.Gray, fontWeight = FontWeight.SemiBold)
+    }
+}
+
+
+@Preview(showBackground = true)
+@Composable
+fun FlightSearchScreenPreview() {
+    TravelMarketTheme {
+        FlightSearchScreen({}, {}, {}, {}, {}, {})
     }
 }
