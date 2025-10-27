@@ -16,12 +16,22 @@ class PackagesRepositoryImpl @Inject constructor(
         return try {
             val response = api.list()
             if (response.isSuccessful && response.body() != null) {
-                val packages = response.body()!!.results?.mapNotNull { PackageMapper.toDomain(it) } ?: emptyList()
+                val body = response.body()!!
+
+                // ✅ LOGS DE DEBUG
+                android.util.Log.d("REPO_DEBUG", "Results: ${body.results}")
+                android.util.Log.d("REPO_DEBUG", "Paquetes size: ${body.results?.paquetes?.size}")
+                body.results?.paquetes?.forEach {
+                    android.util.Log.d("REPO_DEBUG", "Paquete RAW: name=${it.name}, priceAdult=${it.priceAdult}, durationDays=${it.durationDays}, shortDescription=${it.shortDescription}")
+                }
+
+                val packages = body.results?.paquetes?.mapNotNull { PackageMapper.toDomain(it) } ?: emptyList()
                 NetworkResult.Success(packages)
             } else {
                 NetworkResult.Error(response.message() ?: "Unknown error", response.code())
             }
         } catch (e: Exception) {
+            android.util.Log.e("REPO_ERROR", "Exception: ${e.message}", e)
             NetworkResult.Error(e.message ?: "Unknown error")
         }
     }
@@ -97,7 +107,7 @@ class PackagesRepositoryImpl @Inject constructor(
         return try {
             val response = api.listCategories()
             if (response.isSuccessful && response.body() != null) {
-                val categories = response.body()!!.results?.map { PackageMapper.categoryToDomain(it) } ?: emptyList()
+                val categories = response.body()!!.categorias?.map { PackageMapper.categoryToDomain(it) } ?: emptyList()
                 NetworkResult.Success(categories)
             } else {
                 NetworkResult.Error(response.message() ?: "Unknown error", response.code())

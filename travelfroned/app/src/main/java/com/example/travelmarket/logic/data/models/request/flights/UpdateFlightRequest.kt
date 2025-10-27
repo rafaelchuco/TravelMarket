@@ -1,14 +1,14 @@
 package com.example.travelmarket.logic.data.models.request.flights
 
-import com.squareup.moshi.Json
+import com.google.gson.annotations.SerializedName
 
 data class UpdateFlightRequest(
-    @Json(name = "airline") val airline: String?,
-    @Json(name = "flight_number") val flightNumber: String?,
-    @Json(name = "origin") val origin: String?,
-    @Json(name = "destination") val destination: String?,
-    @Json(name = "departure_date") val departureDate: String?,
-    @Json(name = "arrival_date") val arrivalDate: String?,
-    @Json(name = "price") val price: Double?,
-    @Json(name = "available_seats") val availableSeats: Int?
+    @SerializedName("airline") val airline: String?,
+    @SerializedName("flight_number") val flightNumber: String?,
+    @SerializedName("origin") val origin: String?,
+    @SerializedName("destination") val destination: String?,
+    @SerializedName("departure_date") val departureDate: String?,
+    @SerializedName("arrival_date") val arrivalDate: String?,
+    @SerializedName("price") val price: Double?,
+    @SerializedName("available_seats") val availableSeats: Int?
 )

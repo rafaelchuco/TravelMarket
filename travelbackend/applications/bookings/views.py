@@ -3,7 +3,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
-from core.permissions import IsOwnerOrAdmin, IsAdminUser
+from core.permissions import IsOwnerOrAdmin
 from .models import Booking
 from .serializers import (
     BookingListSerializer,
@@ -12,16 +12,11 @@ from .serializers import (
 )
 
 
+
 class BookingViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet para reservas
-    - POST: Usuario autenticado (crear su reserva)
-    - GET list: Solo ve sus propias reservas (admin ve todas)
-    - GET detail/PUT/DELETE: Solo el owner o admin
-    """
-    # ✅ CORREGIDO: Quitamos 'package' del select_related
+    """ViewSet para reservas"""
     queryset = Booking.objects.select_related(
-        'customer'  # Solo customer es ForeignKey
+        'customer', 'package_id'  # ✅ CORREGIDO: era 'package'
     ).prefetch_related(
         'passengers',
         'hotel_bookings',
@@ -35,10 +30,6 @@ class BookingViewSet(viewsets.ModelViewSet):
     ordering = ['-booking_date']
     
     def get_permissions(self):
-        """
-        - create: Usuario autenticado
-        - list, retrieve, update, destroy: Owner o Admin
-        """
         if self.action == 'create':
             return [IsAuthenticated()]
         return [IsOwnerOrAdmin()]
@@ -53,20 +44,13 @@ class BookingViewSet(viewsets.ModelViewSet):
         return BookingDetailSerializer
     
     def get_queryset(self):
-        """
-        Admin: ve todas las reservas
-        Customer: solo ve sus propias reservas
-        """
         queryset = super().get_queryset()
         
-        # Si es admin, ve todo
         if self.request.user.user_type == 'admin':
             pass
-        # Si es customer, solo ve sus reservas
         else:
             queryset = queryset.filter(customer=self.request.user)
         
-        # Filtros de fecha
         travel_date_from = self.request.query_params.get('travel_date_from', None)
         travel_date_to = self.request.query_params.get('travel_date_to', None)
         
@@ -78,15 +62,42 @@ class BookingViewSet(viewsets.ModelViewSet):
         
         return queryset
     
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(queryset)
+        
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response({
+                'exito': True,
+                'mensaje': f'Tienes {queryset.count()} reservas',
+                'reservas': serializer.data
+            })
+        
+        serializer = self.get_serializer(queryset, many=True)
+        return Response({
+            'exito': True,
+            'mensaje': f'Tienes {queryset.count()} reservas',
+            'reservas': serializer.data
+        })
+    
     def create(self, request, *args, **kwargs):
-        """Crear reserva con respuesta personalizada"""
         serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        
+        if not serializer.is_valid():
+            return Response({
+                'exito': False,
+                'mensaje': 'Error al crear la reserva',
+                'errores': serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
         booking = serializer.save()
         
         return Response({
-            'message': 'Reserva creada exitosamente',
-            'booking': BookingDetailSerializer(booking).data
+            'exito': True,
+            'mensaje': '¡Tu reserva ha sido confirmada exitosamente!',
+            'numero_reserva': booking.booking_number,
+            'detalles': BookingDetailSerializer(booking).data
         }, status=status.HTTP_201_CREATED)
     
     @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
@@ -94,7 +105,11 @@ class BookingViewSet(viewsets.ModelViewSet):
         """GET /api/v1/bookings/my_bookings/ - Mis reservas"""
         bookings = self.queryset.filter(customer=request.user)
         serializer = BookingListSerializer(bookings, many=True)
-        return Response(serializer.data)
+        return Response({
+            'exito': True,
+            'mensaje': f'Tienes {bookings.count()} reservas',
+            'reservas': serializer.data
+        })
     
     @action(detail=True, methods=['patch'], permission_classes=[IsOwnerOrAdmin])
     def cancel(self, request, pk=None):
@@ -103,18 +118,22 @@ class BookingViewSet(viewsets.ModelViewSet):
         
         if booking.status == 'cancelled':
             return Response({
-                'error': 'La reserva ya está cancelada'
+                'exito': False,
+                'mensaje': 'Esta reserva ya fue cancelada anteriormente'
             }, status=status.HTTP_400_BAD_REQUEST)
         
         if booking.status == 'completed':
             return Response({
-                'error': 'No se puede cancelar una reserva completada'
+                'exito': False,
+                'mensaje': 'No es posible cancelar una reserva que ya fue completada'
             }, status=status.HTTP_400_BAD_REQUEST)
         
         booking.status = 'cancelled'
         booking.save()
         
         return Response({
-            'message': 'Reserva cancelada exitosamente',
-            'booking': BookingDetailSerializer(booking).data
+            'exito': True,
+            'mensaje': 'Tu reserva ha sido cancelada exitosamente',
+            'numero_reserva': booking.booking_number,
+            'detalles': BookingDetailSerializer(booking).data
         })

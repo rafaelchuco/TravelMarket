@@ -16,7 +16,8 @@ class HotelsRepositoryImpl @Inject constructor(
         return try {
             val response = api.list()
             if (response.isSuccessful && response.body() != null) {
-                val hotels = response.body()!!.results?.map { HotelMapper.toDomain(it) } ?: emptyList()
+                // ✅ CAMBIO: Acceder a results.hoteles en lugar de results directamente
+                val hotels = response.body()!!.results?.hoteles?.map { HotelMapper.toDomain(it) } ?: emptyList()
                 NetworkResult.Success(hotels)
             } else {
                 NetworkResult.Error(response.message() ?: "Unknown error", response.code())

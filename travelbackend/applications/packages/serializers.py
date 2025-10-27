@@ -3,9 +3,7 @@ from .models import Category, Package, Itinerary
 
 
 class CategorySerializer(serializers.ModelSerializer):
-    """
-    Serializer para categorías
-    """
+    """Serializer para categorías"""
     
     class Meta:
         model = Category
@@ -13,9 +11,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class ItinerarySerializer(serializers.ModelSerializer):
-    """
-    Serializer para itinerarios
-    """
+    """Serializer para itinerarios"""
     
     class Meta:
         model = Itinerary
@@ -30,19 +26,26 @@ class ItinerarySerializer(serializers.ModelSerializer):
 
 
 class PackageListSerializer(serializers.ModelSerializer):
-    """
-    Serializer para listado de paquetes (información resumida)
-    """
+    """Serializer para listado de paquetes con camelCase"""
     
-    destination_name = serializers.CharField(
+    destinationName = serializers.CharField(
         source='destination.name',
         read_only=True
     )
     
-    category_name = serializers.CharField(
+    categoryName = serializers.CharField(
         source='category.name',
         read_only=True
     )
+    
+    # ✅ Mapeo explícito a camelCase
+    shortDescription = serializers.CharField(source='short_description')
+    durationDays = serializers.IntegerField(source='duration_days')
+    durationNights = serializers.IntegerField(source='duration_nights')
+    priceAdult = serializers.DecimalField(source='price_adult', max_digits=10, decimal_places=2)
+    priceChild = serializers.DecimalField(source='price_child', max_digits=10, decimal_places=2)
+    isFeatured = serializers.BooleanField(source='is_featured')
+    createdAt = serializers.DateTimeField(source='created_at')
     
     class Meta:
         model = Package
@@ -50,30 +53,47 @@ class PackageListSerializer(serializers.ModelSerializer):
             'id',
             'name',
             'slug',
-            'category_name',
-            'destination_name',
-            'short_description',
-            'duration_days',
-            'duration_nights',
-            'price_adult',
-            'price_child',
+            'categoryName',
+            'destinationName',
+            'shortDescription',
+            'durationDays',
+            'durationNights',
+            'priceAdult',
+            'priceChild',
             'image',
-            'is_featured',
-            'created_at'
+            'isFeatured',
+            'createdAt'
         ]
 
 
 class PackageDetailSerializer(serializers.ModelSerializer):
-    """
-    Serializer detallado de paquete con itinerario completo
-    """
+    """Serializer detallado de paquete con itinerario completo"""
     
     destination = serializers.StringRelatedField()
     category = CategorySerializer(read_only=True)
     itinerary = ItinerarySerializer(many=True, read_only=True)
     
-    # Campos calculados
-    total_duration = serializers.SerializerMethodField()
+    # Mapeo a camelCase
+    shortDescription = serializers.CharField(source='short_description')
+    durationDays = serializers.IntegerField(source='duration_days')
+    durationNights = serializers.IntegerField(source='duration_nights')
+    priceAdult = serializers.DecimalField(source='price_adult', max_digits=10, decimal_places=2)
+    priceChild = serializers.DecimalField(source='price_child', max_digits=10, decimal_places=2)
+    maxPeople = serializers.IntegerField(source='max_people')
+    minPeople = serializers.IntegerField(source='min_people')
+    includesFlight = serializers.BooleanField(source='includes_flight')
+    includesHotel = serializers.BooleanField(source='includes_hotel')
+    includesMeals = serializers.BooleanField(source='includes_meals')
+    includesTransport = serializers.BooleanField(source='includes_transport')
+    includesGuide = serializers.BooleanField(source='includes_guide')
+    isActive = serializers.BooleanField(source='is_active')
+    isFeatured = serializers.BooleanField(source='is_featured')
+    availableFrom = serializers.DateField(source='available_from')
+    availableUntil = serializers.DateField(source='available_until')
+    createdAt = serializers.DateTimeField(source='created_at')
+    updatedAt = serializers.DateTimeField(source='updated_at')
+    
+    totalDuration = serializers.SerializerMethodField()
     
     class Meta:
         model = Package
@@ -84,38 +104,35 @@ class PackageDetailSerializer(serializers.ModelSerializer):
             'category',
             'destination',
             'description',
-            'short_description',
-            'duration_days',
-            'duration_nights',
-            'total_duration',
-            'price_adult',
-            'price_child',
-            'max_people',
-            'min_people',
-            'includes_flight',
-            'includes_hotel',
-            'includes_meals',
-            'includes_transport',
-            'includes_guide',
+            'shortDescription',
+            'durationDays',
+            'durationNights',
+            'totalDuration',
+            'priceAdult',
+            'priceChild',
+            'maxPeople',
+            'minPeople',
+            'includesFlight',
+            'includesHotel',
+            'includesMeals',
+            'includesTransport',
+            'includesGuide',
             'image',
-            'is_active',
-            'is_featured',
-            'available_from',
-            'available_until',
+            'isActive',
+            'isFeatured',
+            'availableFrom',
+            'availableUntil',
             'itinerary',
-            'created_at',
-            'updated_at'
+            'createdAt',
+            'updatedAt'
         ]
     
-    def get_total_duration(self, obj):
-        """Calcular duración total como string"""
+    def get_totalDuration(self, obj):
         return f"{obj.duration_days} días / {obj.duration_nights} noches"
 
 
 class PackageCreateSerializer(serializers.ModelSerializer):
-    """
-    Serializer para crear paquetes
-    """
+    """Serializer para crear paquetes"""
     
     class Meta:
         model = Package
@@ -144,7 +161,6 @@ class PackageCreateSerializer(serializers.ModelSerializer):
         ]
     
     def validate(self, attrs):
-        """Validaciones personalizadas"""
         if attrs.get('duration_days', 0) < 1:
             raise serializers.ValidationError({
                 "duration_days": "La duración debe ser al menos 1 día"

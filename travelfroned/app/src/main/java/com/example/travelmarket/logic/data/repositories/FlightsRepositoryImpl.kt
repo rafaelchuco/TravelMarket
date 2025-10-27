@@ -16,14 +16,13 @@ class FlightsRepositoryImpl @Inject constructor(
         return try {
             val response = api.list()
             if (response.isSuccessful && response.body() != null) {
-                val flights = response.body()!!.results?.map { FlightMapper.toDomain(it) } ?: emptyList()
+                // ✅ CORREGIDO: Acceder a results.vuelos (o el campo que use Django)
+                val flights = response.body()!!.results?.vuelos?.map { FlightMapper.toDomain(it) } ?: emptyList()
                 NetworkResult.Success(flights)
             } else {
-                // ✅ CORREGIDO
                 NetworkResult.Error(response.message() ?: "Unknown error", response.code())
             }
         } catch (e: Exception) {
-            // ✅ CORREGIDO
             NetworkResult.Error(e.message ?: "Unknown error")
         }
     }
@@ -34,11 +33,9 @@ class FlightsRepositoryImpl @Inject constructor(
             if (response.isSuccessful && response.body() != null) {
                 NetworkResult.Success(FlightMapper.toDomain(response.body()!!))
             } else {
-                // ✅ CORREGIDO
                 NetworkResult.Error(response.message() ?: "Unknown error", response.code())
             }
         } catch (e: Exception) {
-            // ✅ CORREGIDO
             NetworkResult.Error(e.message ?: "Unknown error")
         }
     }
@@ -49,11 +46,9 @@ class FlightsRepositoryImpl @Inject constructor(
             if (response.isSuccessful && response.body() != null) {
                 NetworkResult.Success(FlightMapper.toDomain(response.body()!!))
             } else {
-                // ✅ CORREGIDO
                 NetworkResult.Error(response.message() ?: "Unknown error", response.code())
             }
         } catch (e: Exception) {
-            // ✅ CORREGIDO
             NetworkResult.Error(e.message ?: "Unknown error")
         }
     }
@@ -64,11 +59,9 @@ class FlightsRepositoryImpl @Inject constructor(
             if (response.isSuccessful && response.body() != null) {
                 NetworkResult.Success(FlightMapper.toDomain(response.body()!!))
             } else {
-                // ✅ CORREGIDO
                 NetworkResult.Error(response.message() ?: "Unknown error", response.code())
             }
         } catch (e: Exception) {
-            // ✅ CORREGIDO
             NetworkResult.Error(e.message ?: "Unknown error")
         }
     }
@@ -79,11 +72,9 @@ class FlightsRepositoryImpl @Inject constructor(
             if (response.isSuccessful) {
                 NetworkResult.Success(Unit)
             } else {
-                // ✅ CORREGIDO
                 NetworkResult.Error(response.message() ?: "Unknown error", response.code())
             }
         } catch (e: Exception) {
-            // ✅ CORREGIDO
             NetworkResult.Error(e.message ?: "Unknown error")
         }
     }

@@ -2,7 +2,7 @@ package com.example.travelmarket.logic.data.models.request.bookings
 
 import com.google.gson.annotations.SerializedName
 
-data class UpdateBookingRequest(
+data class  UpdateBookingRequest(
     @SerializedName("booking_number")
     val bookingNumber: String?,
 

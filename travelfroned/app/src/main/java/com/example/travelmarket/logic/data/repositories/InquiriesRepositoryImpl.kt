@@ -17,7 +17,8 @@ class InquiriesRepositoryImpl @Inject constructor(
         return try {
             val response = api.list()
             if (response.isSuccessful && response.body() != null) {
-                val inquiries = response.body()!!.results?.map { InquiryMapper.toDomain(it) } ?: emptyList()
+                // ✅ CORREGIDO: Acceder a results.consultas
+                val inquiries = response.body()!!.results?.consultas?.map { InquiryMapper.toDomain(it) } ?: emptyList()
                 NetworkResult.Success(inquiries)
             } else {
                 NetworkResult.Error(response.message() ?: "Unknown error", response.code())

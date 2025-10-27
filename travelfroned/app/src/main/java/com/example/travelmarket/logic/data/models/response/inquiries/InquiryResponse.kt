@@ -1,22 +1,27 @@
 package com.example.travelmarket.logic.data.models.response.inquiries
 
-import com.squareup.moshi.Json
+import com.google.gson.annotations.SerializedName
 
-// ✅ Wrapper para respuesta paginada
 data class InquiriesApiResponse(
-    @Json(name = "count") val count: Int?,
-    @Json(name = "next") val next: String?,
-    @Json(name = "previous") val previous: String?,
-    @Json(name = "results") val results: List<InquiryResponse>?
+    @SerializedName("count") val count: Int?,
+    @SerializedName("next") val next: String?,
+    @SerializedName("previous") val previous: String?,
+    @SerializedName("results") val results: InquiriesResultWrapper?  // ✅ Wrapper
 )
 
-// ✅ Modelo individual
+// ✅ NUEVO: Wrapper interno
+data class InquiriesResultWrapper(
+    @SerializedName("exito") val exito: Boolean?,
+    @SerializedName("mensaje") val mensaje: String?,
+    @SerializedName("consultas") val consultas: List<InquiryResponse>?  // ✅ consultas o inquiries
+)
+
 data class InquiryResponse(
-    @Json(name = "id") val id: Long,
-    @Json(name = "user_id") val userId: Long?,
-    @Json(name = "email") val email: String?,
-    @Json(name = "message") val message: String?,
-    @Json(name = "package_id") val packageId: Long?,
-    @Json(name = "status") val status: String?,
-    @Json(name = "created_at") val createdAt: String?
+    @SerializedName("id") val id: Long,
+    @SerializedName("user_id") val userId: Long?,
+    @SerializedName("email") val email: String?,
+    @SerializedName("message") val message: String?,
+    @SerializedName("package_id") val packageId: Long?,
+    @SerializedName("status") val status: String?,
+    @SerializedName("created_at") val createdAt: String?
 )

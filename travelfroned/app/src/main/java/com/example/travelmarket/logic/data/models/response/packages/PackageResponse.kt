@@ -1,31 +1,40 @@
 package com.example.travelmarket.logic.data.models.response.packages
 
-import com.squareup.moshi.Json
-import com.squareup.moshi.JsonClass
+import com.google.gson.annotations.SerializedName
 
-@JsonClass(generateAdapter = true)
+// ✅ SIN Deserializer, solo camelCase directo
 data class PackageResponse(
-    @Json(name = "id") val id: Long,
-    @Json(name = "name") val name: String?,
-    @Json(name = "slug") val slug: String?,
-    @Json(name = "short_description") val shortDescription: String?,  // ✅ ESTE VIENE EN EL JSON
-    @Json(name = "duration_days") val durationDays: Int?,
-    @Json(name = "duration_nights") val durationNights: Int?,
-    @Json(name = "price_adult") val priceAdult: Double?,
-    @Json(name = "price_child") val priceChild: Double?,
-    @Json(name = "max_people") val maxPeople: Int?,
-    @Json(name = "min_people") val minPeople: Int?,
-    @Json(name = "image") val image: String?,
-    @Json(name = "is_featured") val isFeatured: Boolean?,
-    @Json(name = "created_at") val createdAt: String?,
+    @SerializedName("id") val id: Long,
+    @SerializedName("name") val name: String?,
+    @SerializedName("slug") val slug: String?,
+    @SerializedName("shortDescription") val shortDescription: String?,
+    @SerializedName("durationDays") val durationDays: Int?,
+    @SerializedName("durationNights") val durationNights: Int?,
+    @SerializedName("priceAdult") val priceAdult: String?,
+    @SerializedName("priceChild") val priceChild: String?,
+    @SerializedName("maxPeople") val maxPeople: Int?,
+    @SerializedName("minPeople") val minPeople: Int?,
+    @SerializedName("image") val image: String?,
+    @SerializedName("isFeatured") val isFeatured: Boolean?,
+    @SerializedName("createdAt") val createdAt: String?,
+    @SerializedName("categoryName") val categoryName: String?,
+    @SerializedName("destinationName") val destinationName: String?,
+    @SerializedName("includesFlight") val includesFlight: Boolean?,
+    @SerializedName("includesGuide") val includesGuide: Boolean?,
+    @SerializedName("includesHotel") val includesHotel: Boolean?,
+    @SerializedName("includesMeals") val includesMeals: Boolean?,
+    @SerializedName("includesTransport") val includesTransport: Boolean?
+)
 
-    // ✅ USA LOS NOMBRES QUE VIENEN EN EL JSON
-    @Json(name = "category_name") val categoryName: String?,
-    @Json(name = "destination_name") val destinationName: String?,
+data class PackagesApiResponse(
+    @SerializedName("count") val count: Int?,
+    @SerializedName("next") val next: String?,
+    @SerializedName("previous") val previous: String?,
+    @SerializedName("results") val results: PackagesResultWrapper?
+)
 
-    @Json(name = "includes_flight") val includesFlight: Boolean?,
-    @Json(name = "includes_guide") val includesGuide: Boolean?,
-    @Json(name = "includes_hotel") val includesHotel: Boolean?,
-    @Json(name = "includes_meals") val includesMeals: Boolean?,
-    @Json(name = "includes_transport") val includesTransport: Boolean?
+data class PackagesResultWrapper(
+    @SerializedName("exito") val exito: Boolean?,
+    @SerializedName("mensaje") val mensaje: String?,
+    @SerializedName("paquetes") val paquetes: List<PackageResponse>?
 )

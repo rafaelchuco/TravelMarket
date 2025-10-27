@@ -122,6 +122,7 @@ REST_FRAMEWORK = {
         'rest_framework.filters.SearchFilter',
         'rest_framework.filters.OrderingFilter',
     ],
+    'EXCEPTION_HANDLER': 'core.exceptions.custom_exception_handler',
 }
 
 SIMPLE_JWT = {
@@ -133,8 +134,8 @@ SIMPLE_JWT = {
 }
 
 # CORS - Permitir peticiones desde móvil
-CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', default='').split(',')
-CORS_ALLOW_ALL_ORIGINS = DEBUG  # Solo en desarrollo
+# CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', default='').split(',')
+CORS_ALLOW_ALL_ORIGINS = True  # Solo en desarrollo
 
 # User Model personalizado
 AUTH_USER_MODEL = 'authentication.User'
