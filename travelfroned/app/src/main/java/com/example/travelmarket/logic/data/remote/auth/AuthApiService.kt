@@ -4,6 +4,7 @@ import com.example.travelmarket.logic.data.models.request.auth.LoginRequest
 import com.example.travelmarket.logic.data.models.request.auth.RefreshTokenRequest
 import com.example.travelmarket.logic.data.models.request.auth.RegisterRequest
 import com.example.travelmarket.logic.data.models.request.auth.UpdateProfileRequest
+import com.example.travelmarket.logic.data.models.response.auth.GetUserProfileResponse
 import com.example.travelmarket.logic.data.models.response.auth.LoginResponse
 import com.example.travelmarket.logic.data.models.response.auth.RefreshTokenResponse
 import com.example.travelmarket.logic.data.models.response.auth.RegisterResponse
@@ -29,7 +30,7 @@ interface AuthApiService {
     ): Response<LoginResponse>
 
     @GET("auth/users/me/")
-    suspend fun getUserProfile(): Response<UserResponse>
+    suspend fun getUserProfile(): Response<GetUserProfileResponse>
 
     @PUT("auth/users/update_profile/")
     suspend fun updateProfilePut(

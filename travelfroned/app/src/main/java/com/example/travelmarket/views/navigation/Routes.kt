@@ -7,21 +7,20 @@ sealed class Routes(val route: String) {
     object Profile : Routes("profile")
     object EditProfile : Routes("edit_profile")
 
-    // ========== ACTIVITIES (Tu amigo) ==========
+    // ========== MAIN SCREENS ==========
+    object DestinationsList : Routes("destinations_list")
+    object PackagesList : Routes("packages_list")
+    object PackageDetail : Routes("package_detail/{packageId}") {
+        fun createRoute(packageId: String) = "package_detail/$packageId"
+    }
+    object FlightsSearch : Routes("flights_search")
+    object CouponsList : Routes("coupons_list")
     object ActivitiesList : Routes("activities_list")
     object ActivityDetail : Routes("activity_detail/{activityId}") {
-        fun createRoute(activityId: Int) = "activity_detail/$activityId"
+        fun createRoute(activityId: Long) = "activity_detail/$activityId"
     }
 
-    // ========== TUS MÓDULOS ==========
-    object CategoriesTest : Routes("categories_test")
-    object DestinationsTest : Routes("destinations_test")
-    object FlightsTest : Routes("flights_test")
-    object HotelsTest : Routes("hotels_test")
-    object InquiriesTest : Routes("inquiries_test")
-    object PackagesTest : Routes("packages_test")
-
-    // ========== BOOKINGS (Tu amigo) ==========
+    // ========== BOOKINGS ==========
     object BookingsList : Routes("bookings_list")
     object CreateBooking {
         const val route = "create_booking/{packageId}"

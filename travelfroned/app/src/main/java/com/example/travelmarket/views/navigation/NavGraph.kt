@@ -27,6 +27,10 @@ import com.example.travelmarket.views.ui.test.FlightsTestScreen
 import com.example.travelmarket.views.ui.test.HotelsTestScreen
 import com.example.travelmarket.views.ui.test.InquiriesTestScreen
 import com.example.travelmarket.views.ui.test.PackagesTestScreen
+import com.example.travelmarket.views.ui.destinations.list.DestinationListScreen
+import com.example.travelmarket.views.ui.packages.PackageListScreen
+import com.example.travelmarket.views.ui.packages.PackageDetailScreen
+import com.example.travelmarket.views.ui.coupon_list.CouponListScreen
 
 @Composable
 fun NavGraph(
@@ -59,7 +63,61 @@ fun NavGraph(
             EditProfileScreen(navController = navController)
         }
 
-        // ========== ACTIVITIES (Tu amigo) ==========
+        // ========== MAIN SCREENS ==========
+        composable(Routes.DestinationsList.route) {
+            DestinationListScreen(
+                onNavigateToPackages = { destinationId ->
+                    navController.navigate(Routes.PackagesList.route)
+                },
+                onNavigateToHome = { navController.navigate(Routes.Home.route) },
+                onNavigateToPackageList = { navController.navigate(Routes.PackagesList.route) },
+                onNavigateToBookings = { navController.navigate(Routes.BookingsList.route) },
+                onNavigateToProfile = { navController.navigate(Routes.Profile.route) }
+            )
+        }
+
+        composable(Routes.PackagesList.route) {
+            PackageListScreen(
+                destinationId = null,
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToDetail = { packageId ->
+                    navController.navigate(Routes.PackageDetail.createRoute(packageId))
+                },
+                onNavigateToHome = { navController.navigate(Routes.Home.route) },
+                onNavigateToDestinations = { navController.navigate(Routes.DestinationsList.route) },
+                onNavigateToBookings = { navController.navigate(Routes.BookingsList.route) },
+                onNavigateToProfile = { navController.navigate(Routes.Profile.route) }
+            )
+        }
+
+        composable(
+            route = Routes.PackageDetail.route,
+            arguments = listOf(
+                navArgument("packageId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val packageId = backStackEntry.arguments?.getString("packageId") ?: ""
+            PackageDetailScreen(
+                packageId = packageId,
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToBooking = { packageId ->
+                    navController.navigate(Routes.CreateBooking.createRoute(packageId.toInt()))
+                }
+            )
+        }
+
+        composable(Routes.FlightsSearch.route) {
+            FlightSearchScreenNew(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(Routes.CouponsList.route) {
+            CouponListScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
         composable(Routes.ActivitiesList.route) {
             ActivitiesListScreen(navController = navController)
         }
@@ -67,10 +125,10 @@ fun NavGraph(
         composable(
             route = Routes.ActivityDetail.route,
             arguments = listOf(
-                navArgument("activityId") { type = NavType.IntType }
+                navArgument("activityId") { type = NavType.LongType }
             )
         ) { backStackEntry ->
-            val activityId = backStackEntry.arguments?.getInt("activityId") ?: 0
+            val activityId = backStackEntry.arguments?.getLong("activityId") ?: 0L
             ActivityDetailScreen(activityId = activityId)
         }
 

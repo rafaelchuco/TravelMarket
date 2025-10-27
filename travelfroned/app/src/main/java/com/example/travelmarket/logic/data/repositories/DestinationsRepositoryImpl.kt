@@ -4,27 +4,47 @@ import com.example.travelmarket.core.network.NetworkResult
 import com.example.travelmarket.logic.data.mappers.DestinationMapper
 import com.example.travelmarket.logic.data.models.request.destinations.CreateDestinationRequest
 import com.example.travelmarket.logic.data.models.request.destinations.UpdateDestinationRequest
+import com.example.travelmarket.logic.data.models.response.destinations.DestinationResponse
 import com.example.travelmarket.logic.data.remote.destinations.DestinationsApiService
 import com.example.travelmarket.logic.domain.models.Destination
 import com.example.travelmarket.logic.domain.repositories.DestinationsRepository
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import javax.inject.Inject
 
 class DestinationsRepositoryImpl @Inject constructor(
     private val api: DestinationsApiService
 ) : DestinationsRepository {
 
+    @Suppress("UNCHECKED_CAST", "USELESS_IS_CHECK")
     override suspend fun getDestinations(): NetworkResult<List<Destination>> {
         return try {
             val response = api.list()
             if (response.isSuccessful && response.body() != null) {
-                val destinations = response.body()!!.results?.map { DestinationMapper.toDomain(it) } ?: emptyList()
+                val paginatedResponse = response.body()!!
+
+                val destinationResponses: List<DestinationResponse> = try {
+                    val items = paginatedResponse.getItems()
+
+                    if (items.isNotEmpty() && items.first() is Map<*, *>) {
+                        val gson = Gson()
+                        val json = gson.toJson(items)
+                        val type = object : TypeToken<List<DestinationResponse>>() {}.type
+                        gson.fromJson(json, type)
+                    } else {
+                        items as List<DestinationResponse>
+                    }
+                } catch (e: Exception) {
+                    android.util.Log.e("DESTINATIONS_REPO", "Error parsing: ${e.message}")
+                    emptyList()
+                }
+
+                val destinations = destinationResponses.map { DestinationMapper.toDomain(it) }
                 NetworkResult.Success(destinations)
             } else {
-                // ✅ CORREGIDO: message primero, luego code
                 NetworkResult.Error(response.message() ?: "Unknown error", response.code())
             }
         } catch (e: Exception) {
-            // ✅ CORREGIDO: solo message (sin null)
             NetworkResult.Error(e.message ?: "Unknown error")
         }
     }
@@ -35,11 +55,9 @@ class DestinationsRepositoryImpl @Inject constructor(
             if (response.isSuccessful && response.body() != null) {
                 NetworkResult.Success(DestinationMapper.toDomain(response.body()!!))
             } else {
-                // ✅ CORREGIDO
                 NetworkResult.Error(response.message() ?: "Unknown error", response.code())
             }
         } catch (e: Exception) {
-            // ✅ CORREGIDO
             NetworkResult.Error(e.message ?: "Unknown error")
         }
     }
@@ -50,11 +68,9 @@ class DestinationsRepositoryImpl @Inject constructor(
             if (response.isSuccessful && response.body() != null) {
                 NetworkResult.Success(DestinationMapper.toDomain(response.body()!!))
             } else {
-                // ✅ CORREGIDO
                 NetworkResult.Error(response.message() ?: "Unknown error", response.code())
             }
         } catch (e: Exception) {
-            // ✅ CORREGIDO
             NetworkResult.Error(e.message ?: "Unknown error")
         }
     }
@@ -65,11 +81,9 @@ class DestinationsRepositoryImpl @Inject constructor(
             if (response.isSuccessful && response.body() != null) {
                 NetworkResult.Success(DestinationMapper.toDomain(response.body()!!))
             } else {
-                // ✅ CORREGIDO
                 NetworkResult.Error(response.message() ?: "Unknown error", response.code())
             }
         } catch (e: Exception) {
-            // ✅ CORREGIDO
             NetworkResult.Error(e.message ?: "Unknown error")
         }
     }
@@ -80,11 +94,9 @@ class DestinationsRepositoryImpl @Inject constructor(
             if (response.isSuccessful) {
                 NetworkResult.Success(Unit)
             } else {
-                // ✅ CORREGIDO
                 NetworkResult.Error(response.message() ?: "Unknown error", response.code())
             }
         } catch (e: Exception) {
-            // ✅ CORREGIDO
             NetworkResult.Error(e.message ?: "Unknown error")
         }
     }

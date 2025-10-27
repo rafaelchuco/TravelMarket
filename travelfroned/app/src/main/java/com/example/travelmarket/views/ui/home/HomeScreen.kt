@@ -1,131 +1,131 @@
 package com.example.travelmarket.views.ui.home
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import com.example.travelmarket.ui.theme.TravelMarketTheme
+import com.example.travelmarket.views.ui.home.components.*
 import com.example.travelmarket.views.navigation.Routes
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(navController: NavController) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Travel Market") }
+fun HomeScreen(
+    navController: NavHostController
+) {
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
+    val userName = "Juan Pérez"
+
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            AppDrawerContent(
+                userName = userName,
+                onCloseDrawer = { scope.launch { drawerState.close() } },
+                onNavigateToFavorites = { },
+                onNavigateToHotels = { },
+                onNavigateToFlights = {
+                    scope.launch { drawerState.close() }
+                    navController.navigate(Routes.FlightsSearch.route)
+                },
+                onNavigateToActivities = {
+                    scope.launch { drawerState.close() }
+                    navController.navigate(Routes.ActivitiesList.route)
+                },
+                onNavigateToCoupons = {
+                    scope.launch { drawerState.close() }
+                    navController.navigate(Routes.CouponsList.route)
+                },
+                onNavigateToMessages = {  },
+                onNavigateToPeruInfo = {  },
+                onNavigateToSettings = {  },
+                onNavigateToSupport = { },
+                onNavigateToTerms = {  }
             )
         }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = "Menú Principal",
-                style = MaterialTheme.typography.headlineMedium,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
-
-            // ========== CATÁLOGO ==========
-            Text(
-                text = "CATÁLOGO",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Button(
-                onClick = { navController.navigate(Routes.ActivitiesList.route) },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Ver Actividades")
+    ) {
+        Scaffold(
+            bottomBar = {
+                AppBottomNavigation(
+                    selectedIndex = 0,
+                    onInicioClick = { },
+                    onDestinosClick = { navController.navigate(Routes.DestinationsList.route) },
+                    onPaquetesClick = { navController.navigate(Routes.PackagesList.route) },
+                    onReservasClick = { navController.navigate(Routes.BookingsList.route) },
+                    onPerfilClick = { navController.navigate(Routes.Profile.route) }
+                )
             }
-
-            Button(
-                onClick = { navController.navigate(Routes.DestinationsTest.route) },
-                modifier = Modifier.fillMaxWidth()
+        ) { paddingValues ->
+            LazyColumn(
+                modifier = Modifier
+                    .background(Color(0xFFF5F5F5))
+                    .fillMaxSize(),
+                contentPadding = paddingValues
             ) {
-                Text("Ver Destinos (Test)")
-            }
-
-            Button(
-                onClick = { navController.navigate(Routes.HotelsTest.route) },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Ver Hoteles (Test)")
-            }
-
-            Button(
-                onClick = { navController.navigate(Routes.FlightsTest.route) },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Ver Vuelos (Test)")
-            }
-
-            Button(
-                onClick = { navController.navigate(Routes.PackagesTest.route) },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Ver Paquetes (Test)")
-            }
-
-            Button(
-                onClick = { navController.navigate(Routes.CategoriesTest.route) },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Ver Categorías (Test)")
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // ========== MI CUENTA ==========
-            Text(
-                text = "MI CUENTA",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Button(
-                onClick = { navController.navigate(Routes.Profile.route) },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Mi Perfil")
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // ========== MIS RESERVAS ==========
-            Text(
-                text = "MIS RESERVAS",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Button(
-                onClick = { navController.navigate(Routes.BookingsList.route) },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Ver Mis Reservas")
-            }
-
-            Button(
-                onClick = { navController.navigate(Routes.MyBookings.route) },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("My Bookings")
-            }
-
-            Button(
-                onClick = { navController.navigate(Routes.InquiriesTest.route) },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Mis Consultas (Test)")
+                item {
+                    HomeHeader(
+                        name = userName,
+                        onMenuClick = { scope.launch { drawerState.open() } },
+                        onSearchClick = {  }
+                    )
+                }
+                item {
+                    QuickLinks(
+                        onHotelesClick = { },
+                        onVuelosClick = { navController.navigate(Routes.FlightsSearch.route) },
+                        onActividadesClick = { navController.navigate(Routes.ActivitiesList.route) }
+                    )
+                }
+                item {
+                    SectionHeader(
+                        title = "Categorías",
+                        onVerTodosClick = { }
+                    )
+                }
+                item {
+                    CategoryGrid(onCategoryClick = { categoryId ->
+                        navController.navigate(Routes.PackagesList.route)
+                    })
+                }
+                item {
+                    SectionHeader(
+                        title = "Destinos Destacados",
+                        onVerTodosClick = { navController.navigate(Routes.DestinationsList.route) }
+                    )
+                }
+                items(3) { index ->
+                    DestinationCard(
+                        imageUrl = "",
+                        title = "Machu Picchu",
+                        location = "Cusco - Sierra",
+                        rating = 4.8,
+                        onClick = { }
+                    )
+                }
+                item {
+                    SectionHeader(
+                        title = "Paquetes Populares",
+                        onVerTodosClick = { navController.navigate(Routes.PackagesList.route) }
+                    )
+                }
+                item {
+                    PopularPackagesRow(onPackageClick = { })
+                }
+                item {
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
             }
         }
     }
