@@ -24,5 +24,9 @@ object ApiClient {
         .addConverterFactory(MoshiConverterFactory.create())
         .client(client)
         .build()
+    
+    // Instancias de los servicios API
+    val packagesApiService = retrofit.create(com.example.travelmarket.data.remote.PackagesApiService::class.java)
+    val bookingsApiService = retrofit.create(com.example.travelmarket.data.remote.BookingsApiService::class.java)
 }
 
