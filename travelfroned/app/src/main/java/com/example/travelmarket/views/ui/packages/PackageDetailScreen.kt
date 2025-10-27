@@ -41,7 +41,6 @@ fun PackageDetailScreen(
 ) {
     val packageState by viewModel.packageDetail.collectAsState()
 
-    // The LaunchedEffect is no longer needed if the ViewModel handles the initial load.
 
     Scaffold {
         when (val state = packageState) {
