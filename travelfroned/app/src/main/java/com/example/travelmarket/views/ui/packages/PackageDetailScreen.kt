@@ -2,71 +2,75 @@ package com.example.travelmarket.views.ui.packages
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.travelmarket.R
+import coil.compose.AsyncImage
+import com.example.travelmarket.core.network.NetworkResult
 import com.example.travelmarket.logic.domain.models.Package
+import com.example.travelmarket.logic.viewmodels.packages.PackageDetailViewModel
 import com.example.travelmarket.ui.theme.RedMain
-import com.example.travelmarket.ui.theme.TravelMarketTheme
 import com.example.travelmarket.ui.theme.WhitePure
 import com.example.travelmarket.views.ui.packages.components.ItineraryTab
 import com.example.travelmarket.views.ui.packages.components.ReviewsTab
-
-val packageDetailPlaceholder = Package(0L, "Error", "N/A", 0.0, 0, 0, 0, "")
+import org.koin.androidx.compose.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PackageDetailScreen(
     packageId: String?,
+    onNavigateBack: () -> Unit,
+    onReservarClick: (Int) -> Unit,
+    viewModel: PackageDetailViewModel = koinViewModel(parameters = { parametersOf(packageId) })
+) {
+    val packageState by viewModel.packageDetail.collectAsState()
+
+    // The LaunchedEffect is no longer needed if the ViewModel handles the initial load.
+
+    Scaffold {
+        when (val state = packageState) {
+            is NetworkResult.Loading -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = RedMain)
+                }
+            }
+            is NetworkResult.Success -> {
+                state.data?.let {
+                    PackageDetailContent(
+                        pkg = it,
+                        onNavigateBack = onNavigateBack,
+                        onReservarClick = { onReservarClick(it.id.toInt()) }
+                    )
+                }
+            }
+            is NetworkResult.Error -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("Error: ${state.message}", color = Color.Red)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun PackageDetailContent(
+    pkg: Package,
     onNavigateBack: () -> Unit,
     onReservarClick: () -> Unit
 ) {
@@ -91,7 +95,7 @@ fun PackageDetailScreen(
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Text(
-                        text = "Reservar por S/. ${packageDetailPlaceholder.price}",
+                        text = "Reservar por S/. ${pkg.price}",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -111,9 +115,9 @@ fun PackageDetailScreen(
                         .fillMaxWidth()
                         .height(300.dp)
                 ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_launcher_foreground),
-                        contentDescription = packageDetailPlaceholder.title,
+                    AsyncImage(
+                        model = pkg.imageUrl,
+                        contentDescription = pkg.title,
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop
                     )
@@ -141,13 +145,13 @@ fun PackageDetailScreen(
 
             item {
                 Column(modifier = Modifier.background(Color.White).padding(16.dp)) {
-                    Text(packageDetailPlaceholder.title, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+                    Text(pkg.title, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.Black)
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        InfoChip(Icons.Default.LocationOn, "Destino no especificado")
+                        InfoChip(Icons.Default.LocationOn, pkg.destinationName ?: "N/A")
                         Spacer(modifier = Modifier.width(8.dp))
-                        InfoChip(Icons.Default.Star, "4.5 (120) reseñas")
+                        InfoChip(Icons.Default.Star, "${pkg.rating} (${pkg.reviewsCount} reseñas)")
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                     InfoChip(Icons.Default.Person, "Máx. 12 personas")
@@ -162,7 +166,7 @@ fun PackageDetailScreen(
                             modifier = Modifier.weight(1f)
                         )
                         Text(
-                            text = "S/. ${packageDetailPlaceholder.price}",
+                            text = "S/. ${pkg.price}",
                             fontSize = 24.sp,
                             fontWeight = FontWeight.Bold,
                             color = RedMain
@@ -203,7 +207,7 @@ fun PackageDetailScreen(
                     .padding(16.dp)
                 ) {
                     when (selectedTab) {
-                        "Descripción" -> DescripcionTab(description = "...")
+                        "Descripción" -> DescripcionTab(description = pkg.description ?: "No hay descripción disponible.")
                         "Itinerario" -> ItineraryTab()
                         "Reseñas" -> ReviewsTab()
                     }
@@ -219,7 +223,7 @@ private fun DescripcionTab(description: String) {
         Text("Sobre el tour", fontSize = 18.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Descubre la maravilla del mundo con nuestro tour exclusivo a Machu Picchu. Incluye visita guiada completa, transporte en tren de lujo y alojamiento en Aguas Calientes.",
+            text = description,
             fontSize = 14.sp,
             color = Color.DarkGray
         )

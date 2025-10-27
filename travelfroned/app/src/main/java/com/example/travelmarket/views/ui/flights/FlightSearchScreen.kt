@@ -1,7 +1,6 @@
 package com.example.travelmarket.views.ui.flights
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -18,27 +17,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.travelmarket.core.network.NetworkResult
+import com.example.travelmarket.logic.domain.models.Flight
+import com.example.travelmarket.logic.viewmodels.flights.FlightsListViewModel
 import com.example.travelmarket.ui.theme.RedMain
-import com.example.travelmarket.ui.theme.TravelMarketTheme
 import com.example.travelmarket.views.ui.home.components.AppBottomNavigation
-
-data class FlightResult(
-    val id: String,
-    val airline: String,
-    val departureTime: String,
-    val arrivalTime: String,
-    val duration: String,
-    val stops: String,
-    val price: Double
-)
-val flightResults = listOf(
-    FlightResult("fl1", "LATAM", "08:30", "10:00", "1h 30m", "Directo", 180.50),
-    FlightResult("fl2", "Sky Airline", "11:00", "12:20", "1h 20m", "Directo", 155.00),
-    FlightResult("fl3", "LATAM", "15:45", "17:15", "1h 30m", "Directo", 195.70)
-)
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,8 +35,11 @@ fun FlightSearchScreen(
     onNavigateToDestinations: () -> Unit,
     onNavigateToPackages: () -> Unit,
     onNavigateToBookings: () -> Unit,
-    onNavigateToProfile: () -> Unit
+    onNavigateToProfile: () -> Unit,
+    viewModel: FlightsListViewModel = koinViewModel()
 ) {
+    val state by viewModel.state.collectAsState()
+
     var origin by remember { mutableStateOf("") }
     var destination by remember { mutableStateOf("") }
     var departureDate by remember { mutableStateOf("") }
@@ -132,8 +122,10 @@ fun FlightSearchScreen(
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Button(
-                            onClick = { /* TODO: Implement search logic */ },
-                            modifier = Modifier.fillMaxWidth().height(48.dp),
+                            onClick = { viewModel.loadFlights() }, // Simplified for now
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(48.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = RedMain),
                             shape = RoundedCornerShape(12.dp)
                         ) {
@@ -143,17 +135,45 @@ fun FlightSearchScreen(
                 }
             }
 
-            if (flightResults.isNotEmpty()) { // Simula que hay resultados
-                item {
-                    Text(
-                        text = "${flightResults.size} vuelos encontrados",
-                        fontSize = 14.sp,
-                        color = Color.DarkGray,
-                        modifier = Modifier.padding(bottom = 8.dp, top = 16.dp)
-                    )
+            when (val flightsState = state) {
+                is NetworkResult.Loading -> {
+                    item {
+                        Box(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    }
                 }
-                items(flightResults) { flight ->
-                    FlightResultCard(flight = flight, onSelectClick = {})
+                is NetworkResult.Error -> {
+                    item {
+                        Text(
+                            text = "Error: ${flightsState.message}",
+                            color = Color.Red,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                    }
+                }
+                is NetworkResult.Success -> {
+                    val flights = flightsState.data
+                    if (flights != null && flights.isNotEmpty()) {
+                        item {
+                            Text(
+                                text = "${flights.size} vuelos encontrados",
+                                fontSize = 14.sp,
+                                color = Color.DarkGray,
+                                modifier = Modifier.padding(bottom = 8.dp, top = 16.dp)
+                            )
+                        }
+                        items(flights) { flight ->
+                            FlightResultCard(flight = flight, onSelectClick = {})
+                        }
+                    } else {
+                        item {
+                            Text("No se encontraron vuelos para esta búsqueda.")
+                        }
+                    }
                 }
             }
         }
@@ -207,16 +227,7 @@ fun FlightDateField(
             unfocusedBorderColor = Color.LightGray
         ),
         singleLine = true,
-        readOnly = true,
-        interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
-            .also { interactionSource ->
-                LaunchedEffect(interactionSource) {
-                    interactionSource.interactions.collect {
-                        if (it is androidx.compose.foundation.interaction.PressInteraction.Release) {
-                        }
-                    }
-                }
-            }
+        readOnly = true
     )
 }
 
@@ -234,8 +245,10 @@ fun PassengerSelector(count: Int, onCountChange: (Int) -> Unit) {
                 text = count.toString(),
                 fontWeight = FontWeight.Bold,
                 fontSize = 18.sp,
-                modifier = Modifier.padding(horizontal = 16.dp).widthIn(min=24.dp),
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .widthIn(min = 24.dp),
+                textAlign = TextAlign.Center
             )
             SmallCircleButton(icon = Icons.Default.Add) { onCountChange(count + 1) }
         }
@@ -257,7 +270,7 @@ fun SmallCircleButton(icon: ImageVector, enabled: Boolean = true, onClick: () ->
 }
 
 @Composable
-fun FlightResultCard(flight: FlightResult, onSelectClick: () -> Unit) {
+fun FlightResultCard(flight: Flight, onSelectClick: () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -280,15 +293,18 @@ fun FlightResultCard(flight: FlightResult, onSelectClick: () -> Unit) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                TimeColumn(time = flight.departureTime, label = "SAL")
-                DurationColumn(duration = flight.duration, stops = flight.stops)
-                TimeColumn(time = flight.arrivalTime, label = "LLE")
+                TimeColumn(time = flight.departureDate, label = "SAL")
+                DurationColumn(duration = "N/A", stops = "N/A") // Placeholder
+                TimeColumn(time = flight.arrivalDate, label = "LLE")
             }
             Spacer(modifier = Modifier.height(16.dp))
             Button(
                 onClick = onSelectClick,
                 modifier = Modifier.align(Alignment.End),
-                colors = ButtonDefaults.buttonColors(containerColor = RedMain.copy(alpha = 0.1f), contentColor = RedMain),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = RedMain.copy(alpha = 0.1f),
+                    contentColor = RedMain
+                ),
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
             ) {
                 Text("Seleccionar", fontWeight = FontWeight.SemiBold)
@@ -311,14 +327,5 @@ fun DurationColumn(duration: String, stops: String) {
         Text(duration, fontSize = 12.sp, color = Color.Gray)
         Divider(modifier = Modifier.width(60.dp).padding(vertical = 2.dp), color = Color.LightGray)
         Text(stops, fontSize = 12.sp, color = Color.Gray, fontWeight = FontWeight.SemiBold)
-    }
-}
-
-
-@Preview(showBackground = true)
-@Composable
-fun FlightSearchScreenPreview() {
-    TravelMarketTheme {
-        FlightSearchScreen({}, {}, {}, {}, {}, {})
     }
 }

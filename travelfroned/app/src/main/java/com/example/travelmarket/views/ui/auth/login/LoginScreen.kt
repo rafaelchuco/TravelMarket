@@ -16,19 +16,16 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.travelmarket.core.network.NetworkResult
-import com.example.travelmarket.core.storage.TokenManager
 import com.example.travelmarket.logic.viewmodels.auth.LoginViewModel
 import com.example.travelmarket.ui.theme.RedMain
 import com.example.travelmarket.ui.theme.WhitePure
 import com.example.travelmarket.views.ui.auth.components.AuthTextField
 import org.koin.androidx.compose.koinViewModel
-import org.koin.compose.koinInject
 
 @Composable
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
-    viewModel: LoginViewModel = koinViewModel(),
-    tokenManager: TokenManager = koinInject()
+    viewModel: LoginViewModel = koinViewModel()
 ) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -37,16 +34,8 @@ fun LoginScreen(
     var rememberMe by remember { mutableStateOf(false) }
 
     LaunchedEffect(loginState) {
-        when (loginState) {
-            is NetworkResult.Success -> {
-                val loginResponse = (loginState as NetworkResult.Success).data
-                tokenManager.saveTokens(
-                    accessToken = loginResponse.accessToken,
-                    refreshToken = loginResponse.refreshToken
-                )
-                onLoginSuccess()
-            }
-            else -> {}
+        if (loginState is NetworkResult.Success) {
+            onLoginSuccess()
         }
     }
 

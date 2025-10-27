@@ -5,52 +5,27 @@ import com.example.travelmarket.core.network.NetworkResult
 import com.example.travelmarket.logic.data.mappers.BookingMapper
 import com.example.travelmarket.logic.data.models.request.bookings.CreateBookingRequest
 import com.example.travelmarket.logic.data.models.request.bookings.UpdateBookingRequest
-import com.example.travelmarket.logic.data.models.response.bookings.BookingDetailResponse
-import com.example.travelmarket.logic.data.models.response.bookings.BookingResponse
 import com.example.travelmarket.logic.data.remote.bookings.BookingsApiService
 import com.example.travelmarket.logic.domain.models.Booking
 import com.example.travelmarket.logic.domain.models.BookingDetail
 import com.example.travelmarket.logic.domain.repositories.BookingsRepository
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 
 class BookingsRepositoryImpl(
     private val apiService: BookingsApiService
 ) : BaseRepository(), BookingsRepository {
 
-    @Suppress("UNCHECKED_CAST", "USELESS_IS_CHECK")
     override suspend fun getBookings(
         search: String?,
         ordering: String?,
         page: Int?
     ): NetworkResult<List<Booking>> {
         val result = executeApiCall {
-            apiService.getBookings(
-                search = search,
-                ordering = ordering,
-                page = page
-            )
+            apiService.getBookings(search, ordering, page)
         }
 
         return when (result) {
             is NetworkResult.Success -> {
-                // ✅ Parsear manualmente
-                val bookingResponses: List<BookingResponse> = try {
-                    val items = result.data.results
-
-                    if (items.isNotEmpty() && items.first() is Map<*, *>) {
-                        val gson = Gson()
-                        val json = gson.toJson(items)
-                        val type = object : TypeToken<List<BookingResponse>>() {}.type
-                        gson.fromJson(json, type)
-                    } else {
-                        items as List<BookingResponse>
-                    }
-                } catch (e: Exception) {
-                    android.util.Log.e("BOOKINGS_REPO", "Error parsing: ${e.message}")
-                    emptyList()
-                }
-
+                val bookingResponses = result.data.results?.reservas ?: emptyList()
                 val bookings = BookingMapper.toDomainList(bookingResponses)
                 NetworkResult.Success(bookings)
             }
@@ -68,14 +43,12 @@ class BookingsRepositoryImpl(
 
         return when (result) {
             is NetworkResult.Success -> {
-                // ✅ Extraer booking del wrapper
-                val bookingDetail = result.data.booking
+                val bookingDetail = result.data.detalles
 
-                // Convertir a Booking
                 val booking = Booking(
                     id = bookingDetail.id,
                     bookingNumber = bookingDetail.bookingNumber ?: "",
-                    customerId = bookingDetail.customer.toString(),  // ✅ CORREGIDO
+                    customerId = bookingDetail.customer.toString(),
                     travelDate = bookingDetail.travelDate,
                     returnDate = bookingDetail.returnDate,
                     numAdults = bookingDetail.numAdults ?: 0,
@@ -93,39 +66,18 @@ class BookingsRepositoryImpl(
         }
     }
 
-    @Suppress("UNCHECKED_CAST", "USELESS_IS_CHECK")
     override suspend fun getMyBookings(
         search: String?,
         ordering: String?,
         page: Int?
     ): NetworkResult<List<BookingDetail>> {
         val result = executeApiCall {
-            apiService.getMyBookings(
-                search = search,
-                ordering = ordering,
-                page = page
-            )
+            apiService.getMyBookings(search, ordering, page)
         }
 
         return when (result) {
             is NetworkResult.Success -> {
-                // ✅ Parsear manualmente
-                val bookingDetailResponses: List<BookingDetailResponse> = try {
-                    val items = result.data.results
-
-                    if (items.isNotEmpty() && items.first() is Map<*, *>) {
-                        val gson = Gson()
-                        val json = gson.toJson(items)
-                        val type = object : TypeToken<List<BookingDetailResponse>>() {}.type
-                        gson.fromJson(json, type)
-                    } else {
-                        items as List<BookingDetailResponse>
-                    }
-                } catch (e: Exception) {
-                    android.util.Log.e("BOOKINGS_REPO", "Error parsing: ${e.message}")
-                    emptyList()
-                }
-
+                val bookingDetailResponses = result.data.results?.reservas ?: emptyList()
                 val bookings = BookingMapper.detailToDomainList(bookingDetailResponses)
                 NetworkResult.Success(bookings)
             }

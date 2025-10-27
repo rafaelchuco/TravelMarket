@@ -6,8 +6,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-
-// --- Tus Imports de Pantallas (Asegúrate que las rutas sean correctas) ---
 import com.example.travelmarket.views.ui.activities.list.ActivityListScreen
 import com.example.travelmarket.views.ui.auth.AuthContainerScreen
 import com.example.travelmarket.views.ui.coupon_list.CouponListScreen
@@ -16,8 +14,6 @@ import com.example.travelmarket.views.ui.home.HomeScreen
 import com.example.travelmarket.views.ui.packages.PackageDetailScreen
 import com.example.travelmarket.views.ui.packages.PackageListScreen
 import com.example.travelmarket.views.ui.welcome.WelcomeScreen
-
-// --- Imports de Pantallas de Compañeros ---
 import com.example.travelmarket.views.ui.activities.detail.ActivityDetailScreen
 import com.example.travelmarket.views.ui.auth.EditProfileScreen
 import com.example.travelmarket.views.ui.auth.profile.ProfileScreen

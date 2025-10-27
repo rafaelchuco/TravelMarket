@@ -14,25 +14,32 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.example.travelmarket.logic.viewmodels.home.HomeViewModel
 import com.example.travelmarket.ui.theme.TravelMarketTheme
 import com.example.travelmarket.views.ui.home.components.*
 import com.example.travelmarket.views.navigation.Routes
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    navController: NavHostController
+    navController: NavHostController,
+    viewModel: HomeViewModel = koinViewModel()
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-    val userName = "Juan Pérez"
+
+    val user by viewModel.user.collectAsState()
+    val categories by viewModel.categories.collectAsState()
+    val destinations by viewModel.destinations.collectAsState()
+    val packages by viewModel.packages.collectAsState()
 
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
             AppDrawerContent(
-                userName = userName,
+                userName = user?.fullName ?: "",
                 onCloseDrawer = { scope.launch { drawerState.close() } },
                 onNavigateToFavorites = { },
                 onNavigateToHotels = { },
@@ -76,7 +83,7 @@ fun HomeScreen(
             ) {
                 item {
                     HomeHeader(
-                        name = userName,
+                        name = user?.fullName ?: "",
                         onMenuClick = { scope.launch { drawerState.open() } },
                         onSearchClick = {  }
                     )
@@ -95,7 +102,7 @@ fun HomeScreen(
                     )
                 }
                 item {
-                    CategoryGrid(onCategoryClick = { categoryId ->
+                    CategoryGrid(categories = categories, onCategoryClick = { categoryId ->
                         navController.navigate(Routes.PackageList.createRoute(categoryId))
                     })
                 }
@@ -105,13 +112,13 @@ fun HomeScreen(
                         onVerTodosClick = { navController.navigate(Routes.DestinationList.route) }
                     )
                 }
-                items(3) { index ->
+                items(destinations) { destination ->
                     DestinationCard(
-                        imageUrl = "",
-                        title = "Machu Picchu",
-                        location = "Cusco - Sierra",
-                        rating = 4.8,
-                        onClick = { }
+                        imageUrl = destination.imageUrl,
+                        title = destination.name,
+                        location = destination.location,
+                        rating = destination.rating,
+                        onClick = { navController.navigate(Routes.PackageList.createRoute(destination.id.toString())) }
                     )
                 }
                 item {
@@ -121,7 +128,9 @@ fun HomeScreen(
                     )
                 }
                 item {
-                    PopularPackagesRow(onPackageClick = { })
+                    PopularPackagesRow(packages = packages, onPackageClick = { packageId ->
+                        navController.navigate(Routes.PackageDetail.createRoute(packageId))
+                    })
                 }
                 item {
                     Spacer(modifier = Modifier.height(16.dp))

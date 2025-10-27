@@ -1,8 +1,8 @@
 package com.example.travelmarket.logic.data.models.request.packages
 
-import com.squareup.moshi.Json
+import com.google.gson.annotations.SerializedName
 
 data class CreateCategoryRequest(
-    @Json(name = "name") val name: String,
-    @Json(name = "description") val description: String?
+    @SerializedName("name") val name: String,
+    @SerializedName("description") val description: String?
 )

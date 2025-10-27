@@ -30,9 +30,9 @@ class ActivitiesRepositoryImpl(
             is NetworkResult.Success -> {
                 val paginatedResponse = result.data
 
-                // ✅ Parsear manually porque results es un objeto anidado
+                // ✅ Parsear manualmente porque results es un objeto anidado
                 val activityResponses: List<ActivityResponse> = try {
-                    val items = paginatedResponse.results
+                    val items = paginatedResponse.getItems()
 
                     // Si son LinkedTreeMaps, convertir a ActivityResponse
                     if (items.isNotEmpty() && items.first() is Map<*, *>) {

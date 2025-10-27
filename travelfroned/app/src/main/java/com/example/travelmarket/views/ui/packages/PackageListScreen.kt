@@ -12,6 +12,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -21,7 +22,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -33,15 +33,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.travelmarket.R
+import com.example.travelmarket.logic.viewmodels.packages.PackagesListViewModel
 import com.example.travelmarket.ui.theme.RedMain
-import com.example.travelmarket.ui.theme.TravelMarketTheme
 import com.example.travelmarket.views.ui.home.components.AppBottomNavigation
 import com.example.travelmarket.views.ui.packages.components.PackageListItem
-import com.example.travelmarket.logic.viewmodels.packages.PackagesListViewModel
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -61,9 +59,9 @@ fun PackageListScreen(
     val loading by viewModel.loading.collectAsState()
     val error by viewModel.error.collectAsState()
 
-    // Cargar paquetes al iniciar la pantalla
-    LaunchedEffect(Unit) {
-        viewModel.loadPackages()
+    LaunchedEffect(destinationId) {
+        val destId = if (destinationId == "all") null else destinationId
+        viewModel.loadPackages(destinationId = destId)
     }
 
     val title = when (destinationId) {
@@ -82,9 +80,11 @@ fun PackageListScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { }) {
-                        Icon(painterResource(id = R.drawable.ic_launcher_foreground),
-                            contentDescription = "Filtros")
+                    IconButton(onClick = { /* TODO: Implement filter */ }) {
+                        Icon(
+                            painterResource(id = R.drawable.ic_launcher_foreground),
+                            contentDescription = "Filtros"
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -114,8 +114,13 @@ fun PackageListScreen(
             item {
                 OutlinedTextField(
                     value = searchQuery,
-                    onValueChange = { searchQuery = it },
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+                    onValueChange = {
+                        searchQuery = it
+                        viewModel.loadPackages(searchQuery = it)
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
                     placeholder = { Text("Buscar paquetes...") },
                     leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Buscar") },
                     shape = RoundedCornerShape(50),
@@ -135,7 +140,7 @@ fun PackageListScreen(
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
             }
-            
+
             when {
                 loading -> {
                     item {

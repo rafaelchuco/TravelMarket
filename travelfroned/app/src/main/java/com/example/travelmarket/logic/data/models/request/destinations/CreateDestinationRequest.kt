@@ -1,10 +1,10 @@
 package com.example.travelmarket.logic.data.models.request.destinations
 
-import com.squareup.moshi.Json
+import com.google.gson.annotations.SerializedName
 
 data class CreateDestinationRequest(
-    @Json(name = "name") val name: String,
-    @Json(name = "country") val country: String,
-    @Json(name = "description") val description: String?,
-    @Json(name = "image_url") val imageUrl: String? = null
+    @SerializedName("name") val name: String,
+    @SerializedName("country") val country: String,
+    @SerializedName("description") val description: String?,
+    @SerializedName("image_url") val imageUrl: String? = null
 )

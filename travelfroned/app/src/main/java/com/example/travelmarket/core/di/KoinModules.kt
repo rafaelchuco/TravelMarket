@@ -26,7 +26,6 @@ import com.example.travelmarket.logic.domain.usecases.bookings.GetBookingByIdUse
 import com.example.travelmarket.logic.domain.usecases.bookings.GetBookingsUseCase
 import com.example.travelmarket.logic.domain.usecases.bookings.GetMyBookingsUseCase
 import com.example.travelmarket.logic.domain.usecases.bookings.UpdateBookingUseCase
-import com.example.travelmarket.logic.domain.usecases.destinations.GetDestinationsUseCase
 import com.example.travelmarket.logic.viewmodels.activities.ActivitiesListViewModel
 import com.example.travelmarket.logic.viewmodels.activities.ActivityDetailViewModel
 import com.example.travelmarket.logic.viewmodels.auth.LoginViewModel
@@ -39,7 +38,6 @@ import com.example.travelmarket.logic.viewmodels.bookings.CreateBookingViewModel
 import com.example.travelmarket.logic.viewmodels.bookings.DeleteBookingViewModel
 import com.example.travelmarket.logic.viewmodels.bookings.MyBookingsViewModel
 import com.example.travelmarket.logic.viewmodels.bookings.UpdateBookingViewModel
-import com.example.travelmarket.logic.viewmodels.destinations.DestinationsListViewModel
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.android.ext.koin.androidContext
@@ -54,7 +52,7 @@ val koinStorageModule = module {
     single { TokenManager(androidContext()) }
 }
 
-// ✅ Módulo de red (Retrofit con Gson para Koin)
+// ✅ Módulo de red (Retrofit con Gson estándar)
 val koinNetworkModule = module {
     single { NetworkInterceptor(tokenManager = get()) }
 
@@ -72,6 +70,7 @@ val koinNetworkModule = module {
             .build()
     }
 
+    // ✅ SIN Gson personalizado - Django ahora envía camelCase
     single {
         Retrofit.Builder()
             .baseUrl(Constants.BASE_URL)
