@@ -1,17 +1,22 @@
 package com.example.travelmarket.views.ui.reviews
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.travelmarket.core.network.NetworkResult
 import com.example.travelmarket.logic.data.models.response.bookings.BookingSimple
@@ -51,7 +56,7 @@ fun CreateReviewScreen(
         when (createReviewState) {
             is NetworkResult.Success -> {
                 snackbarHostState.showSnackbar(
-                    message = "Reseña creada exitosamente",
+                    message = "✅ Reseña creada exitosamente",
                     duration = SnackbarDuration.Short
                 )
                 delay(1000)
@@ -64,265 +69,592 @@ fun CreateReviewScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Crear Reseña") }
+                title = {
+                    Text(
+                        "Crear Reseña",
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.White
+                )
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
+                .background(Color(0xFFF5F5F5))
                 .padding(paddingValues)
-                .padding(16.dp)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text(
-                text = "Información de la Reseña",
-                style = MaterialTheme.typography.titleMedium
-            )
-
-            // DROPDOWN DE RESERVAS
-            when (bookingsState) {
-                is NetworkResult.Loading -> {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
-                }
-                is NetworkResult.Success -> {
-                    val bookings = (bookingsState as NetworkResult.Success).data
-
-                    if (bookings.isEmpty()) {
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.secondaryContainer
-                            )
-                        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // HEADER CARD
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color(0xFFDC143C)
+                    ),
+                    elevation = CardDefaults.cardElevation(4.dp),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(20.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
                             Text(
-                                text = "No tienes reservas disponibles para calificar",
-                                modifier = Modifier.padding(16.dp),
-                                style = MaterialTheme.typography.bodyMedium
+                                text = "¿Cómo fue tu experiencia?",
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+                            Text(
+                                text = "Tu opinión es muy importante",
+                                fontSize = 14.sp,
+                                color = Color.White.copy(alpha = 0.9f)
                             )
                         }
-                    } else {
-                        ExposedDropdownMenuBox(
-                            expanded = expanded,
-                            onExpandedChange = { expanded = !expanded }
-                        ) {
-                            OutlinedTextField(
-                                value = selectedBooking?.displayText ?: "",
-                                onValueChange = {},
-                                readOnly = true,
-                                label = { Text("Selecciona tu reserva *") },
-                                trailingIcon = {
-                                    Icon(Icons.Default.ArrowDropDown, "Expandir")
-                                },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .menuAnchor(),
-                                colors = OutlinedTextFieldDefaults.colors()
-                            )
+                        Icon(
+                            Icons.Default.RateReview,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(48.dp)
+                        )
+                    }
+                }
 
-                            ExposedDropdownMenu(
-                                expanded = expanded,
-                                onDismissRequest = { expanded = false }
-                            ) {
-                                bookings.forEach { booking ->
-                                    DropdownMenuItem(
-                                        text = { Text(booking.displayText) },
-                                        onClick = {
-                                            selectedBooking = booking
-                                            expanded = false
+                // DROPDOWN DE RESERVAS
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.White
+                    ),
+                    elevation = CardDefaults.cardElevation(4.dp),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(20.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Icon(
+                                Icons.Default.BookOnline,
+                                contentDescription = null,
+                                tint = Color(0xFFDC143C),
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Text(
+                                text = "Selecciona tu Reserva",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF212121)
+                            )
+                        }
+
+                        when (bookingsState) {
+                            is NetworkResult.Loading -> {
+                                Box(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    CircularProgressIndicator(color = Color(0xFFDC143C))
+                                }
+                            }
+
+                            is NetworkResult.Success -> {
+                                val bookings = (bookingsState as NetworkResult.Success).data
+
+                                if (bookings.isEmpty()) {
+                                    Surface(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        shape = RoundedCornerShape(12.dp),
+                                        color = Color(0xFFFFF3E0)
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.padding(16.dp),
+                                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Icon(
+                                                Icons.Default.Info,
+                                                contentDescription = null,
+                                                tint = Color(0xFFFF9800)
+                                            )
+                                            Text(
+                                                text = "No tienes reservas disponibles para calificar",
+                                                fontSize = 14.sp,
+                                                color = Color(0xFF212121)
+                                            )
                                         }
+                                    }
+                                } else {
+                                    ExposedDropdownMenuBox(
+                                        expanded = expanded,
+                                        onExpandedChange = { expanded = !expanded }
+                                    ) {
+                                        OutlinedTextField(
+                                            value = selectedBooking?.displayText ?: "",
+                                            onValueChange = {},
+                                            readOnly = true,
+                                            label = { Text("Selecciona tu reserva *") },
+                                            trailingIcon = {
+                                                Icon(
+                                                    Icons.Default.ArrowDropDown,
+                                                    "Expandir",
+                                                    tint = Color(0xFFDC143C)
+                                                )
+                                            },
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .menuAnchor(),
+                                            colors = OutlinedTextFieldDefaults.colors(
+                                                focusedBorderColor = Color(0xFFDC143C),
+                                                focusedLabelColor = Color(0xFFDC143C)
+                                            )
+                                        )
+
+                                        ExposedDropdownMenu(
+                                            expanded = expanded,
+                                            onDismissRequest = { expanded = false }
+                                        ) {
+                                            bookings.forEach { booking ->
+                                                DropdownMenuItem(
+                                                    text = { Text(booking.displayText) },
+                                                    onClick = {
+                                                        selectedBooking = booking
+                                                        expanded = false
+                                                    }
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            is NetworkResult.Error -> {
+                                Surface(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = RoundedCornerShape(12.dp),
+                                    color = Color(0xFFFFEBEE)
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(16.dp),
+                                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            Icons.Default.Error,
+                                            contentDescription = null,
+                                            tint = Color(0xFFC62828)
+                                        )
+                                        Text(
+                                            text = "Error: ${(bookingsState as NetworkResult.Error).message}",
+                                            fontSize = 14.sp,
+                                            color = Color(0xFFC62828)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // INFORMACIÓN BÁSICA
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.White
+                    ),
+                    elevation = CardDefaults.cardElevation(4.dp),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(20.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Icon(
+                                Icons.Default.Edit,
+                                contentDescription = null,
+                                tint = Color(0xFFDC143C),
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Text(
+                                text = "Información Básica",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF212121)
+                            )
+                        }
+
+                        OutlinedTextField(
+                            value = title,
+                            onValueChange = { title = it },
+                            label = { Text("Título de la reseña *") },
+                            modifier = Modifier.fillMaxWidth(),
+                            placeholder = { Text("Ej: Excelente experiencia") },
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = Color(0xFFDC143C),
+                                focusedLabelColor = Color(0xFFDC143C)
+                            )
+                        )
+
+                        // Calificación general con estrellas
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text(
+                                text = "Calificación General *",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color(0xFF212121)
+                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    repeat(5) { index ->
+                                        IconButton(
+                                            onClick = { overallRating = index + 1 }
+                                        ) {
+                                            Icon(
+                                                if (index < overallRating) {
+                                                    Icons.Default.Star
+                                                } else {
+                                                    Icons.Default.StarBorder
+                                                },
+                                                contentDescription = null,
+                                                tint = Color(0xFFFFC107),
+                                                modifier = Modifier.size(36.dp)
+                                            )
+                                        }
+                                    }
+                                }
+                                Surface(
+                                    shape = RoundedCornerShape(20.dp),
+                                    color = Color(0xFFDC143C)
+                                ) {
+                                    Text(
+                                        text = "$overallRating/5",
+                                        fontSize = 18.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.White,
+                                        modifier = Modifier.padding(
+                                            horizontal = 16.dp,
+                                            vertical = 8.dp
+                                        )
                                     )
                                 }
                             }
                         }
                     }
                 }
-                is NetworkResult.Error -> {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.errorContainer
-                        )
+
+                // CALIFICACIONES DETALLADAS
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.White
+                    ),
+                    elevation = CardDefaults.cardElevation(4.dp),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(20.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        Text(
-                            text = "Error al cargar reservas: ${(bookingsState as NetworkResult.Error).message}",
-                            color = MaterialTheme.colorScheme.onErrorContainer,
-                            modifier = Modifier.padding(16.dp)
-                        )
-                    }
-                }
-            }
-
-            // Título
-            OutlinedTextField(
-                value = title,
-                onValueChange = { title = it },
-                label = { Text("Título *") },
-                modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("Ej: Excelente experiencia") }
-            )
-
-            // Calificación general
-            Text(
-                text = "Calificación General: $overallRating/5 *",
-                style = MaterialTheme.typography.bodyLarge
-            )
-            Slider(
-                value = overallRating.toFloat(),
-                onValueChange = { overallRating = it.toInt() },
-                valueRange = 1f..5f,
-                steps = 3
-            )
-
-            // Calificaciones opcionales
-            Text(
-                text = "Calificaciones Detalladas (Opcional)",
-                style = MaterialTheme.typography.titleSmall
-            )
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                OutlinedTextField(
-                    value = accommodationRating,
-                    onValueChange = { accommodationRating = it.filter { char -> char.isDigit() } },
-                    label = { Text("Alojamiento") },
-                    placeholder = { Text("1-5") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.weight(1f)
-                )
-
-                OutlinedTextField(
-                    value = transportRating,
-                    onValueChange = { transportRating = it.filter { char -> char.isDigit() } },
-                    label = { Text("Transporte") },
-                    placeholder = { Text("1-5") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.weight(1f)
-                )
-            }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                OutlinedTextField(
-                    value = guideRating,
-                    onValueChange = { guideRating = it.filter { char -> char.isDigit() } },
-                    label = { Text("Guía") },
-                    placeholder = { Text("1-5") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.weight(1f)
-                )
-
-                OutlinedTextField(
-                    value = valueRating,
-                    onValueChange = { valueRating = it.filter { char -> char.isDigit() } },
-                    label = { Text("Relación calidad-precio") },
-                    placeholder = { Text("1-5") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.weight(1f)
-                )
-            }
-
-            // Comentario
-            OutlinedTextField(
-                value = comment,
-                onValueChange = { comment = it },
-                label = { Text("Comentario *") },
-                modifier = Modifier.fillMaxWidth(),
-                minLines = 4,
-                maxLines = 8,
-                placeholder = { Text("Describe tu experiencia...") }
-            )
-
-            // Pros
-            OutlinedTextField(
-                value = pros,
-                onValueChange = { pros = it },
-                label = { Text("Aspectos Positivos (Opcional)") },
-                modifier = Modifier.fillMaxWidth(),
-                minLines = 2,
-                maxLines = 4,
-                placeholder = { Text("¿Qué te gustó más?") }
-            )
-
-            // Cons
-            OutlinedTextField(
-                value = cons,
-                onValueChange = { cons = it },
-                label = { Text("Aspectos a Mejorar (Opcional)") },
-                modifier = Modifier.fillMaxWidth(),
-                minLines = 2,
-                maxLines = 4,
-                placeholder = { Text("¿Qué podría mejorar?") }
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Botón crear
-            Button(
-                onClick = {
-                    selectedBooking?.let { booking ->
-                        viewModel.createReview(
-                            overallRating = overallRating,
-                            accommodationRating = accommodationRating.toIntOrNull(),
-                            transportRating = transportRating.toIntOrNull(),
-                            guideRating = guideRating.toIntOrNull(),
-                            valueRating = valueRating.toIntOrNull(),
-                            title = title,
-                            comment = comment,
-                            pros = pros.ifEmpty { null },
-                            cons = cons.ifEmpty { null },
-                            bookingId = booking.id,
-                            packageId = booking.packageId
-                        )
-                    }
-                },
-                modifier = Modifier.fillMaxWidth(),
-                enabled = title.isNotEmpty() &&
-                        comment.isNotEmpty() &&
-                        selectedBooking != null &&
-                        createReviewState !is NetworkResult.Loading
-            ) {
-                Text("Crear Reseña")
-            }
-
-            // Estados
-            when (createReviewState) {
-                is NetworkResult.Loading -> {
-                    Box(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            CircularProgressIndicator()
-                            Text("Creando reseña...")
+                            Icon(
+                                Icons.Default.Assessment,
+                                contentDescription = null,
+                                tint = Color(0xFFDC143C),
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Text(
+                                text = "Calificaciones Detalladas (Opcional)",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF212121)
+                            )
+                        }
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            OutlinedTextField(
+                                value = accommodationRating,
+                                onValueChange = {
+                                    accommodationRating = it.filter { char -> char.isDigit() }
+                                },
+                                label = { Text("Alojamiento") },
+                                placeholder = { Text("1-5") },
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                modifier = Modifier.weight(1f),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = Color(0xFFDC143C),
+                                    focusedLabelColor = Color(0xFFDC143C)
+                                )
+                            )
+
+                            OutlinedTextField(
+                                value = transportRating,
+                                onValueChange = {
+                                    transportRating = it.filter { char -> char.isDigit() }
+                                },
+                                label = { Text("Transporte") },
+                                placeholder = { Text("1-5") },
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                modifier = Modifier.weight(1f),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = Color(0xFFDC143C),
+                                    focusedLabelColor = Color(0xFFDC143C)
+                                )
+                            )
+                        }
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            OutlinedTextField(
+                                value = guideRating,
+                                onValueChange = {
+                                    guideRating = it.filter { char -> char.isDigit() }
+                                },
+                                label = { Text("Guía") },
+                                placeholder = { Text("1-5") },
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                modifier = Modifier.weight(1f),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = Color(0xFFDC143C),
+                                    focusedLabelColor = Color(0xFFDC143C)
+                                )
+                            )
+
+                            OutlinedTextField(
+                                value = valueRating,
+                                onValueChange = {
+                                    valueRating = it.filter { char -> char.isDigit() }
+                                },
+                                label = { Text("Precio/Calidad") },
+                                placeholder = { Text("1-5") },
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                modifier = Modifier.weight(1f),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = Color(0xFFDC143C),
+                                    focusedLabelColor = Color(0xFFDC143C)
+                                )
+                            )
                         }
                     }
                 }
-                is NetworkResult.Error -> {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.errorContainer
-                        )
+
+                // COMENTARIOS
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.White
+                    ),
+                    elevation = CardDefaults.cardElevation(4.dp),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(20.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        Text(
-                            text = "Error: ${(createReviewState as NetworkResult.Error).message}",
-                            color = MaterialTheme.colorScheme.onErrorContainer,
-                            modifier = Modifier.padding(16.dp)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Icon(
+                                Icons.Default.Comment,
+                                contentDescription = null,
+                                tint = Color(0xFFDC143C),
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Text(
+                                text = "Tu Experiencia",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF212121)
+                            )
+                        }
+
+                        OutlinedTextField(
+                            value = comment,
+                            onValueChange = { comment = it },
+                            label = { Text("Comentario *") },
+                            modifier = Modifier.fillMaxWidth(),
+                            minLines = 4,
+                            maxLines = 8,
+                            placeholder = { Text("Describe tu experiencia en detalle...") },
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = Color(0xFFDC143C),
+                                focusedLabelColor = Color(0xFFDC143C)
+                            )
+                        )
+
+                        OutlinedTextField(
+                            value = pros,
+                            onValueChange = { pros = it },
+                            label = { Text("Aspectos Positivos (Opcional)") },
+                            modifier = Modifier.fillMaxWidth(),
+                            minLines = 2,
+                            maxLines = 4,
+                            placeholder = { Text("¿Qué te gustó más?") },
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = Color(0xFFDC143C),
+                                focusedLabelColor = Color(0xFFDC143C)
+                            ),
+                            leadingIcon = {
+                                Icon(
+                                    Icons.Default.ThumbUp,
+                                    contentDescription = null,
+                                    tint = Color(0xFF4CAF50)
+                                )
+                            }
+                        )
+
+                        OutlinedTextField(
+                            value = cons,
+                            onValueChange = { cons = it },
+                            label = { Text("Aspectos a Mejorar (Opcional)") },
+                            modifier = Modifier.fillMaxWidth(),
+                            minLines = 2,
+                            maxLines = 4,
+                            placeholder = { Text("¿Qué podría mejorar?") },
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = Color(0xFFDC143C),
+                                focusedLabelColor = Color(0xFFDC143C)
+                            ),
+                            leadingIcon = {
+                                Icon(
+                                    Icons.Default.ThumbDown,
+                                    contentDescription = null,
+                                    tint = Color(0xFFFF9800)
+                                )
+                            }
                         )
                     }
                 }
-                null -> {}
-                else -> {}
+
+                // Estados
+                when (createReviewState) {
+                    is NetworkResult.Loading -> {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = CardDefaults.cardColors(
+                                containerColor = Color.White
+                            ),
+                            elevation = CardDefaults.cardElevation(4.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(24.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    CircularProgressIndicator(color = Color(0xFFDC143C))
+                                    Text(
+                                        "Creando reseña...",
+                                        fontSize = 14.sp,
+                                        color = Color.Gray
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    is NetworkResult.Error -> {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = CardDefaults.cardColors(
+                                containerColor = Color(0xFFFFEBEE)
+                            ),
+                            elevation = CardDefaults.cardElevation(4.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(16.dp),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    Icons.Default.Error,
+                                    contentDescription = null,
+                                    tint = Color(0xFFC62828)
+                                )
+                                Text(
+                                    text = "Error: ${(createReviewState as NetworkResult.Error).message}",
+                                    color = Color(0xFFC62828)
+                                )
+                            }
+                        }
+                    }
+
+                    else -> {}
+                }
+
+                // Botón crear
+                Button(
+                    onClick = {
+                        selectedBooking?.let { booking ->
+                            viewModel.createReview(
+                                overallRating = overallRating,
+                                accommodationRating = accommodationRating.toIntOrNull(),
+                                transportRating = transportRating.toIntOrNull(),
+                                guideRating = guideRating.toIntOrNull(),
+                                valueRating = valueRating.toIntOrNull(),
+                                title = title,
+                                comment = comment,
+                                pros = pros.ifEmpty { null },
+                                cons = cons.ifEmpty { null },
+                                bookingId = booking.id,
+                                packageId = booking.packageId
+                            )
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = title.isNotEmpty() &&
+                            comment.isNotEmpty() &&
+                            selectedBooking != null &&
+                            createReviewState !is NetworkResult.Loading,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFDC143C)
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Icon(Icons.Default.Send, contentDescription = null)
+                    Spacer(Modifier.width(8.dp))
+                    Text("Publicar Reseña", fontSize = 16.sp)
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }

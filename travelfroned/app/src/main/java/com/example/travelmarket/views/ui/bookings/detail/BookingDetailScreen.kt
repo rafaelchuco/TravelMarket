@@ -1,19 +1,20 @@
 package com.example.travelmarket.views.ui.bookings.detail
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.travelmarket.core.network.NetworkResult
 import com.example.travelmarket.logic.viewmodels.bookings.BookingDetailViewModel
@@ -38,340 +39,441 @@ fun BookingDetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Detalle de Reserva") },
+                title = {
+                    Text(
+                        "Detalle de Reserva",
+                        fontWeight = FontWeight.Bold
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Default.ArrowBack, "Volver")
+                        Icon(
+                            Icons.Default.ArrowBack,
+                            "Volver",
+                            tint = Color(0xFFDC143C)
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    containerColor = Color.White
                 )
             )
         }
     ) { paddingValues ->
-        when (bookingDetailState) {
-            is NetworkResult.Loading -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
-            }
-            is NetworkResult.Success -> {
-                val booking = (bookingDetailState as NetworkResult.Success).data
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(16.dp)
-                            .verticalScroll(rememberScrollState()),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0xFFF5F5F5))
+                .padding(paddingValues)
+        ) {
+            when (bookingDetailState) {
+                is NetworkResult.Loading -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer
-                            )
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            Column(
-                                modifier = Modifier.padding(16.dp),
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            CircularProgressIndicator(color = Color(0xFFDC143C))
+                            Text(
+                                "Cargando detalles...",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.Gray
+                            )
+                        }
+                    }
+                }
+
+                is NetworkResult.Success -> {
+                    val booking = (bookingDetailState as NetworkResult.Success).data
+
+                    Column(
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(16.dp)
+                                .verticalScroll(rememberScrollState()),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            // HEADER ROJO
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = Color(0xFFDC143C)
+                                ),
+                                elevation = CardDefaults.cardElevation(4.dp),
+                                shape = RoundedCornerShape(16.dp)
                             ) {
-                                Text(
-                                    text = "Reserva #${booking.bookingNumber}",
-                                    style = MaterialTheme.typography.titleLarge,
-                                    fontWeight = FontWeight.Bold
+                                Column(
+                                    modifier = Modifier.padding(20.dp),
+                                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    Text(
+                                        text = "Reserva #${booking.bookingNumber}",
+                                        fontSize = 22.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.White
+                                    )
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                    ) {
+                                        Surface(
+                                            shape = RoundedCornerShape(20.dp),
+                                            color = Color.White
+                                        ) {
+                                            Text(
+                                                text = getStatusText(booking.status),
+                                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                                fontSize = 12.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = getStatusColor(booking.status)
+                                            )
+                                        }
+                                        Surface(
+                                            shape = RoundedCornerShape(20.dp),
+                                            color = Color.White
+                                        ) {
+                                            Text(
+                                                text = getPaymentStatusText(booking.paymentStatus),
+                                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                                fontSize = 12.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = getPaymentStatusColor(booking.paymentStatus)
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+
+                            // FECHAS
+                            DetailSection(title = "Fechas del Viaje", icon = Icons.Default.CalendarToday) {
+                                DetailRow("Fecha de viaje", booking.travelDate ?: "N/A")
+                                DetailRow("Fecha de retorno", booking.returnDate ?: "N/A")
+                                DetailRow("Fecha de reserva", booking.bookingDate)
+                                DetailRow("Última actualización", booking.updatedAt)
+                            }
+
+                            // PASAJEROS
+                            DetailSection(title = "Pasajeros", icon = Icons.Default.People) {
+                                DetailRow("Adultos", booking.numAdults.toString())
+                                DetailRow("Niños", booking.numChildren.toString())
+                                DetailRow("Infantes", booking.numInfants.toString())
+                            }
+
+                            // MONTOS
+                            DetailSection(title = "Resumen de Pago", icon = Icons.Default.AttachMoney) {
+                                DetailRow("Subtotal", "$${booking.subtotal}")
+                                DetailRow("Descuento", "-$${booking.discountAmount}")
+                                DetailRow("Impuestos", "$${booking.taxAmount}")
+
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(vertical = 8.dp),
+                                    color = Color(0xFFE0E0E0)
                                 )
+
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Surface(
-                                        shape = MaterialTheme.shapes.small,
-                                        color = getStatusColor(booking.status)
-                                    ) {
+                                    Text(
+                                        text = "Total",
+                                        fontSize = 18.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color(0xFF212121)
+                                    )
+                                    Text(
+                                        text = "$${booking.totalAmount}",
+                                        fontSize = 24.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color(0xFFDC143C)
+                                    )
+                                }
+
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(vertical = 8.dp),
+                                    color = Color(0xFFE0E0E0)
+                                )
+
+                                DetailRow("Pagado", "$${booking.paidAmount}")
+                            }
+
+                            // SOLICITUDES ESPECIALES
+                            booking.specialRequests?.let { requests ->
+                                if (requests.isNotBlank()) {
+                                    DetailSection(title = "Solicitudes Especiales", icon = Icons.Default.Notes) {
                                         Text(
-                                            text = getStatusText(booking.status),
-                                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
-                                            style = MaterialTheme.typography.labelMedium,
-                                            color = MaterialTheme.colorScheme.onPrimary
-                                        )
-                                    }
-                                    Surface(
-                                        shape = MaterialTheme.shapes.small,
-                                        color = getPaymentStatusColor(booking.paymentStatus)
-                                    ) {
-                                        Text(
-                                            text = getPaymentStatusText(booking.paymentStatus),
-                                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
-                                            style = MaterialTheme.typography.labelMedium,
-                                            color = MaterialTheme.colorScheme.onPrimary
+                                            text = requests,
+                                            fontSize = 14.sp,
+                                            color = Color(0xFF212121),
+                                            lineHeight = 20.sp
                                         )
                                     }
                                 }
                             }
+
+                            // INFORMACIÓN ADICIONAL
+                            DetailSection(title = "Información Adicional", icon = Icons.Default.Info) {
+                                DetailRow("ID Cliente", booking.customer.toString())
+                                DetailRow("ID Paquete", booking.packageId?.toString() ?: "N/A")
+                            }
                         }
 
-                        DetailSection(title = "FECHAS") {
-                            DetailRow("Fecha de viaje", booking.travelDate ?: "N/A")
-                            DetailRow("Fecha de retorno", booking.returnDate ?: "N/A")
-                            DetailRow("Fecha de reserva", booking.bookingDate)
-                            DetailRow("Última actualización", booking.updatedAt)
-                        }
-
-                        DetailSection(title = "PASAJEROS") {
-                            DetailRow("Adultos", booking.numAdults.toString())
-                            DetailRow("Niños", booking.numChildren.toString())
-                            DetailRow("Infantes", booking.numInfants.toString())
-                        }
-
-                        DetailSection(title = "MONTOS") {
-                            DetailRow("Subtotal", "$${booking.subtotal}")
-                            DetailRow("Descuento", "$${booking.discountAmount}")
-                            DetailRow("Impuestos", "$${booking.taxAmount}")
-                            HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 8.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween
+                        // BOTONES DE ACCIÓN (FOOTER FIJO)
+                        Surface(
+                            modifier = Modifier.fillMaxWidth(),
+                            shadowElevation = 8.dp,
+                            color = Color.White
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(16.dp),
+                                verticalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
+                                when (booking.status.lowercase()) {
+                                    "cancelled", "canceled" -> {
+                                        Card(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            colors = CardDefaults.cardColors(
+                                                containerColor = Color(0xFFFFEBEE)
+                                            )
+                                        ) {
+                                            Row(
+                                                modifier = Modifier.padding(12.dp),
+                                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Icon(
+                                                    Icons.Default.Cancel,
+                                                    contentDescription = null,
+                                                    tint = Color(0xFFDC143C)
+                                                )
+                                                Text(
+                                                    text = "Esta reserva está cancelada",
+                                                    fontSize = 14.sp,
+                                                    fontWeight = FontWeight.Medium,
+                                                    color = Color(0xFFDC143C)
+                                                )
+                                            }
+                                        }
+
+                                        Button(
+                                            onClick = { showDeleteDialog = true },
+                                            modifier = Modifier.fillMaxWidth(),
+                                            colors = ButtonDefaults.buttonColors(
+                                                containerColor = Color(0xFFDC143C)
+                                            ),
+                                            shape = RoundedCornerShape(12.dp)
+                                        ) {
+                                            Icon(Icons.Default.Delete, contentDescription = null)
+                                            Spacer(Modifier.width(8.dp))
+                                            Text("Eliminar Reserva", fontSize = 16.sp)
+                                        }
+                                    }
+
+                                    else -> {
+                                        Button(
+                                            onClick = {
+                                                navController.navigate(
+                                                    Routes.UpdateBooking.createRoute(bookingId)
+                                                )
+                                            },
+                                            modifier = Modifier.fillMaxWidth(),
+                                            colors = ButtonDefaults.buttonColors(
+                                                containerColor = Color(0xFFDC143C)
+                                            ),
+                                            shape = RoundedCornerShape(12.dp)
+                                        ) {
+                                            Icon(Icons.Default.Edit, contentDescription = null)
+                                            Spacer(Modifier.width(8.dp))
+                                            Text("Actualizar Reserva", fontSize = 16.sp)
+                                        }
+
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                        ) {
+                                            OutlinedButton(
+                                                onClick = { showCancelDialog = true },
+                                                modifier = Modifier.weight(1f),
+                                                colors = ButtonDefaults.outlinedButtonColors(
+                                                    contentColor = Color(0xFFFF9800)
+                                                ),
+                                                shape = RoundedCornerShape(12.dp)
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Close,
+                                                    contentDescription = null,
+                                                    modifier = Modifier.size(20.dp)
+                                                )
+                                                Spacer(Modifier.width(4.dp))
+                                                Text("Cancelar")
+                                            }
+
+                                            OutlinedButton(
+                                                onClick = { showDeleteDialog = true },
+                                                modifier = Modifier.weight(1f),
+                                                colors = ButtonDefaults.outlinedButtonColors(
+                                                    contentColor = Color(0xFFDC143C)
+                                                ),
+                                                shape = RoundedCornerShape(12.dp)
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Delete,
+                                                    contentDescription = null,
+                                                    modifier = Modifier.size(20.dp)
+                                                )
+                                                Spacer(Modifier.width(4.dp))
+                                                Text("Eliminar")
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // DIALOG ELIMINAR
+                    if (showDeleteDialog) {
+                        AlertDialog(
+                            onDismissRequest = { showDeleteDialog = false },
+                            icon = {
+                                Icon(
+                                    Icons.Default.Delete,
+                                    contentDescription = null,
+                                    tint = Color(0xFFDC143C),
+                                    modifier = Modifier.size(48.dp)
+                                )
+                            },
+                            title = {
                                 Text(
-                                    text = "Total:",
+                                    "Eliminar Reserva",
+                                    fontWeight = FontWeight.Bold
+                                )
+                            },
+                            text = {
+                                Text("¿Estás seguro de que deseas eliminar esta reserva?\n\nEsta acción no se puede deshacer.")
+                            },
+                            confirmButton = {
+                                Button(
+                                    onClick = {
+                                        showDeleteDialog = false
+                                        navController.navigate(Routes.DeleteBooking.createRoute(bookingId))
+                                    },
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = Color(0xFFDC143C)
+                                    )
+                                ) {
+                                    Text("Eliminar")
+                                }
+                            },
+                            dismissButton = {
+                                TextButton(onClick = { showDeleteDialog = false }) {
+                                    Text("Cancelar", color = Color.Gray)
+                                }
+                            }
+                        )
+                    }
+
+                    // DIALOG CANCELAR
+                    if (showCancelDialog) {
+                        AlertDialog(
+                            onDismissRequest = { showCancelDialog = false },
+                            icon = {
+                                Icon(
+                                    Icons.Default.Close,
+                                    contentDescription = null,
+                                    tint = Color(0xFFFF9800),
+                                    modifier = Modifier.size(48.dp)
+                                )
+                            },
+                            title = {
+                                Text(
+                                    "Cancelar Reserva",
+                                    fontWeight = FontWeight.Bold
+                                )
+                            },
+                            text = {
+                                Text("¿Estás seguro de que deseas cancelar esta reserva?\n\nEl estado cambiará a 'Cancelada'.")
+                            },
+                            confirmButton = {
+                                Button(
+                                    onClick = {
+                                        showCancelDialog = false
+                                        navController.navigate(Routes.CancelBooking.createRoute(bookingId))
+                                    },
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = Color(0xFFFF9800)
+                                    )
+                                ) {
+                                    Text("Sí, cancelar")
+                                }
+                            },
+                            dismissButton = {
+                                TextButton(onClick = { showCancelDialog = false }) {
+                                    Text("No, volver", color = Color.Gray)
+                                }
+                            }
+                        )
+                    }
+                }
+
+                is NetworkResult.Error -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(24.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = Color.White
+                            ),
+                            elevation = CardDefaults.cardElevation(4.dp)
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(24.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(16.dp)
+                            ) {
+                                Icon(
+                                    Icons.Default.ErrorOutline,
+                                    contentDescription = null,
+                                    tint = Color(0xFFDC143C),
+                                    modifier = Modifier.size(64.dp)
+                                )
+                                Text(
+                                    "Error al cargar la reserva",
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold
                                 )
                                 Text(
-                                    text = "$${booking.totalAmount}",
-                                    style = MaterialTheme.typography.titleLarge,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.primary
+                                    (bookingDetailState as NetworkResult.Error).message,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = Color.Gray
                                 )
-                            }
-                            DetailRow("Pagado", "$${booking.paidAmount}")
-                        }
-
-                        booking.specialRequests?.let { requests ->
-                            if (requests.isNotBlank()) {
-                                DetailSection(title = "SOLICITUDES ESPECIALES") {
-                                    Text(
-                                        text = requests,
-                                        style = MaterialTheme.typography.bodyMedium
+                                Button(
+                                    onClick = { viewModel.getBookingById(bookingId) },
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = Color(0xFFDC143C)
                                     )
-                                }
-                            }
-                        }
-
-                        DetailSection(title = "INFORMACIÓN ADICIONAL") {
-                            DetailRow("ID Cliente", booking.customer.toString())
-                            DetailRow("ID Paquete", booking.packageId?.toString() ?: "N/A")
-                        }
-                    }
-
-                    Surface(
-                        modifier = Modifier.fillMaxWidth(),
-                        shadowElevation = 8.dp,
-                        tonalElevation = 2.dp
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            when (booking.status.lowercase()) {
-                                "cancelled", "canceled" -> {
-                                    Card(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        colors = CardDefaults.cardColors(
-                                            containerColor = MaterialTheme.colorScheme.errorContainer
-                                        )
-                                    ) {
-                                        Text(
-                                            text = "⚠️ Esta reserva está cancelada",
-                                            modifier = Modifier.padding(12.dp),
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            color = MaterialTheme.colorScheme.onErrorContainer
-                                        )
-                                    }
-                                    Spacer(modifier = Modifier.height(8.dp))
-                                    Button(
-                                        onClick = { showDeleteDialog = true },
-                                        modifier = Modifier.fillMaxWidth(),
-                                        colors = ButtonDefaults.buttonColors(
-                                            containerColor = MaterialTheme.colorScheme.error
-                                        )
-                                    ) {
-                                        Icon(Icons.Default.Delete, contentDescription = null)
-                                        Spacer(Modifier.width(8.dp))
-                                        Text("Eliminar Reserva")
-                                    }
-                                }
-                                else -> {
-                                    Button(
-                                        onClick = {
-                                            navController.navigate(
-                                                Routes.UpdateBooking.createRoute(bookingId)
-                                            )
-                                        },
-                                        modifier = Modifier.fillMaxWidth(),
-                                        colors = ButtonDefaults.buttonColors(
-                                            containerColor = MaterialTheme.colorScheme.primary
-                                        )
-                                    ) {
-                                        Icon(Icons.Default.Edit, contentDescription = null)
-                                        Spacer(Modifier.width(8.dp))
-                                        Text("Actualizar Reserva")
-                                    }
-
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                    ) {
-                                        OutlinedButton(
-                                            onClick = { showCancelDialog = true },
-                                            modifier = Modifier.weight(1f),
-                                            colors = ButtonDefaults.outlinedButtonColors(
-                                                contentColor = MaterialTheme.colorScheme.tertiary
-                                            )
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Default.Close,
-                                                contentDescription = null,
-                                                modifier = Modifier.size(20.dp)
-                                            )
-                                            Spacer(Modifier.width(4.dp))
-                                            Text("Cancelar")
-                                        }
-
-                                        OutlinedButton(
-                                            onClick = { showDeleteDialog = true },
-                                            modifier = Modifier.weight(1f),
-                                            colors = ButtonDefaults.outlinedButtonColors(
-                                                contentColor = MaterialTheme.colorScheme.error
-                                            )
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Default.Delete,
-                                                contentDescription = null,
-                                                modifier = Modifier.size(20.dp)
-                                            )
-                                            Spacer(Modifier.width(4.dp))
-                                            Text("Eliminar")
-                                        }
-                                    }
+                                ) {
+                                    Icon(Icons.Default.Refresh, contentDescription = null)
+                                    Spacer(Modifier.width(8.dp))
+                                    Text("Reintentar")
                                 }
                             }
                         }
                     }
                 }
 
-                if (showDeleteDialog) {
-                    AlertDialog(
-                        onDismissRequest = { showDeleteDialog = false },
-                        icon = {
-                            Icon(
-                                Icons.Default.Delete,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.error
-                            )
-                        },
-                        title = { Text("Eliminar Reserva") },
-                        text = {
-                            Text("¿Estás seguro de que deseas eliminar esta reserva?\n\nEsta acción no se puede deshacer.")
-                        },
-                        confirmButton = {
-                            Button(
-                                onClick = {
-                                    showDeleteDialog = false
-                                    navController.navigate(Routes.DeleteBooking.createRoute(bookingId))
-                                },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.error
-                                )
-                            ) {
-                                Text("Eliminar")
-                            }
-                        },
-                        dismissButton = {
-                            TextButton(onClick = { showDeleteDialog = false }) {
-                                Text("Cancelar")
-                            }
-                        }
-                    )
-                }
-
-                if (showCancelDialog) {
-                    AlertDialog(
-                        onDismissRequest = { showCancelDialog = false },
-                        icon = {
-                            Icon(
-                                Icons.Default.Close,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.tertiary
-                            )
-                        },
-                        title = { Text("Cancelar Reserva") },
-                        text = {
-                            Text("¿Estás seguro de que deseas cancelar esta reserva?\n\nEl estado cambiará a 'Cancelada'.")
-                        },
-                        confirmButton = {
-                            Button(
-                                onClick = {
-                                    showCancelDialog = false
-                                    navController.navigate(Routes.CancelBooking.createRoute(bookingId))
-                                },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.tertiary
-                                )
-                            ) {
-                                Text("Sí, cancelar")
-                            }
-                        },
-                        dismissButton = {
-                            TextButton(onClick = { showCancelDialog = false }) {
-                                Text("No, volver")
-                            }
-                        }
-                    )
-                }
+                null -> {}
             }
-            is NetworkResult.Error -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Text(
-                            text = "Error al cargar la reserva",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.error
-                        )
-                        Text(
-                            text = (bookingDetailState as NetworkResult.Error).message,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Spacer(Modifier.height(8.dp))
-                        Button(onClick = { viewModel.getBookingById(bookingId) }) {
-                            Text("Reintentar")
-                        }
-                    }
-                }
-            }
-            null -> {}
         }
     }
 }
@@ -379,26 +481,41 @@ fun BookingDetailScreen(
 @Composable
 private fun DetailSection(
     title: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
     content: @Composable ColumnScope.() -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = Color.White
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(4.dp),
+        shape = RoundedCornerShape(16.dp)
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            modifier = Modifier.padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
-            )
-            HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    icon,
+                    contentDescription = null,
+                    tint = Color(0xFFDC143C),
+                    modifier = Modifier.size(24.dp)
+                )
+                Text(
+                    text = title,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF212121)
+                )
+            }
+
+            HorizontalDivider(color = Color(0xFFE0E0E0))
+
             content()
         }
     }
@@ -408,29 +525,31 @@ private fun DetailSection(
 private fun DetailRow(label: String, value: String) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            fontSize = 14.sp,
+            color = Color.Gray
         )
         Text(
             text = value,
-            style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.Medium
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Medium,
+            color = Color(0xFF212121)
         )
     }
 }
 
 @Composable
-private fun getStatusColor(status: String): androidx.compose.ui.graphics.Color {
+private fun getStatusColor(status: String): Color {
     return when (status.lowercase()) {
-        "confirmed" -> MaterialTheme.colorScheme.primary
-        "pending" -> MaterialTheme.colorScheme.tertiary
-        "cancelled", "canceled" -> MaterialTheme.colorScheme.error
-        "completed" -> MaterialTheme.colorScheme.secondary
-        else -> MaterialTheme.colorScheme.onSurfaceVariant
+        "confirmed" -> Color(0xFF4CAF50)
+        "pending" -> Color(0xFFFF9800)
+        "cancelled", "canceled" -> Color(0xFFDC143C)
+        "completed" -> Color(0xFF2196F3)
+        else -> Color.Gray
     }
 }
 
@@ -446,13 +565,13 @@ private fun getStatusText(status: String): String {
 }
 
 @Composable
-private fun getPaymentStatusColor(status: String): androidx.compose.ui.graphics.Color {
+private fun getPaymentStatusColor(status: String): Color {
     return when (status.lowercase()) {
-        "paid" -> MaterialTheme.colorScheme.primary
-        "unpaid" -> MaterialTheme.colorScheme.error
-        "partial" -> MaterialTheme.colorScheme.tertiary
-        "refunded" -> MaterialTheme.colorScheme.secondary
-        else -> MaterialTheme.colorScheme.onSurfaceVariant
+        "paid" -> Color(0xFF4CAF50)
+        "unpaid" -> Color(0xFFDC143C)
+        "partial" -> Color(0xFFFF9800)
+        "refunded" -> Color(0xFF2196F3)
+        else -> Color.Gray
     }
 }
 
