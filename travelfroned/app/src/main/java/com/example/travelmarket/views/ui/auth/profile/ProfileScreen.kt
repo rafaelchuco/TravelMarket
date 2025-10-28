@@ -1,19 +1,29 @@
 package com.example.travelmarket.views.ui.auth.profile
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import com.example.travelmarket.core.network.NetworkResult
 import com.example.travelmarket.logic.viewmodels.auth.ProfileViewModel
 import com.example.travelmarket.views.navigation.Routes
+import com.example.travelmarket.views.ui.auth.components.AuthButton
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.androidx.compose.koinViewModel
 
@@ -26,7 +36,6 @@ fun ProfileScreen(
     val profileState by viewModel.profileState.collectAsState()
     val lifecycleOwner = LocalLifecycleOwner.current
 
-    // ✅ Recargar datos cada vez que la pantalla vuelva a estar activa
     LaunchedEffect(lifecycleOwner) {
         lifecycleOwner.lifecycle.currentStateFlow.collectLatest { state ->
             if (state == Lifecycle.State.RESUMED) {
@@ -35,140 +44,240 @@ fun ProfileScreen(
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Mi Perfil") }
-            )
-        }
-    ) { paddingValues ->
-        when (profileState) {
-            is NetworkResult.Loading -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
-            }
-            is NetworkResult.Success -> {
-                val user = (profileState as NetworkResult.Success).data
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFFF5F5F5))  // ✅ FONDO GRIS CLARO
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            // ✅ HEADER ROJO
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color(0xFFDC143C))
+                    .padding(vertical = 40.dp),
+                contentAlignment = Alignment.Center
+            ) {
                 Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
-                        .padding(16.dp)
-                        .verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Card(
-                        modifier = Modifier.fillMaxWidth()
+                    // Avatar circular
+                    Box(
+                        modifier = Modifier
+                            .size(80.dp)
+                            .clip(RoundedCornerShape(40.dp))
+                            .background(Color.White),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Text(
-                                text = "Información Personal",
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                            HorizontalDivider()
-                            ProfileItem("Usuario", user.username)
-                            ProfileItem("Email", user.email)
-                            ProfileItem("Nombre", user.firstName)
-                            ProfileItem("Apellidos", user.lastName)
-                            user.phone?.let { ProfileItem("Teléfono", it) }
-                        }
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = null,
+                            tint = Color(0xFFDC143C),
+                            modifier = Modifier.size(48.dp)
+                        )
                     }
 
-                    Card(
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
+                    when (profileState) {
+                        is NetworkResult.Success -> {
+                            val user = (profileState as NetworkResult.Success).data
                             Text(
-                                text = "Información Adicional",
-                                style = MaterialTheme.typography.titleMedium
+                                text = "${user.firstName} ${user.lastName}",
+                                fontSize = 24.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
                             )
-                            HorizontalDivider()
-                            user.nationality?.let {
-                                ProfileItem("Nacionalidad", it)  // ✅ Solo lectura
-                            }
-                            user.passportNumber?.let { ProfileItem("Pasaporte", it) }
-                            user.address?.let { ProfileItem("Dirección", it) }
-                            user.city?.let { ProfileItem("Ciudad", it) }
-                            user.country?.let { ProfileItem("País", it) }
-                        }
-                    }
-
-                    Card(
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
                             Text(
-                                text = "Información de Cuenta",
-                                style = MaterialTheme.typography.titleMedium
+                                text = "@${user.username}",
+                                fontSize = 14.sp,
+                                color = Color.White.copy(alpha = 0.9f)
                             )
-                            HorizontalDivider()
-                            ProfileItem("Tipo de Usuario", user.userType)
-                            ProfileItem("Activo", if (user.isActive) "Sí" else "No")
-                            ProfileItem("Fecha de Registro", user.dateJoined)
                         }
-                    }
-
-                    Button(
-                        onClick = {
-                            navController.navigate(Routes.EditProfile.route)
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("Editar Perfil")
+                        else -> {}
                     }
                 }
             }
-            is NetworkResult.Error -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+
+            // ✅ CONTENIDO
+            when (profileState) {
+                is NetworkResult.Loading -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = "Error: ${(profileState as NetworkResult.Error).message}",
-                            color = MaterialTheme.colorScheme.error
+                        CircularProgressIndicator(color = Color(0xFFDC143C))
+                    }
+                }
+
+                is NetworkResult.Success -> {
+                    val user = (profileState as NetworkResult.Success).data
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState())
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        // ✅ INFORMACIÓN PERSONAL
+                        ProfileCard(title = "Información Personal") {
+                            ProfileItemRow(Icons.Default.Person, "Usuario", user.username)
+                            ProfileItemRow(Icons.Default.Email, "Email", user.email)
+                            ProfileItemRow(Icons.Default.Badge, "Nombre", user.firstName)
+                            ProfileItemRow(Icons.Default.Badge, "Apellidos", user.lastName)
+                            user.phone?.let {
+                                ProfileItemRow(Icons.Default.Phone, "Teléfono", it)
+                            }
+                        }
+
+                        // ✅ INFORMACIÓN ADICIONAL
+                        ProfileCard(title = "Información Adicional") {
+                            user.nationality?.let {
+                                ProfileItemRow(Icons.Default.Public, "Nacionalidad", it)
+                            }
+                            user.passportNumber?.let {
+                                ProfileItemRow(Icons.Default.CardTravel, "Pasaporte", it)
+                            }
+                            user.address?.let {
+                                ProfileItemRow(Icons.Default.LocationOn, "Dirección", it)
+                            }
+                            user.city?.let {
+                                ProfileItemRow(Icons.Default.LocationCity, "Ciudad", it)
+                            }
+                            user.country?.let {
+                                ProfileItemRow(Icons.Default.Flag, "País", it)
+                            }
+                        }
+
+                        // ✅ INFORMACIÓN DE CUENTA
+                        ProfileCard(title = "Información de Cuenta") {
+                            ProfileItemRow(
+                                Icons.Default.VerifiedUser,
+                                "Tipo de Usuario",
+                                user.userType
+                            )
+                            ProfileItemRow(
+                                Icons.Default.CheckCircle,
+                                "Estado",
+                                if (user.isActive) "Activo" else "Inactivo"
+                            )
+                            ProfileItemRow(
+                                Icons.Default.CalendarToday,
+                                "Fecha de Registro",
+                                user.dateJoined
+                            )
+                        }
+
+                        // ✅ BOTÓN EDITAR
+                        AuthButton(
+                            text = "Editar Perfil",
+                            onClick = { navController.navigate(Routes.EditProfile.route) }
                         )
-                        Button(onClick = { viewModel.getUserProfile() }) {
-                            Text("Reintentar")
+
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
+                }
+
+                is NetworkResult.Error -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ErrorOutline,
+                                contentDescription = null,
+                                tint = Color(0xFFDC143C),
+                                modifier = Modifier.size(64.dp)
+                            )
+                            Text(
+                                text = "Error al cargar el perfil",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = Color(0xFFDC143C)
+                            )
+                            Text(
+                                text = (profileState as NetworkResult.Error).message,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.Gray
+                            )
+                            AuthButton(
+                                text = "Reintentar",
+                                onClick = { viewModel.getUserProfile() }
+                            )
                         }
                     }
                 }
+
+                else -> {}
             }
         }
     }
 }
 
+// ✅ COMPONENTE: Card de sección
 @Composable
-fun ProfileItem(label: String, value: String) {
-    Column {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+private fun ProfileCard(
+    title: String,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White
+        ),
+        elevation = CardDefaults.cardElevation(2.dp),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                color = Color(0xFFDC143C),
+                fontWeight = FontWeight.Bold
+            )
+            HorizontalDivider(color = Color(0xFFDC143C).copy(alpha = 0.3f))
+            content()
+        }
+    }
+}
+
+// ✅ COMPONENTE: Item con icono - VALORES EN NEGRO
+@Composable
+private fun ProfileItemRow(
+    icon: ImageVector,
+    label: String,
+    value: String
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = Color(0xFFDC143C),
+            modifier = Modifier.size(24.dp)
         )
-        Text(
-            text = value,
-            style = MaterialTheme.typography.bodyLarge
-        )
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.Gray
+            )
+            Text(
+                text = value,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Medium,
+                color = Color(0xFF212121)  // ✅ NEGRO OSCURO
+            )
+        }
     }
 }

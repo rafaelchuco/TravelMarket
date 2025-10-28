@@ -1,6 +1,8 @@
 package com.example.travelmarket.views.navigation
 
 sealed class Routes(val route: String) {
+    // ========== AUTH & BIENVENIDA ==========
+    object Welcome : Routes("welcome")  // ✅ NUEVA RUTA
     object Home : Routes("home")
     object Login : Routes("login")
     object Register : Routes("register")

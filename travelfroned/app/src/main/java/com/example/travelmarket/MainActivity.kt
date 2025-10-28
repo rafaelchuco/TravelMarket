@@ -12,9 +12,9 @@ import androidx.navigation.compose.rememberNavController
 import com.example.travelmarket.ui.theme.TravelMarketTheme
 import com.example.travelmarket.views.navigation.NavGraph
 import com.example.travelmarket.views.navigation.Routes
-import dagger.hilt.android.AndroidEntryPoint  // ✅ IMPORTAR
+import dagger.hilt.android.AndroidEntryPoint
 
-@AndroidEntryPoint  // ✅ AGREGAR ESTA LÍNEA
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,7 +25,7 @@ class MainActivity : ComponentActivity() {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     NavGraph(
                         navController = navController,
-                        startDestination = Routes.Register.route,
+                        startDestination = Routes.Welcome.route,  // ✅ CAMBIAR A WELCOME
                         modifier = Modifier.padding(innerPadding)
                     )
                 }

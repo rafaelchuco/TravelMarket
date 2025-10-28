@@ -1,154 +1,195 @@
 package com.example.travelmarket.views.ui.home
 
+import android.content.Context
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.travelmarket.logic.viewmodels.packages.PackagesListViewModel
 import com.example.travelmarket.views.navigation.Routes
+import com.example.travelmarket.views.ui.home.components.*
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(navController: NavController) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Travel Market") }
+fun HomeScreen(
+    navController: NavController,
+    packagesViewModel: PackagesListViewModel = hiltViewModel()
+) {
+    val context = LocalContext.current
+    val sharedPrefs = context.getSharedPreferences("travel_market_prefs", Context.MODE_PRIVATE)
+
+    // ✅ OBTENER NOMBRE REAL DEL USUARIO
+    val userName = sharedPrefs.getString("user_name", null)
+        ?: sharedPrefs.getString("user_first_name", null)
+        ?: "Usuario"
+
+    val packages by packagesViewModel.packages.collectAsState()
+    val loading by packagesViewModel.loading.collectAsState()
+
+    // ✅ ESTADO DE BÚSQUEDA
+    var searchQuery by remember { mutableStateOf("") }
+    var isSearching by remember { mutableStateOf(false) }
+
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(Unit) {
+        packagesViewModel.loadPackages()
+    }
+
+    // ✅ FILTRAR PAQUETES SEGÚN BÚSQUEDA
+    val filteredPackages = if (searchQuery.isBlank()) {
+        packages
+    } else {
+        packages.filter { pkg ->
+            pkg.title.contains(searchQuery, ignoreCase = true) ||
+                    pkg.description.contains(searchQuery, ignoreCase = true)
+        }
+    }
+
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            AppDrawerContent(
+                userName = userName,
+                onCloseDrawer = { scope.launch { drawerState.close() } },
+                onNavigateToFavorites = { navController.navigate(Routes.Profile.route) },
+                onNavigateToHotels = { navController.navigate(Routes.HotelsTest.route) },
+                onNavigateToFlights = { navController.navigate(Routes.FlightsTest.route) },
+                onNavigateToActivities = { navController.navigate(Routes.ActivitiesList.route) },
+                onNavigateToCoupons = { navController.navigate(Routes.PromotionsList.route) },
+                onNavigateToMessages = { navController.navigate(Routes.InquiriesTest.route) },
+                onNavigateToPeruInfo = { },
+                onNavigateToSettings = { navController.navigate(Routes.Profile.route) },
+                onNavigateToSupport = { },
+                onNavigateToTerms = { }
             )
         }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(16.dp)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = "Menú Principal",
-                style = MaterialTheme.typography.headlineMedium,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
-
-            Text(
-                text = "CATÁLOGO",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Button(
-                onClick = { navController.navigate(Routes.ActivitiesList.route) },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Ver Actividades")
+    ) {
+        Scaffold(
+            bottomBar = {
+                AppBottomNavigation(
+                    selectedIndex = 0,
+                    onInicioClick = { },
+                    onDestinosClick = { navController.navigate(Routes.DestinationsTest.route) },
+                    onPaquetesClick = { navController.navigate(Routes.PackagesTest.route) },
+                    onReservasClick = { navController.navigate(Routes.BookingsList.route) },
+                    onPerfilClick = { navController.navigate(Routes.Profile.route) }
+                )
             }
-
-            Button(
-                onClick = { navController.navigate(Routes.DestinationsTest.route) },
-                modifier = Modifier.fillMaxWidth()
+        ) { paddingValues ->
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.White)
+                    .padding(paddingValues)
             ) {
-                Text("Ver Destinos (Test)")
-            }
+                // ✅ HEADER CON NOMBRE REAL Y BÚSQUEDA FUNCIONAL
+                item {
+                    HomeHeader(
+                        name = userName,
+                        searchQuery = searchQuery,
+                        onSearchQueryChange = {
+                            searchQuery = it
+                            isSearching = it.isNotBlank()
+                        },
+                        onMenuClick = { scope.launch { drawerState.open() } }
+                    )
+                }
 
-            Button(
-                onClick = { navController.navigate(Routes.HotelsTest.route) },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Ver Hoteles (Test)")
-            }
+                // ✅ SI ESTÁ BUSCANDO, MOSTRAR SOLO RESULTADOS
+                if (isSearching) {
+                    item {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = "Resultados de búsqueda (${filteredPackages.size})",
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.padding(horizontal = 16.dp)
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
 
-            Button(
-                onClick = { navController.navigate(Routes.FlightsTest.route) },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Ver Vuelos (Test)")
-            }
+                    if (filteredPackages.isEmpty()) {
+                        item {
+                            Text(
+                                text = "No se encontraron resultados para \"$searchQuery\"",
+                                color = Color.Gray,
+                                modifier = Modifier.padding(16.dp)
+                            )
+                        }
+                    } else {
+                        items(filteredPackages) { pkg ->
+                            DestinationCard(
+                                destination = pkg,
+                                onClick = { }
+                            )
+                        }
+                    }
+                } else {
+                    // ✅ VISTA NORMAL CON CATEGORÍAS Y DESTINOS
+                    item {
+                        SectionHeader(
+                            title = "Categorías",
+                            onVerTodosClick = { navController.navigate(Routes.CategoriesTest.route) }
+                        )
+                    }
 
-            Button(
-                onClick = { navController.navigate(Routes.PackagesTest.route) },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Ver Paquetes (Test)")
-            }
+                    item {
+                        CategoriesGrid(
+                            onCategoryClick = { category ->
+                                when(category) {
+                                    "hotels" -> navController.navigate(Routes.HotelsTest.route)
+                                    "flights" -> navController.navigate(Routes.FlightsTest.route)
+                                    "activities" -> navController.navigate(Routes.ActivitiesList.route)
+                                    "packages" -> navController.navigate(Routes.PackagesTest.route)
+                                    "destinations" -> navController.navigate(Routes.DestinationsTest.route)
+                                    else -> { }
+                                }
+                            }
+                        )
+                    }
 
-            Button(
-                onClick = { navController.navigate(Routes.CategoriesTest.route) },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Ver Categorías (Test)")
-            }
+                    item {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        SectionHeader(
+                            title = "Destinos Destacados",
+                            onVerTodosClick = { navController.navigate(Routes.DestinationsTest.route) }
+                        )
+                    }
 
-            Spacer(modifier = Modifier.height(16.dp))
+                    if (loading) {
+                        item {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(32.dp),
+                                contentAlignment = androidx.compose.ui.Alignment.Center
+                            ) {
+                                CircularProgressIndicator(color = Color(0xFFE53935))
+                            }
+                        }
+                    } else {
+                        items(packages.take(3)) { pkg ->
+                            DestinationCard(
+                                destination = pkg,
+                                onClick = { }
+                            )
+                        }
+                    }
+                }
 
-            Text(
-                text = "MI CUENTA",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Button(
-                onClick = { navController.navigate(Routes.Profile.route) },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Mi Perfil")
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                text = "MIS RESERVAS",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Button(
-                onClick = { navController.navigate(Routes.BookingsList.route) },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Ver Mis Reservas")
-            }
-
-            Button(
-                onClick = { navController.navigate(Routes.InquiriesTest.route) },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Mis Consultas (Test)")
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                text = "RESEÑAS Y PROMOCIONES",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-
-            Button(
-                onClick = { navController.navigate(Routes.MyReviews.route) },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Mis Reseñas")
-            }
-
-            Button(
-                onClick = { navController.navigate(Routes.CreateReview.route) },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Crear Reseña")
-            }
-
-            Button(
-                onClick = { navController.navigate(Routes.PromotionsList.route) },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Ver Promociones")
+                item {
+                    Spacer(modifier = Modifier.height(80.dp))
+                }
             }
         }
     }

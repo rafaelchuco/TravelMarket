@@ -18,7 +18,6 @@ import com.example.travelmarket.views.ui.bookings.create.CreateBookingScreen
 import com.example.travelmarket.views.ui.bookings.delete.DeleteBookingScreen
 import com.example.travelmarket.views.ui.bookings.detail.BookingDetailScreen
 import com.example.travelmarket.views.ui.bookings.list.BookingsListScreen
-import com.example.travelmarket.views.ui.bookings.myBookings.MyBookingsScreen
 import com.example.travelmarket.views.ui.bookings.update.UpdateBookingScreen
 import com.example.travelmarket.views.ui.categories.CategoriesTestScreen
 import com.example.travelmarket.views.ui.home.HomeScreen
@@ -33,11 +32,12 @@ import com.example.travelmarket.views.ui.test.FlightsTestScreen
 import com.example.travelmarket.views.ui.test.HotelsTestScreen
 import com.example.travelmarket.views.ui.test.InquiriesTestScreen
 import com.example.travelmarket.views.ui.test.PackagesTestScreen
+import com.example.travelmarket.views.ui.welcome.WelcomeScreen  // ✅ IMPORTAR
 
 @Composable
 fun NavGraph(
     navController: NavHostController,
-    startDestination: String = Routes.Home.route,
+    startDestination: String = Routes.Welcome.route,  // ✅ CAMBIAR A WELCOME
     modifier: Modifier = Modifier
 ) {
     NavHost(
@@ -45,6 +45,23 @@ fun NavGraph(
         startDestination = startDestination,
         modifier = modifier
     ) {
+        // ✅ PANTALLA DE BIENVENIDA (PRIMERA PANTALLA)
+        composable(Routes.Welcome.route) {
+            WelcomeScreen(
+                onStartClick = {
+                    navController.navigate(Routes.Login.route)
+                },
+                onRegisterClick = {
+                    navController.navigate(Routes.Register.route)
+                },
+                onSkipClick = {
+                    navController.navigate(Routes.Home.route) {
+                        popUpTo(Routes.Welcome.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+
         composable(Routes.Home.route) {
             HomeScreen(navController = navController)
         }
@@ -175,7 +192,6 @@ fun NavGraph(
                 navController = navController
             )
         }
-        
 
         composable(Routes.CreateReview.route) {
             CreateReviewScreen(navController = navController)

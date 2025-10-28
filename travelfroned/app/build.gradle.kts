@@ -84,6 +84,8 @@ dependencies {
 
     // Navigation Compose - versión más reciente combinada
     implementation("androidx.navigation:navigation-compose:2.8.5")
+    // build.gradle.kts (Module: app)
+    dependencies {implementation("io.coil-kt:coil-compose:2.5.0") }
 
     // Lifecycle
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7")
@@ -93,6 +95,7 @@ dependencies {
     // Kotlin Coroutine
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
+    implementation("io.coil-kt:coil-compose:2.5.0")
 
     // Retrofit + Moshi + Gson
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
@@ -116,6 +119,8 @@ dependencies {
     // Koin (si se sigue usando podría validar luego si no eliminar)
     implementation("io.insert-koin:koin-android:4.0.0")
     implementation("io.insert-koin:koin-androidx-compose:4.0.0")
+    implementation("androidx.compose.material:material-icons-extended:1.7.5")
+
 
     // DataStore
     implementation("androidx.datastore:datastore-preferences:1.1.1")
