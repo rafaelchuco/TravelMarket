@@ -36,7 +36,6 @@ fun HomeScreen(navController: NavController) {
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
-            // ========== CATÁLOGO ==========
             Text(
                 text = "CATÁLOGO",
                 style = MaterialTheme.typography.titleMedium,
@@ -87,7 +86,6 @@ fun HomeScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // ========== MI CUENTA ==========
             Text(
                 text = "MI CUENTA",
                 style = MaterialTheme.typography.titleMedium,
@@ -103,7 +101,6 @@ fun HomeScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // ========== MIS RESERVAS ==========
             Text(
                 text = "MIS RESERVAS",
                 style = MaterialTheme.typography.titleMedium,
@@ -118,13 +115,6 @@ fun HomeScreen(navController: NavController) {
             }
 
             Button(
-                onClick = { navController.navigate(Routes.MyBookings.route) },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("My Bookings")
-            }
-
-            Button(
                 onClick = { navController.navigate(Routes.InquiriesTest.route) },
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -133,7 +123,6 @@ fun HomeScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // ========== RESEÑAS Y PROMOCIONES (ALEX) ==========
             Text(
                 text = "RESEÑAS Y PROMOCIONES",
                 style = MaterialTheme.typography.titleMedium,

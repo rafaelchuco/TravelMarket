@@ -15,8 +15,8 @@ class UpdateBookingViewModel(
     private val updateBookingUseCase: UpdateBookingUseCase
 ) : ViewModel() {
 
-    private val _updateBookingState = MutableStateFlow<NetworkResult<BookingDetail>>(NetworkResult.Loading)
-    val updateBookingState: StateFlow<NetworkResult<BookingDetail>> = _updateBookingState.asStateFlow()
+    private val _updateBookingState = MutableStateFlow<NetworkResult<BookingDetail>?>(null)
+    val updateBookingState: StateFlow<NetworkResult<BookingDetail>?> = _updateBookingState.asStateFlow()
 
     fun updateBooking(
         id: Int,

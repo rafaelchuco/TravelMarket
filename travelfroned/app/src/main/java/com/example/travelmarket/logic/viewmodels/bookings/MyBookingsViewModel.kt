@@ -3,8 +3,7 @@ package com.example.travelmarket.logic.viewmodels.bookings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.travelmarket.core.network.NetworkResult
-import com.example.travelmarket.logic.domain.models.BookingDetail
-import com.example.travelmarket.logic.domain.usecases.bookings.GetMyBookingsParams
+import com.example.travelmarket.logic.domain.models.Booking
 import com.example.travelmarket.logic.domain.usecases.bookings.GetMyBookingsUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,12 +14,8 @@ class MyBookingsViewModel(
     private val getMyBookingsUseCase: GetMyBookingsUseCase
 ) : ViewModel() {
 
-    private val _myBookingsState = MutableStateFlow<NetworkResult<List<BookingDetail>>>(NetworkResult.Loading)
-    val myBookingsState: StateFlow<NetworkResult<List<BookingDetail>>> = _myBookingsState.asStateFlow()
-
-    init {
-        getMyBookings()
-    }
+    private val _myBookingsState = MutableStateFlow<NetworkResult<List<Booking>>?>(null)
+    val myBookingsState: StateFlow<NetworkResult<List<Booking>>?> = _myBookingsState.asStateFlow()
 
     fun getMyBookings(
         search: String? = null,
@@ -29,13 +24,7 @@ class MyBookingsViewModel(
     ) {
         viewModelScope.launch {
             _myBookingsState.value = NetworkResult.Loading
-            _myBookingsState.value = getMyBookingsUseCase(
-                GetMyBookingsParams(
-                    search = search,
-                    ordering = ordering,
-                    page = page
-                )
-            )
+            _myBookingsState.value = getMyBookingsUseCase(search, ordering, page)
         }
     }
 }
