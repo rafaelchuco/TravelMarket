@@ -1,6 +1,7 @@
 package com.example.travelmarket.logic.domain.repositories
 
 import com.example.travelmarket.core.network.NetworkResult
+import com.example.travelmarket.logic.data.models.response.bookings.BookingSimple
 import com.example.travelmarket.logic.domain.models.Review
 
 interface ReviewsRepository {
@@ -47,4 +48,6 @@ interface ReviewsRepository {
         ordering: String? = null,
         page: Int? = null
     ): NetworkResult<List<Review>>
+
+    suspend fun getBookingsWithoutReview(): NetworkResult<List<BookingSimple>>
 }

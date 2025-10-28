@@ -13,70 +13,111 @@ class InquiriesRepositoryImpl @Inject constructor(
     private val api: InquiriesApiService
 ) : InquiriesRepository {
 
+    /**
+     * ✅ Obtener SOLO las consultas del usuario logueado
+     * Endpoint: GET /api/inquiries/my-inquiries/
+     */
     override suspend fun getInquiries(): NetworkResult<List<Inquiry>> {
         return try {
-            val response = api.list()
+            val response = api.getMyInquiries()  // ✅ Cambio aquí
             if (response.isSuccessful && response.body() != null) {
-                // ✅ CORREGIDO: Acceder a results.consultas
-                val inquiries = response.body()!!.results?.consultas?.map { InquiryMapper.toDomain(it) } ?: emptyList()
-                NetworkResult.Success(inquiries)
+                val inquiries = response.body()!!.consultas?.map { inquiry ->
+                    InquiryMapper.toDomain(inquiry)
+                } ?: emptyList()
+                NetworkResult.Success(data = inquiries)
             } else {
-                NetworkResult.Error(response.message() ?: "Unknown error", response.code())
+                NetworkResult.Error(
+                    message = response.message() ?: "Error al cargar consultas",
+                    code = response.code()
+                )
             }
         } catch (e: Exception) {
-            NetworkResult.Error(e.message ?: "Unknown error")
+            NetworkResult.Error(message = e.message ?: "Error de conexión")
         }
     }
 
+    /**
+     * ✅ Obtener una consulta por ID
+     * Endpoint: GET /api/inquiries/{id}/
+     */
     override suspend fun getInquiryById(id: Long): NetworkResult<Inquiry> {
         return try {
             val response = api.read(id)
             if (response.isSuccessful && response.body() != null) {
-                NetworkResult.Success(InquiryMapper.toDomain(response.body()!!))
+                NetworkResult.Success(data = InquiryMapper.toDomain(response.body()!!))
             } else {
-                NetworkResult.Error(response.message() ?: "Unknown error", response.code())
+                NetworkResult.Error(
+                    message = response.message() ?: "Consulta no encontrada",
+                    code = response.code()
+                )
             }
         } catch (e: Exception) {
-            NetworkResult.Error(e.message ?: "Unknown error")
+            NetworkResult.Error(message = e.message ?: "Error de conexión")
         }
     }
 
+    /**
+     * ✅ Crear consulta (sin autenticación)
+     * Endpoint: POST /api/inquiries/
+     */
     override suspend fun createInquiry(request: CreateInquiryRequest): NetworkResult<Inquiry> {
         return try {
             val response = api.create(request)
             if (response.isSuccessful && response.body() != null) {
-                NetworkResult.Success(InquiryMapper.toDomain(response.body()!!))
+                val inquiry = response.body()!!.consulta
+                if (inquiry != null) {
+                    NetworkResult.Success(data = InquiryMapper.toDomain(inquiry))
+                } else {
+                    NetworkResult.Error(message = "No se recibió la consulta creada")
+                }
             } else {
-                NetworkResult.Error(response.message() ?: "Unknown error", response.code())
+                NetworkResult.Error(
+                    message = response.message() ?: "Error al crear consulta",
+                    code = response.code()
+                )
             }
         } catch (e: Exception) {
-            NetworkResult.Error(e.message ?: "Unknown error")
+            NetworkResult.Error(message = e.message ?: "Error de conexión")
         }
     }
 
+    /**
+     * ✅ Actualizar consulta (ADMIN)
+     * Endpoint: PUT /api/inquiries/{id}/
+     */
     override suspend fun updateInquiry(id: Long, request: UpdateInquiryRequest): NetworkResult<Inquiry> {
         return try {
             val response = api.update(id, request)
             if (response.isSuccessful && response.body() != null) {
-                NetworkResult.Success(InquiryMapper.toDomain(response.body()!!))
+                NetworkResult.Success(data = InquiryMapper.toDomain(response.body()!!))
             } else {
-                NetworkResult.Error(response.message() ?: "Unknown error", response.code())
+                NetworkResult.Error(
+                    message = response.message() ?: "Error al actualizar consulta",
+                    code = response.code()
+                )
             }
         } catch (e: Exception) {
-            NetworkResult.Error(e.message ?: "Unknown error")
+            NetworkResult.Error(message = e.message ?: "Error de conexión")
         }
     }
 
+    /**
+     * ✅ Eliminar consulta (ADMIN)
+     * Endpoint: DELETE /api/inquiries/{id}/
+     */
     override suspend fun deleteInquiry(id: Long): NetworkResult<Unit> {
         return try {
             val response = api.delete(id)
             if (response.isSuccessful) {
-                NetworkResult.Success(Unit)
+                NetworkResult.Success(data = Unit)
             } else {
-                NetworkResult.Error(response.message() ?: "Unknown error", response.code())
+                NetworkResult.Error(
+                    message = response.message() ?: "Error al eliminar consulta",
+                    code = response.code()
+                )
             }
         } catch (e: Exception) {
-            NetworkResult.Error(e.message ?: "Unknown error")
+            NetworkResult.Error(message = e.message ?: "Error de conexión")
         }
     }
 }

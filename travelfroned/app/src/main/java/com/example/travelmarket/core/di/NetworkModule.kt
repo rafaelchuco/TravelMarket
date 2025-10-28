@@ -1,6 +1,8 @@
 package com.example.travelmarket.core.di
 
+import android.content.Context
 import com.example.travelmarket.core.network.ApiClient
+import com.example.travelmarket.core.storage.TokenManager
 import com.example.travelmarket.logic.data.remote.destinations.DestinationsApiService
 import com.example.travelmarket.logic.data.remote.flights.FlightsApiService
 import com.example.travelmarket.logic.data.remote.hotels.HotelsApiService
@@ -9,7 +11,9 @@ import com.example.travelmarket.logic.data.remote.packages.PackagesApiService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import javax.inject.Singleton
 
@@ -19,7 +23,21 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideRetrofit(): Retrofit = ApiClient.retrofit
+    fun provideTokenManager(@ApplicationContext context: Context): TokenManager {
+        return TokenManager(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideOkHttpClient(tokenManager: TokenManager): OkHttpClient {
+        return ApiClient.createOkHttpClient(tokenManager)
+    }
+
+    @Provides
+    @Singleton
+    fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
+        return ApiClient.createRetrofit(okHttpClient)
+    }
 
     @Provides
     @Singleton
@@ -45,5 +63,4 @@ object NetworkModule {
     @Singleton
     fun providePackagesApi(retrofit: Retrofit): PackagesApiService =
         retrofit.create(PackagesApiService::class.java)
-
 }

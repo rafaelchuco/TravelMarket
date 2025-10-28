@@ -166,7 +166,7 @@ val useCaseModule = module {
 
     // ========== VIEWMODELS - REVIEWS (ALEX) ==========
     viewModel { ReviewsListViewModel(getReviewsUseCase = get()) }
-    viewModel { CreateReviewViewModel(createReviewUseCase = get()) }
+    viewModel { CreateReviewViewModel(createReviewUseCase = get(), reviewsRepository = get()) }
     viewModel { MyReviewsViewModel(getMyReviewsUseCase = get()) }
     viewModel { ReviewDetailViewModel(getReviewByIdUseCase = get()) }
     viewModel { UpdateReviewViewModel(updateReviewUseCase = get()) }

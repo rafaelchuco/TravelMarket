@@ -7,12 +7,16 @@ object InquiryMapper {
     fun toDomain(response: InquiryResponse): Inquiry {
         return Inquiry(
             id = response.id,
-            userId = response.userId,
-            email = response.email ?: "",  // ✅ AGREGADO ?:
-            message = response.message ?: "",  // ✅ AGREGADO ?:
+            name = response.name ?: "Sin nombre",
+            email = response.email ?: "",
+            phone = response.phone,
+            subject = response.subject ?: "Sin asunto",
+            message = response.message ?: "",
             packageId = response.packageId,
             status = response.status ?: "pending",
-            createdAt = response.createdAt ?: ""
+            adminResponse = response.adminResponse,
+            createdAt = response.createdAt ?: "",
+            updatedAt = response.updatedAt
         )
     }
 

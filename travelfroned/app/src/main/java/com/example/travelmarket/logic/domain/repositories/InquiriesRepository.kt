@@ -5,6 +5,18 @@ import com.example.travelmarket.logic.data.models.request.inquiries.CreateInquir
 import com.example.travelmarket.logic.data.models.request.inquiries.UpdateInquiryRequest
 import com.example.travelmarket.logic.domain.models.Inquiry
 
+/**
+ * Repositorio de Inquiries (Consultas de Usuarios).
+ *
+ * USO PARA USUARIOS:
+ *   - createInquiry()    // ✅ Crear consulta (POST sin autenticación)
+ *   - getInquiryById()   // ✅ Ver detalle de una consulta (GET)
+ *
+ * SOLO PARA ADMIN:
+ *   - getInquiries()     // ⚠️ Listar todas las consultas
+ *   - updateInquiry()    // ⚠️ Actualizar consulta
+ *   - deleteInquiry()    // ⚠️ Eliminar consulta
+ */
 interface InquiriesRepository {
     suspend fun getInquiries(): NetworkResult<List<Inquiry>>
     suspend fun getInquiryById(id: Long): NetworkResult<Inquiry>
@@ -12,17 +24,3 @@ interface InquiriesRepository {
     suspend fun updateInquiry(id: Long, request: UpdateInquiryRequest): NetworkResult<Inquiry>
     suspend fun deleteInquiry(id: Long): NetworkResult<Unit>
 }
-
-
-/**
- * Repositorio de solicitudes/consultas.
- *
- * USO EN APP MÓVIL USUARIO:
- *   - getInquiries()         // ✅ Listar consultas (GET)
- *   - getInquiryById()       // ✅ Detalle de consulta (GET)
- *
- * SOLO ADMIN (NO USAR EN VISTAS USUARIO):
- *   - createInquiry()
- *   - updateInquiry()
- *   - deleteInquiry()
- */

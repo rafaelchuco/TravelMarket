@@ -5,6 +5,7 @@ import com.example.travelmarket.core.network.NetworkResult
 import com.example.travelmarket.logic.data.mappers.ReviewMapper
 import com.example.travelmarket.logic.data.models.request.reviews.CreateReviewRequest
 import com.example.travelmarket.logic.data.models.request.reviews.UpdateReviewRequest
+import com.example.travelmarket.logic.data.models.response.bookings.BookingSimple
 import com.example.travelmarket.logic.data.remote.reviews.ReviewsApiService
 import com.example.travelmarket.logic.domain.models.Review
 import com.example.travelmarket.logic.domain.repositories.ReviewsRepository
@@ -137,17 +138,29 @@ class ReviewsRepositoryImpl(
         ordering: String?,
         page: Int?
     ): NetworkResult<List<Review>> {
-        val result = executeApiCall {
-            apiService.getMyReviews(search, ordering, page)
-        }
-
-        return when (result) {
-            is NetworkResult.Success -> {
-                val reviews = ReviewMapper.toDomainList(result.data.getItems())
+        return try {
+            val response = apiService.getMyReviews()
+            if (response.isSuccessful && response.body() != null) {
+                val reviews = ReviewMapper.toDomainList(response.body()!!.reviews)
                 NetworkResult.Success(reviews)
+            } else {
+                NetworkResult.Error("Error al obtener reseñas", response.code())
             }
-            is NetworkResult.Error -> NetworkResult.Error(result.message, result.code)
-            is NetworkResult.Loading -> NetworkResult.Loading
+        } catch (e: Exception) {
+            NetworkResult.Error(e.message ?: "Error desconocido")
+        }
+    }
+
+    override suspend fun getBookingsWithoutReview(): NetworkResult<List<BookingSimple>> {
+        return try {
+            val response = apiService.getBookingsWithoutReview()
+            if (response.isSuccessful && response.body() != null) {
+                NetworkResult.Success(response.body()!!.bookings)
+            } else {
+                NetworkResult.Error("Error al obtener reservas", response.code())
+            }
+        } catch (e: Exception) {
+            NetworkResult.Error(e.message ?: "Error desconocido")
         }
     }
 }

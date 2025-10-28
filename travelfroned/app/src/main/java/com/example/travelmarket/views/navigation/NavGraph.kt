@@ -27,7 +27,6 @@ import com.example.travelmarket.views.ui.promotions.PromotionsListScreen
 import com.example.travelmarket.views.ui.reviews.CreateReviewScreen
 import com.example.travelmarket.views.ui.reviews.MyReviewsScreen
 import com.example.travelmarket.views.ui.reviews.ReviewDetailScreen
-import com.example.travelmarket.views.ui.reviews.ReviewsListScreen
 import com.example.travelmarket.views.ui.reviews.UpdateReviewScreen
 import com.example.travelmarket.views.ui.test.DestinationsTestScreen
 import com.example.travelmarket.views.ui.test.FlightsTestScreen
@@ -173,9 +172,6 @@ fun NavGraph(
         }
 
         // ========== REVIEWS (Alex) ==========
-        composable(Routes.ReviewsList.route) {
-            ReviewsListScreen(navController = navController)
-        }
 
         composable(Routes.CreateReview.route) {
             CreateReviewScreen(navController = navController)

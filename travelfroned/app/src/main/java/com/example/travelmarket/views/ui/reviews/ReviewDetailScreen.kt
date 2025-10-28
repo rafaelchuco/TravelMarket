@@ -67,7 +67,7 @@ fun ReviewDetailScreen(
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             Text(
-                                text = review.title,
+                                text = review.title ?: "Sin título",  // ← CORREGIDO
                                 style = MaterialTheme.typography.headlineSmall
                             )
 
@@ -142,7 +142,7 @@ fun ReviewDetailScreen(
                                 style = MaterialTheme.typography.titleMedium
                             )
                             HorizontalDivider()
-                            Text(text = review.comment)
+                            Text(text = review.comment ?: "")  // ← CORREGIDO
                         }
                     }
 
@@ -193,7 +193,7 @@ fun ReviewDetailScreen(
                             Text(text = "ID Reserva: ${review.bookingId}")
                             Text(text = "ID Paquete: ${review.packageId}")
                             Text(text = "ID Cliente: ${review.customerId}")
-                            Text(text = "Fecha: ${review.createdAt}")
+                            Text(text = "Fecha: ${review.createdAt ?: "No disponible"}")  // ← CORREGIDO
                         }
                     }
                 }

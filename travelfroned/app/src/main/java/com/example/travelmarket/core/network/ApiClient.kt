@@ -12,7 +12,6 @@ import java.util.concurrent.TimeUnit
 
 object ApiClient {
 
-    // Para Hilt: usa Moshi
     private val logging = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY
     }
@@ -21,17 +20,22 @@ object ApiClient {
         .add(KotlinJsonAdapterFactory())
         .build()
 
-    // Cliente temporal sin TokenManager (para APIs sin autenticación de Hilt)
-    private val client = OkHttpClient.Builder()
-        .addInterceptor(logging)
-        .connectTimeout(Constants.TIMEOUT_SECONDS, TimeUnit.SECONDS)
-        .readTimeout(Constants.TIMEOUT_SECONDS, TimeUnit.SECONDS)
-        .writeTimeout(Constants.TIMEOUT_SECONDS, TimeUnit.SECONDS)
-        .build()
+    // ✅ ELIMINADO el tokenManager (lo inyectará Hilt)
+    fun createOkHttpClient(tokenManager: TokenManager): OkHttpClient {
+        return OkHttpClient.Builder()
+            .addInterceptor(NetworkInterceptor(tokenManager))
+            .addInterceptor(logging)
+            .connectTimeout(Constants.TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            .readTimeout(Constants.TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            .writeTimeout(Constants.TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            .build()
+    }
 
-    val retrofit: Retrofit = Retrofit.Builder()
-        .baseUrl(Constants.BASE_URL)
-        .addConverterFactory(MoshiConverterFactory.create(moshi))
-        .client(client)
-        .build()
+    fun createRetrofit(client: OkHttpClient): Retrofit {
+        return Retrofit.Builder()
+            .baseUrl(Constants.BASE_URL)
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .client(client)
+            .build()
+    }
 }

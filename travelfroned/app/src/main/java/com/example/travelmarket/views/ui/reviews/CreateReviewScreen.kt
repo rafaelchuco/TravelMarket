@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -12,8 +14,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.travelmarket.core.network.NetworkResult
+import com.example.travelmarket.logic.data.models.response.bookings.BookingSimple
 import com.example.travelmarket.logic.viewmodels.reviews.CreateReviewViewModel
-import com.example.travelmarket.views.navigation.Routes
 import kotlinx.coroutines.delay
 import org.koin.androidx.compose.koinViewModel
 
@@ -32,10 +34,13 @@ fun CreateReviewScreen(
     var comment by remember { mutableStateOf("") }
     var pros by remember { mutableStateOf("") }
     var cons by remember { mutableStateOf("") }
-    var bookingId by remember { mutableStateOf("") }
-    var packageId by remember { mutableStateOf("") }
+
+    // Estado dropdown
+    var selectedBooking by remember { mutableStateOf<BookingSimple?>(null) }
+    var expanded by remember { mutableStateOf(false) }
 
     val createReviewState by viewModel.createReviewState.collectAsState()
+    val bookingsState by viewModel.bookingsState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {
@@ -50,12 +55,11 @@ fun CreateReviewScreen(
                     duration = SnackbarDuration.Short
                 )
                 delay(1000)
-                navController.popBackStack()  // ✅ Solo regresa atrás
+                navController.popBackStack()
             }
             else -> {}
         }
     }
-
 
     Scaffold(
         topBar = {
@@ -77,6 +81,79 @@ fun CreateReviewScreen(
                 text = "Información de la Reseña",
                 style = MaterialTheme.typography.titleMedium
             )
+
+            // DROPDOWN DE RESERVAS
+            when (bookingsState) {
+                is NetworkResult.Loading -> {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+                }
+                is NetworkResult.Success -> {
+                    val bookings = (bookingsState as NetworkResult.Success).data
+
+                    if (bookings.isEmpty()) {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.secondaryContainer
+                            )
+                        ) {
+                            Text(
+                                text = "No tienes reservas disponibles para calificar",
+                                modifier = Modifier.padding(16.dp),
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                    } else {
+                        ExposedDropdownMenuBox(
+                            expanded = expanded,
+                            onExpandedChange = { expanded = !expanded }
+                        ) {
+                            OutlinedTextField(
+                                value = selectedBooking?.displayText ?: "",
+                                onValueChange = {},
+                                readOnly = true,
+                                label = { Text("Selecciona tu reserva *") },
+                                trailingIcon = {
+                                    Icon(Icons.Default.ArrowDropDown, "Expandir")
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .menuAnchor(),
+                                colors = OutlinedTextFieldDefaults.colors()
+                            )
+
+                            ExposedDropdownMenu(
+                                expanded = expanded,
+                                onDismissRequest = { expanded = false }
+                            ) {
+                                bookings.forEach { booking ->
+                                    DropdownMenuItem(
+                                        text = { Text(booking.displayText) },
+                                        onClick = {
+                                            selectedBooking = booking
+                                            expanded = false
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+                is NetworkResult.Error -> {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer
+                        )
+                    ) {
+                        Text(
+                            text = "Error al cargar reservas: ${(bookingsState as NetworkResult.Error).message}",
+                            color = MaterialTheme.colorScheme.onErrorContainer,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                    }
+                }
+            }
 
             // Título
             OutlinedTextField(
@@ -184,57 +261,31 @@ fun CreateReviewScreen(
                 placeholder = { Text("¿Qué podría mejorar?") }
             )
 
-            // IDs
-            Text(
-                text = "Referencias",
-                style = MaterialTheme.typography.titleSmall
-            )
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                OutlinedTextField(
-                    value = bookingId,
-                    onValueChange = { bookingId = it.filter { char -> char.isDigit() } },
-                    label = { Text("ID Reserva *") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.weight(1f)
-                )
-
-                OutlinedTextField(
-                    value = packageId,
-                    onValueChange = { packageId = it.filter { char -> char.isDigit() } },
-                    label = { Text("ID Paquete *") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.weight(1f)
-                )
-            }
-
             Spacer(modifier = Modifier.height(8.dp))
 
             // Botón crear
             Button(
                 onClick = {
-                    viewModel.createReview(
-                        overallRating = overallRating,
-                        accommodationRating = accommodationRating.toIntOrNull(),
-                        transportRating = transportRating.toIntOrNull(),
-                        guideRating = guideRating.toIntOrNull(),
-                        valueRating = valueRating.toIntOrNull(),
-                        title = title,
-                        comment = comment,
-                        pros = pros.ifEmpty { null },
-                        cons = cons.ifEmpty { null },
-                        bookingId = bookingId.toIntOrNull() ?: 0,
-                        packageId = packageId.toIntOrNull() ?: 0
-                    )
+                    selectedBooking?.let { booking ->
+                        viewModel.createReview(
+                            overallRating = overallRating,
+                            accommodationRating = accommodationRating.toIntOrNull(),
+                            transportRating = transportRating.toIntOrNull(),
+                            guideRating = guideRating.toIntOrNull(),
+                            valueRating = valueRating.toIntOrNull(),
+                            title = title,
+                            comment = comment,
+                            pros = pros.ifEmpty { null },
+                            cons = cons.ifEmpty { null },
+                            bookingId = booking.id,
+                            packageId = booking.packageId
+                        )
+                    }
                 },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = title.isNotEmpty() &&
                         comment.isNotEmpty() &&
-                        bookingId.isNotEmpty() &&
-                        packageId.isNotEmpty() &&
+                        selectedBooking != null &&
                         createReviewState !is NetworkResult.Loading
             ) {
                 Text("Crear Reseña")

@@ -8,23 +8,28 @@ object ReviewMapper {
     fun toDomain(response: ReviewResponse): Review {
         return Review(
             id = response.id,
+            booking = response.booking,
+            customer = response.customer,
+            customerName = response.customerName ?: "Usuario",
+            packageId = response.packageId,
+            packageName = response.packageName ?: "Sin paquete",
             overallRating = response.overallRating,
             accommodationRating = response.accommodationRating,
             transportRating = response.transportRating,
             guideRating = response.guideRating,
             valueRating = response.valueRating,
-            title = response.title,
-            comment = response.comment,
+            averageRating = response.averageRating,
+            title = response.title ?: "Sin título",  // ← AGREGAR
+            comment = response.comment ?: "",  // ← AGREGAR
             pros = response.pros,
             cons = response.cons,
             isVerified = response.isVerified,
             isApproved = response.isApproved,
-            createdAt = response.createdAt,
-            bookingId = response.bookingId,
-            customerId = response.customerId,
-            packageId = response.packageId
+            createdAt = response.createdAt ?: ""  // ← AGREGAR
         )
     }
+
+
 
     fun toDomainList(responses: List<ReviewResponse>): List<Review> {
         return responses.map { toDomain(it) }

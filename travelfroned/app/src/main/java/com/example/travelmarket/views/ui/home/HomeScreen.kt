@@ -140,12 +140,6 @@ fun HomeScreen(navController: NavController) {
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Button(
-                onClick = { navController.navigate(Routes.ReviewsList.route) },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Ver Reseñas")
-            }
 
             Button(
                 onClick = { navController.navigate(Routes.MyReviews.route) },

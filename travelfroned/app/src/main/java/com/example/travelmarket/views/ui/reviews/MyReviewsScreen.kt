@@ -35,13 +35,21 @@ fun MyReviewsScreen(
     var reviewToDelete by remember { mutableStateOf<Review?>(null) }
 
     LaunchedEffect(deleteReviewState) {
-        when (deleteReviewState) {
-            is NetworkResult.Success -> {
-                deleteViewModel.resetDeleteState()
-                viewModel.refresh()
-                showDeleteDialog = false
+        deleteReviewState?.let { state ->
+            when (state) {
+                is NetworkResult.Success -> {
+                    showDeleteDialog = false
+                    reviewToDelete = null
+                    viewModel.refresh()
+                    deleteViewModel.resetDeleteState()
+                }
+                is NetworkResult.Error -> {
+                    showDeleteDialog = false
+                    reviewToDelete = null
+                    deleteViewModel.resetDeleteState()
+                }
+                else -> {}
             }
-            else -> {}
         }
     }
 
@@ -127,7 +135,10 @@ fun MyReviewsScreen(
 
                 if (showDeleteDialog && reviewToDelete != null) {
                     AlertDialog(
-                        onDismissRequest = { showDeleteDialog = false },
+                        onDismissRequest = {
+                            showDeleteDialog = false
+                            reviewToDelete = null
+                        },
                         title = { Text("Eliminar Reseña") },
                         text = { Text("¿Estás seguro de que deseas eliminar esta reseña?") },
                         confirmButton = {
@@ -143,7 +154,12 @@ fun MyReviewsScreen(
                             }
                         },
                         dismissButton = {
-                            TextButton(onClick = { showDeleteDialog = false }) {
+                            TextButton(
+                                onClick = {
+                                    showDeleteDialog = false
+                                    reviewToDelete = null
+                                }
+                            ) {
                                 Text("Cancelar")
                             }
                         }
@@ -192,13 +208,14 @@ fun MyReviewCard(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+            // Header con título y rating
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = review.title,
+                    text = review.title ?: "Sin título",
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.weight(1f)
                 )
@@ -218,21 +235,39 @@ fun MyReviewCard(
                 }
             }
 
+            // Comentario
             Text(
-                text = review.comment,
+                text = review.comment ?: "",
                 style = MaterialTheme.typography.bodyMedium,
                 maxLines = 2
             )
 
+            // Badge de aprobación
+            if (!review.isApproved) {
+                Surface(
+                    color = MaterialTheme.colorScheme.errorContainer,
+                    shape = MaterialTheme.shapes.small
+                ) {
+                    Text(
+                        text = "Pendiente de aprobación",
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onErrorContainer
+                    )
+                }
+            }
+
+            // Footer con nombre del paquete y acciones
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Package: ${review.packageId}",
+                    text = review.packageName ?: "Sin paquete",
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.weight(1f)
                 )
 
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

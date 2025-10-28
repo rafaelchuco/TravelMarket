@@ -54,13 +54,14 @@ fun UpdateReviewScreen(
             transportRating = review.transportRating?.toString() ?: ""
             guideRating = review.guideRating?.toString() ?: ""
             valueRating = review.valueRating?.toString() ?: ""
-            title = review.title
-            comment = review.comment
+            title = review.title ?: ""  // ← AGREGAR ?: ""
+            comment = review.comment ?: ""  // ← AGREGAR ?: ""
             pros = review.pros ?: ""
             cons = review.cons ?: ""
             isLoaded = true
         }
     }
+
 
     LaunchedEffect(updateReviewState) {
         when (updateReviewState) {

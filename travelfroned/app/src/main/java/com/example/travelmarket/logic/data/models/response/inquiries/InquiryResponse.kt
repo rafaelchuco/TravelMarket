@@ -2,26 +2,31 @@ package com.example.travelmarket.logic.data.models.response.inquiries
 
 import com.google.gson.annotations.SerializedName
 
+// ✅ Respuesta cuando obtienes una lista de inquiries
 data class InquiriesApiResponse(
-    @SerializedName("count") val count: Int?,
-    @SerializedName("next") val next: String?,
-    @SerializedName("previous") val previous: String?,
-    @SerializedName("results") val results: InquiriesResultWrapper?  // ✅ Wrapper
-)
-
-// ✅ NUEVO: Wrapper interno
-data class InquiriesResultWrapper(
     @SerializedName("exito") val exito: Boolean?,
     @SerializedName("mensaje") val mensaje: String?,
-    @SerializedName("consultas") val consultas: List<InquiryResponse>?  // ✅ consultas o inquiries
+    @SerializedName("consultas") val consultas: List<InquiryResponse>?
 )
 
+// ✅ Respuesta de un inquiry individual
 data class InquiryResponse(
     @SerializedName("id") val id: Long,
-    @SerializedName("user_id") val userId: Long?,
+    @SerializedName("name") val name: String?,
     @SerializedName("email") val email: String?,
+    @SerializedName("phone") val phone: String?,
+    @SerializedName("subject") val subject: String?,
     @SerializedName("message") val message: String?,
-    @SerializedName("package_id") val packageId: Long?,
+    @SerializedName("package") val packageId: Long?,
     @SerializedName("status") val status: String?,
-    @SerializedName("created_at") val createdAt: String?
+    @SerializedName("admin_response") val adminResponse: String?,
+    @SerializedName("created_at") val createdAt: String?,
+    @SerializedName("updated_at") val updatedAt: String?
+)
+
+// ✅ Respuesta al crear un inquiry
+data class CreateInquiryApiResponse(
+    @SerializedName("exito") val exito: Boolean?,
+    @SerializedName("mensaje") val mensaje: String?,
+    @SerializedName("consulta") val consulta: InquiryResponse?
 )
