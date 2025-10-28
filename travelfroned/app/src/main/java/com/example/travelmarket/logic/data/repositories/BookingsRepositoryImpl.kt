@@ -70,15 +70,15 @@ class BookingsRepositoryImpl(
         search: String?,
         ordering: String?,
         page: Int?
-    ): NetworkResult<List<BookingDetail>> {
+    ): NetworkResult<List<Booking>> {
         val result = executeApiCall {
             apiService.getMyBookings(search, ordering, page)
         }
 
         return when (result) {
             is NetworkResult.Success -> {
-                val bookingDetailResponses = result.data.results?.reservas ?: emptyList()
-                val bookings = BookingMapper.detailToDomainList(bookingDetailResponses)
+                val bookingResponses = result.data.reservas ?: emptyList()
+                val bookings = BookingMapper.toDomainList(bookingResponses)
                 NetworkResult.Success(bookings)
             }
             is NetworkResult.Error -> NetworkResult.Error(result.message, result.code)

@@ -66,7 +66,6 @@ fun NavGraph(
             EditProfileScreen(navController = navController)
         }
 
-        // ========== ACTIVITIES (Tu amigo) ==========
         composable(Routes.ActivitiesList.route) {
             ActivitiesListScreen(navController = navController)
         }
@@ -81,7 +80,6 @@ fun NavGraph(
             ActivityDetailScreen(activityId = activityId)
         }
 
-        // ========== TUS TEST SCREENS ==========
         composable(Routes.CategoriesTest.route) {
             CategoriesTestScreen(
                 onBack = { navController.popBackStack() }
@@ -119,17 +117,12 @@ fun NavGraph(
             )
         }
 
-        // ========== BOOKINGS (Tu amigo) ==========
         composable(Routes.BookingsList.route) {
-            BookingsListScreen()
+            BookingsListScreen(navController = navController)
         }
 
         composable(Routes.CreateBooking.route) {
             CreateBookingScreen(navController = navController)
-        }
-
-        composable(Routes.MyBookings.route) {
-            MyBookingsScreen()
         }
 
         composable(
@@ -139,7 +132,10 @@ fun NavGraph(
             )
         ) { backStackEntry ->
             val bookingId = backStackEntry.arguments?.getInt("bookingId") ?: 0
-            BookingDetailScreen(bookingId = bookingId)
+            BookingDetailScreen(
+                bookingId = bookingId,
+                navController = navController
+            )
         }
 
         composable(
@@ -149,7 +145,10 @@ fun NavGraph(
             )
         ) { backStackEntry ->
             val bookingId = backStackEntry.arguments?.getInt("bookingId") ?: 0
-            UpdateBookingScreen(bookingId = bookingId, navController = navController)
+            UpdateBookingScreen(
+                bookingId = bookingId,
+                navController = navController
+            )
         }
 
         composable(
@@ -159,7 +158,10 @@ fun NavGraph(
             )
         ) { backStackEntry ->
             val bookingId = backStackEntry.arguments?.getInt("bookingId") ?: 0
-            DeleteBookingScreen(bookingId = bookingId, navController = navController)
+            DeleteBookingScreen(
+                bookingId = bookingId,
+                navController = navController
+            )
         }
 
         composable(
@@ -169,10 +171,12 @@ fun NavGraph(
             )
         ) { backStackEntry ->
             val bookingId = backStackEntry.arguments?.getInt("bookingId") ?: 0
-            CancelBookingScreen(bookingId = bookingId, navController = navController)
+            CancelBookingScreen(
+                bookingId = bookingId,
+                navController = navController
+            )
         }
 
-        // ========== REVIEWS (Alex) ==========
         composable(Routes.ReviewsList.route) {
             ReviewsListScreen(navController = navController)
         }
@@ -202,10 +206,12 @@ fun NavGraph(
             )
         ) { backStackEntry ->
             val reviewId = backStackEntry.arguments?.getInt("reviewId") ?: 0
-            UpdateReviewScreen(reviewId = reviewId, navController = navController)
+            UpdateReviewScreen(
+                reviewId = reviewId,
+                navController = navController
+            )
         }
 
-        // ========== PROMOTIONS (Alex) ==========
         composable(Routes.PromotionsList.route) {
             PromotionsListScreen(navController = navController)
         }
@@ -217,8 +223,7 @@ fun NavGraph(
             )
         ) { backStackEntry ->
             val promotionId = backStackEntry.arguments?.getInt("promotionId") ?: 0
-            PromotionDetailScreen(promotionId = promotionId)  // ✅ SIN navController
+            PromotionDetailScreen(promotionId = promotionId)
         }
-
     }
 }

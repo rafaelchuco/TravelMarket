@@ -7,14 +7,12 @@ import com.example.travelmarket.logic.domain.models.Booking
 import com.example.travelmarket.logic.domain.models.BookingDetail
 
 interface BookingsRepository {
-
     suspend fun getBookings(
         search: String? = null,
         ordering: String? = null,
         page: Int? = null
     ): NetworkResult<List<Booking>>
 
-    // ✅ CAMBIADO: Ahora recibe CreateBookingRequest
     suspend fun createBooking(
         request: CreateBookingRequest
     ): NetworkResult<Booking>
@@ -23,11 +21,10 @@ interface BookingsRepository {
         search: String? = null,
         ordering: String? = null,
         page: Int? = null
-    ): NetworkResult<List<BookingDetail>>
+    ): NetworkResult<List<Booking>>  // ✅ CAMBIAR de BookingDetail a Booking
 
     suspend fun getBookingById(id: Int): NetworkResult<BookingDetail>
 
-    // ✅ PUEDES DEJARLO ASÍ O CREAR UpdateBookingRequest TAMBIÉN
     suspend fun updateBooking(
         id: Int,
         request: UpdateBookingRequest

@@ -1,29 +1,52 @@
 package com.example.travelmarket.views.ui.bookings.list
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.travelmarket.core.network.NetworkResult
 import com.example.travelmarket.logic.domain.models.Booking
-import com.example.travelmarket.logic.viewmodels.bookings.BookingsListViewModel
+import com.example.travelmarket.logic.viewmodels.bookings.MyBookingsViewModel
+import com.example.travelmarket.views.navigation.Routes
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BookingsListScreen(
-    viewModel: BookingsListViewModel = koinViewModel()
+    navController: NavController,
+    viewModel: MyBookingsViewModel = koinViewModel()
 ) {
-    val bookingsState by viewModel.bookingsState.collectAsState()
+    val bookingsState by viewModel.myBookingsState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.getMyBookings()
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Mis Reservas") }
+                title = { Text("Mis Reservas") },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Volver")
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
             )
         }
     ) { paddingValues ->
@@ -39,16 +62,48 @@ fun BookingsListScreen(
                 }
             }
             is NetworkResult.Success -> {
-                val bookings = (bookingsState as NetworkResult.Success).data
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(bookings) { booking ->
-                        BookingItem(booking = booking)
+                val bookings = (bookingsState as NetworkResult.Success<List<Booking>>).data
+
+                if (bookings.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(
+                                text = "No tienes reservas",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            Text(
+                                text = "Tus reservas aparecerán aquí",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                } else {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues),
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(bookings) { booking ->
+                            BookingCard(
+                                booking = booking,
+                                onClick = {
+                                    navController.navigate(
+                                        Routes.BookingDetail.createRoute(booking.id)
+                                    )
+                                }
+                            )
+                        }
                     }
                 }
             }
@@ -59,10 +114,35 @@ fun BookingsListScreen(
                         .padding(paddingValues),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = "Error: ${(bookingsState as NetworkResult.Error).message}",
-                        color = MaterialTheme.colorScheme.error
-                    )
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = "Error al cargar reservas",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                        Text(
+                            text = (bookingsState as NetworkResult.Error).message,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Button(onClick = { viewModel.getMyBookings() }) {
+                            Text("Reintentar")
+                        }
+                    }
+                }
+            }
+            null -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
                 }
             }
         }
@@ -70,19 +150,198 @@ fun BookingsListScreen(
 }
 
 @Composable
-fun BookingItem(booking: Booking) {
-    Column(
+fun BookingCard(
+    booking: Booking,
+    onClick: () -> Unit
+) {
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
+            .clickable(onClick = onClick),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
     ) {
-        Text(text = "Reserva: ${booking.bookingNumber}")
-        Text(text = "Fecha viaje: ${booking.travelDate ?: "N/A"}")
-        Text(text = "Fecha retorno: ${booking.returnDate ?: "N/A"}")
-        Text(text = "Adultos: ${booking.numAdults}, Niños: ${booking.numChildren}, Infantes: ${booking.numInfants}")
-        Text(text = "Total: ${booking.totalAmount}")
-        Text(text = "Estado: ${booking.status}")
-        Text(text = "Estado pago: ${booking.paymentStatus}")
-        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(
+                        text = "Reserva #${booking.bookingNumber}",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = getStatusText(booking.status),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = getStatusColor(booking.status)
+                    )
+                }
+
+                Surface(
+                    shape = MaterialTheme.shapes.small,
+                    color = getPaymentStatusColor(booking.paymentStatus)
+                ) {
+                    Text(
+                        text = getPaymentStatusText(booking.paymentStatus),
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+
+            HorizontalDivider()
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.DateRange,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            text = "Viaje",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Text(
+                        text = booking.travelDate ?: "N/A",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+
+                Column(modifier = Modifier.weight(1f)) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.DateRange,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            text = "Retorno",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Text(
+                        text = booking.returnDate ?: "N/A",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp),
+                        tint = MaterialTheme.colorScheme.secondary
+                    )
+                    Text(
+                        text = "${booking.numAdults} adultos, ${booking.numChildren} niños, ${booking.numInfants} infantes",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            HorizontalDivider()
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Total:",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = "$${booking.totalAmount}",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun getStatusColor(status: String): androidx.compose.ui.graphics.Color {
+    return when (status.lowercase()) {
+        "confirmed" -> MaterialTheme.colorScheme.primary
+        "pending" -> MaterialTheme.colorScheme.tertiary
+        "cancelled" -> MaterialTheme.colorScheme.error
+        "completed" -> MaterialTheme.colorScheme.secondary
+        else -> MaterialTheme.colorScheme.onSurfaceVariant
+    }
+}
+
+@Composable
+private fun getStatusText(status: String): String {
+    return when (status.lowercase()) {
+        "confirmed" -> "Confirmada"
+        "pending" -> "Pendiente"
+        "cancelled" -> "Cancelada"
+        "completed" -> "Completada"
+        else -> status
+    }
+}
+
+@Composable
+private fun getPaymentStatusColor(status: String): androidx.compose.ui.graphics.Color {
+    return when (status.lowercase()) {
+        "paid" -> MaterialTheme.colorScheme.primary
+        "unpaid" -> MaterialTheme.colorScheme.error
+        "partial" -> MaterialTheme.colorScheme.tertiary
+        "refunded" -> MaterialTheme.colorScheme.secondary
+        else -> MaterialTheme.colorScheme.onSurfaceVariant
+    }
+}
+
+@Composable
+private fun getPaymentStatusText(status: String): String {
+    return when (status.lowercase()) {
+        "paid" -> "Pagado"
+        "unpaid" -> "Sin Pagar"
+        "partial" -> "Pago Parcial"
+        "refunded" -> "Reembolsado"
+        else -> status
     }
 }

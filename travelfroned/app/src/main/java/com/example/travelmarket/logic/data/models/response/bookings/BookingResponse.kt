@@ -10,7 +10,7 @@ data class BookingResponse(
     val bookingNumber: String,
 
     @SerializedName("customer_id")
-    val customerId: String?,
+    val customerId: Int,
 
     @SerializedName("travel_date")
     val travelDate: String?,
