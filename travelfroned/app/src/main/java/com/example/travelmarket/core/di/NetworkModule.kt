@@ -45,4 +45,5 @@ object NetworkModule {
     @Singleton
     fun providePackagesApi(retrofit: Retrofit): PackagesApiService =
         retrofit.create(PackagesApiService::class.java)
+
 }

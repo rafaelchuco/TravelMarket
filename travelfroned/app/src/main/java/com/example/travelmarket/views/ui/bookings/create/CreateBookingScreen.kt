@@ -29,6 +29,7 @@ fun CreateBookingScreen(
     var numAdults by remember { mutableStateOf("1") }
     var numChildren by remember { mutableStateOf("0") }
     var numInfants by remember { mutableStateOf("0") }
+    var totalAmount by remember { mutableStateOf("0.0") }  // ✅ AGREGADO
     var specialRequests by remember { mutableStateOf("") }
 
     val createBookingState by viewModel.createBookingState.collectAsState()
@@ -139,6 +140,16 @@ fun CreateBookingScreen(
                 )
             }
 
+            // ✅ AGREGADO - Total Amount
+            OutlinedTextField(
+                value = totalAmount,
+                onValueChange = { totalAmount = it.filter { char -> char.isDigit() || char == '.' } },
+                label = { Text("Monto Total *") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                modifier = Modifier.fillMaxWidth(),
+                supportingText = { Text("Ingresa el monto total de la reserva") }
+            )
+
             // Solicitudes especiales
             OutlinedTextField(
                 value = specialRequests,
@@ -162,6 +173,7 @@ fun CreateBookingScreen(
                         numAdults = numAdults.toIntOrNull() ?: 1,
                         numChildren = numChildren.toIntOrNull() ?: 0,
                         numInfants = numInfants.toIntOrNull() ?: 0,
+                        totalAmount = totalAmount.toDoubleOrNull() ?: 0.0,  // ✅ AGREGADO
                         specialRequests = specialRequests.ifEmpty { null }
                     )
                 },
@@ -170,6 +182,7 @@ fun CreateBookingScreen(
                         travelDate.isNotEmpty() &&
                         returnDate.isNotEmpty() &&
                         numAdults.isNotEmpty() &&
+                        totalAmount.isNotEmpty() &&  // ✅ AGREGADO
                         createBookingState !is NetworkResult.Loading
             ) {
                 Text("Crear Reserva")

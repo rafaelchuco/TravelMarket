@@ -137,6 +137,7 @@ fun PackagesTestScreen(
                                                     numAdults = 2,
                                                     numChildren = 0,
                                                     numInfants = 0,
+                                                    totalAmount = pkg.price * 2,  // ✅ AGREGADO - precio * adultos
                                                     specialRequests = "Test"
                                                 )
                                             },

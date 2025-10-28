@@ -25,6 +25,7 @@ class CreateBookingViewModel(
         numAdults: Int,
         numChildren: Int,
         numInfants: Int,
+        totalAmount: Double,  // ✅ AGREGADO
         specialRequests: String?
     ) {
         viewModelScope.launch {
@@ -37,6 +38,7 @@ class CreateBookingViewModel(
                 numAdults = numAdults,
                 numChildren = numChildren,
                 numInfants = numInfants,
+                totalAmount = totalAmount,  // ✅ AGREGADO
                 specialRequests = specialRequests
             )
 

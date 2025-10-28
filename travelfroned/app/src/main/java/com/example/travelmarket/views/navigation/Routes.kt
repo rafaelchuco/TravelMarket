@@ -40,4 +40,21 @@ sealed class Routes(val route: String) {
     object CancelBooking : Routes("cancel_booking/{bookingId}") {
         fun createRoute(bookingId: Int) = "cancel_booking/$bookingId"
     }
+
+    // ========== REVIEWS (Alex) ==========
+    object ReviewsList : Routes("reviews_list")
+    object CreateReview : Routes("create_review")
+    object MyReviews : Routes("my_reviews")
+    object ReviewDetail : Routes("review_detail/{reviewId}") {
+        fun createRoute(reviewId: Int) = "review_detail/$reviewId"
+    }
+    object UpdateReview : Routes("update_review/{reviewId}") {
+        fun createRoute(reviewId: Int) = "update_review/$reviewId"
+    }
+
+    // ========== PROMOTIONS (Alex) ==========
+    object PromotionsList : Routes("promotions_list")
+    object PromotionDetail : Routes("promotion_detail/{promotionId}") {
+        fun createRoute(promotionId: Int) = "promotion_detail/$promotionId"
+    }
 }

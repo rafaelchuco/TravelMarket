@@ -1,7 +1,5 @@
 from uuid import uuid4
-
 from rest_framework import serializers
-
 from . import models
 
 
@@ -113,10 +111,19 @@ class BookingCreateSerializer(serializers.ModelSerializer):
             'hotel_bookings',
             'flight_bookings',
         ]
-        read_only_fields = ['id', 'booking_date', 'updated_at']
+        read_only_fields = ['id', 'booking_date', 'updated_at', 'booking_number', 'customer_id']
         extra_kwargs = {
-            'booking_number': {'required': False, 'allow_blank': True},
-            'customer_id': {'required': False},  # ✅ AGREGADO
+            'package_id': {'required': True},
+            'travel_date': {'required': True},
+            'num_adults': {'required': True},
+            'total_amount': {'required': True},
+            'subtotal': {'required': False, 'default': 0},
+            'discount_amount': {'required': False, 'default': 0},
+            'tax_amount': {'required': False, 'default': 0},
+            'paid_amount': {'required': False, 'default': 0},
+            'status': {'required': False, 'default': 'pending'},
+            'payment_status': {'required': False, 'default': 'unpaid'},
+            'special_requests': {'required': False, 'allow_blank': True, 'default': ''},
         }
 
     def validate(self, attrs):
@@ -127,11 +134,11 @@ class BookingCreateSerializer(serializers.ModelSerializer):
         hotel_bookings_data = validated_data.pop('hotel_bookings', [])
         flight_bookings_data = validated_data.pop('flight_bookings', [])
 
-        # ✅ ASIGNAR CUSTOMER DEL REQUEST
+        # ✅ ASIGNAR customer del request
         validated_data['customer_id'] = self.context['request'].user.id
 
-        if not validated_data.get('booking_number'):
-            validated_data['booking_number'] = uuid4().hex[:12].upper()
+        # ✅ GENERAR booking_number
+        validated_data['booking_number'] = uuid4().hex[:12].upper()
 
         booking = models.Booking.objects.create(**validated_data)
 

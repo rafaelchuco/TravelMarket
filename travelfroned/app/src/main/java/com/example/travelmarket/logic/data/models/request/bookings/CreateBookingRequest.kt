@@ -16,15 +16,32 @@ data class CreateBookingRequest(
     val numAdults: Int,
 
     @SerializedName("num_children")
-    val numChildren: Int,
+    val numChildren: Int = 0,
 
     @SerializedName("num_infants")
-    val numInfants: Int,
+    val numInfants: Int = 0,
+
+    @SerializedName("total_amount")
+    val totalAmount: Double,  // ✅ AGREGADO - REQUERIDO
+
+    @SerializedName("subtotal")
+    val subtotal: Double = 0.0,
+
+    @SerializedName("discount_amount")
+    val discountAmount: Double = 0.0,
+
+    @SerializedName("tax_amount")
+    val taxAmount: Double = 0.0,
+
+    @SerializedName("paid_amount")
+    val paidAmount: Double = 0.0,
+
+    @SerializedName("status")
+    val status: String = "pending",
+
+    @SerializedName("payment_status")
+    val paymentStatus: String = "unpaid",
 
     @SerializedName("special_requests")
-    val specialRequests: String?
-
-    // ❌ NO ENVIAR: booking_number, subtotal, discount_amount, tax_amount,
-    //               total_amount, paid_amount, status, payment_status
-    // El backend los calcula automáticamente
+    val specialRequests: String? = null
 )

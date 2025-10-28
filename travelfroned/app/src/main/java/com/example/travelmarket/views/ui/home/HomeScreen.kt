@@ -1,6 +1,8 @@
 package com.example.travelmarket.views.ui.home
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -23,7 +25,8 @@ fun HomeScreen(navController: NavController) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(16.dp),
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -126,6 +129,43 @@ fun HomeScreen(navController: NavController) {
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Mis Consultas (Test)")
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // ========== RESEÑAS Y PROMOCIONES (ALEX) ==========
+            Text(
+                text = "RESEÑAS Y PROMOCIONES",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Button(
+                onClick = { navController.navigate(Routes.ReviewsList.route) },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Ver Reseñas")
+            }
+
+            Button(
+                onClick = { navController.navigate(Routes.MyReviews.route) },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Mis Reseñas")
+            }
+
+            Button(
+                onClick = { navController.navigate(Routes.CreateReview.route) },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Crear Reseña")
+            }
+
+            Button(
+                onClick = { navController.navigate(Routes.PromotionsList.route) },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Ver Promociones")
             }
         }
     }

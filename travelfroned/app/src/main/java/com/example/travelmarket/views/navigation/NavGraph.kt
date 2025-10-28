@@ -22,6 +22,13 @@ import com.example.travelmarket.views.ui.bookings.myBookings.MyBookingsScreen
 import com.example.travelmarket.views.ui.bookings.update.UpdateBookingScreen
 import com.example.travelmarket.views.ui.categories.CategoriesTestScreen
 import com.example.travelmarket.views.ui.home.HomeScreen
+import com.example.travelmarket.views.ui.promotions.PromotionDetailScreen
+import com.example.travelmarket.views.ui.promotions.PromotionsListScreen
+import com.example.travelmarket.views.ui.reviews.CreateReviewScreen
+import com.example.travelmarket.views.ui.reviews.MyReviewsScreen
+import com.example.travelmarket.views.ui.reviews.ReviewDetailScreen
+import com.example.travelmarket.views.ui.reviews.ReviewsListScreen
+import com.example.travelmarket.views.ui.reviews.UpdateReviewScreen
 import com.example.travelmarket.views.ui.test.DestinationsTestScreen
 import com.example.travelmarket.views.ui.test.FlightsTestScreen
 import com.example.travelmarket.views.ui.test.HotelsTestScreen
@@ -108,7 +115,7 @@ fun NavGraph(
         composable(Routes.PackagesTest.route) {
             PackagesTestScreen(
                 onBack = { navController.popBackStack() },
-                navController = navController  // ✅ ÚNICA LÍNEA AGREGADA
+                navController = navController
             )
         }
 
@@ -164,5 +171,54 @@ fun NavGraph(
             val bookingId = backStackEntry.arguments?.getInt("bookingId") ?: 0
             CancelBookingScreen(bookingId = bookingId, navController = navController)
         }
+
+        // ========== REVIEWS (Alex) ==========
+        composable(Routes.ReviewsList.route) {
+            ReviewsListScreen(navController = navController)
+        }
+
+        composable(Routes.CreateReview.route) {
+            CreateReviewScreen(navController = navController)
+        }
+
+        composable(Routes.MyReviews.route) {
+            MyReviewsScreen(navController = navController)
+        }
+
+        composable(
+            route = Routes.ReviewDetail.route,
+            arguments = listOf(
+                navArgument("reviewId") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
+            val reviewId = backStackEntry.arguments?.getInt("reviewId") ?: 0
+            ReviewDetailScreen(reviewId = reviewId)
+        }
+
+        composable(
+            route = Routes.UpdateReview.route,
+            arguments = listOf(
+                navArgument("reviewId") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
+            val reviewId = backStackEntry.arguments?.getInt("reviewId") ?: 0
+            UpdateReviewScreen(reviewId = reviewId, navController = navController)
+        }
+
+        // ========== PROMOTIONS (Alex) ==========
+        composable(Routes.PromotionsList.route) {
+            PromotionsListScreen(navController = navController)
+        }
+
+        composable(
+            route = Routes.PromotionDetail.route,
+            arguments = listOf(
+                navArgument("promotionId") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
+            val promotionId = backStackEntry.arguments?.getInt("promotionId") ?: 0
+            PromotionDetailScreen(promotionId = promotionId)  // ✅ SIN navController
+        }
+
     }
 }
