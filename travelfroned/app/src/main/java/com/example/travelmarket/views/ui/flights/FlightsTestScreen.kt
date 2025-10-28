@@ -1,16 +1,17 @@
-package com.example.travelmarket.views.ui.test
+package com.example.travelmarket.views.ui.flights
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel  // ✅ IMPORTAR
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.travelmarket.logic.domain.models.Flight
 import com.example.travelmarket.logic.viewmodels.flights.FlightsListViewModel
 import com.example.travelmarket.logic.viewmodels.flights.FlightsListState
 
@@ -18,9 +19,13 @@ import com.example.travelmarket.logic.viewmodels.flights.FlightsListState
 @Composable
 fun FlightsTestScreen(
     onBack: () -> Unit,
-    viewModel: FlightsListViewModel = hiltViewModel()  // ✅ CAMBIADO
+    viewModel: FlightsListViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.loadFlights()
+    }
 
     Scaffold(
         topBar = {
@@ -28,7 +33,7 @@ fun FlightsTestScreen(
                 title = { Text("✈️ Flights Test") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, "Volver")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Volver")
                     }
                 }
             )
@@ -83,7 +88,7 @@ fun FlightsTestScreen(
                     ) {
                         Column(Modifier.padding(16.dp)) {
                             Text(
-                                "GET /flights/",
+                                "GET /flights/", // Endpoint de ejemplo
                                 style = MaterialTheme.typography.titleMedium
                             )
                             Text("Total: ${currentState.flights.size} items")
@@ -100,33 +105,50 @@ fun FlightsTestScreen(
                             Text("✅ API conectada - Sin vuelos en BD")
                         }
                     } else {
-                        LazyColumn {
+                        LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             items(currentState.flights) { flight ->
-                                Card(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 4.dp)
-                                ) {
-                                    Column(Modifier.padding(12.dp)) {
-                                        Text(
-                                            "Vuelo #${flight.id}",
-                                            style = MaterialTheme.typography.titleMedium
-                                        )
-                                        Text(
-                                            "${flight.origin} → ${flight.destination}",
-                                            style = MaterialTheme.typography.bodyMedium
-                                        )
-                                        Text(
-                                            "Precio: $${flight.price}",
-                                            style = MaterialTheme.typography.bodySmall
-                                        )
-                                    }
-                                }
+                                FlightItemCard(flight = flight)
                             }
                         }
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun FlightItemCard(flight: Flight) {
+    Card(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(Modifier.padding(12.dp)) {
+            Text(
+                "Vuelo #${flight.id}", // Asume ID existe
+                style = MaterialTheme.typography.titleMedium
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                "${flight.origin} → ${flight.destination}",
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = flight.airline,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = "S/. ${flight.price}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold // Hacer precio más visible
+                )
+            }
+
         }
     }
 }

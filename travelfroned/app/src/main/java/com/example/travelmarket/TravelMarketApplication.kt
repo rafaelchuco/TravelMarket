@@ -1,14 +1,14 @@
 package com.example.travelmarket
 
 import android.app.Application
-import com.example.travelmarket.core.di.koinStorageModule
 import com.example.travelmarket.core.di.koinNetworkModule
 import com.example.travelmarket.core.di.koinRepositoryModule
+import com.example.travelmarket.core.di.koinStorageModule
 import com.example.travelmarket.core.di.useCaseModule
 import dagger.hilt.android.HiltAndroidApp
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
-import org.koin.core.context.startKoin
+import org.koin.core.context.GlobalContext.startKoin
 import org.koin.core.logger.Level
 
 @HiltAndroidApp
