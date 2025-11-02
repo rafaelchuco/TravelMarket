@@ -1,36 +1,28 @@
-# Gradle
-/.gradle
-/build
-/app/build
-
-# Android Studio
+# Git ignore for Android + Kotlin projects
+# Android Studio / IntelliJ
 .idea/
 *.iml
+*.ipr
+*.iws
 
-# Kotlin/Java
-*.class
-*.jar
-
-# Local configuration
+# Gradle
+.gradle/
+build/
+*/build/
 local.properties
 
-# Log files
+# Logs
 *.log
 
-# Mac
+# OS files
 .DS_Store
-*.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
-local.properties
+Thumbs.db
+
+# Kotlin specific
+*.class
+*.jar
+*.war
+*.ear
+
+# Misc
+captures/
