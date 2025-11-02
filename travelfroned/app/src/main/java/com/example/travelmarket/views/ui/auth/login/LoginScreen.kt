@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.travelmarket.core.network.NetworkResult
 import com.example.travelmarket.core.storage.TokenManager
@@ -26,14 +27,12 @@ import com.example.travelmarket.views.ui.auth.components.AuthButton
 import com.example.travelmarket.views.ui.auth.components.AuthHeader
 import com.example.travelmarket.views.ui.auth.components.AuthTextField
 import com.example.travelmarket.views.ui.auth.components.AuthTextButton
-import org.koin.androidx.compose.koinViewModel
-import org.koin.compose.koinInject
 
 @Composable
 fun LoginScreen(
     navController: NavController,
-    viewModel: LoginViewModel = koinViewModel(),
-    tokenManager: TokenManager = koinInject()
+    viewModel: LoginViewModel = hiltViewModel(),
+    tokenManager: TokenManager = hiltViewModel()
 ) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }

@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -24,7 +25,6 @@ import com.example.travelmarket.core.network.NetworkResult
 import com.example.travelmarket.logic.domain.models.Package
 import com.example.travelmarket.logic.viewmodels.bookings.CreateBookingViewModel
 import com.example.travelmarket.logic.viewmodels.packages.PackagesListViewModel
-import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -33,7 +33,7 @@ fun PackagesTestScreen(
     navController: NavController
 ) {
     val vm: PackagesListViewModel = hiltViewModel()
-    val bookingVm: CreateBookingViewModel = koinViewModel()
+    val bookingVm: CreateBookingViewModel = hiltViewModel()
 
     val packages by vm.packages.collectAsState()
     val loading by vm.loading.collectAsState()
@@ -234,13 +234,13 @@ private fun PackageCard(
                     .fillMaxWidth()
                     .height(200.dp)
             ) {
-                // 🔥🔥🔥 TODO: REEMPLAZAR CON IMAGEN DEL BACKEND DJANGO 🔥🔥🔥
-                // model = packageItem.imageUrl,
                 AsyncImage(
-                    model = getPeruPackageImage(packageItem.id.toInt()),  // ✅ CONVERTIR Long a Int
+                    model = packageItem.imageUrl,
                     contentDescription = packageItem.title,
                     modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
+                    contentScale = ContentScale.Crop,
+                    placeholder = rememberVectorPainter(image = Icons.Default.Image),
+                    error = rememberVectorPainter(image = Icons.Default.BrokenImage)
                 )
 
                 // ✅ DEGRADADO OSCURO
@@ -323,7 +323,7 @@ private fun PackageCard(
                     )
                     InfoChip(
                         icon = Icons.Default.CalendarMonth,
-                        text = "${packageItem.durationDays} días",  // ✅ SIMPLIFICADO
+                        text = "${packageItem.durationDays} días",
                         color = Color(0xFF2196F3)
                     )
                 }
@@ -391,16 +391,4 @@ private fun InfoChip(
             )
         }
     }
-}
-
-// 🔥 FUNCIÓN TEMPORAL - ELIMINAR cuando uses imageUrl desde Django
-private fun getPeruPackageImage(packageId: Int): String {
-    val peruImages = listOf(
-        "https://images.unsplash.com/photo-1587595431973-160d0d94add1?w=800&q=80",
-        "https://images.unsplash.com/photo-1531968455001-5c5272a41129?w=800&q=80",
-        "https://images.unsplash.com/photo-1616699002880-e00bc8c0cca6?w=800&q=80",
-        "https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=800&q=80",
-        "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=800&q=80"
-    )
-    return peruImages[packageId % peruImages.size]
 }
