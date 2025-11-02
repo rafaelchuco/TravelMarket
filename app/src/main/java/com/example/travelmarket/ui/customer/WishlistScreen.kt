@@ -24,11 +24,30 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.example.travelmarket.ui.viewmodels.PackagesViewModel
 
 @Composable
-fun WishlistScreen() {
-    var wishlistItems by remember { mutableStateOf(getSampleWishlistItems()) }
+fun WishlistScreen(
+    viewModel: PackagesViewModel = viewModel()
+) {
+    val packages by viewModel.packages.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+    val error by viewModel.error.collectAsState()
+    
+    // Convertir Package a WishlistItem para mantener compatibilidad
+    val wishlistItems = packages.map { packageItem ->
+        WishlistItem(
+            id = packageItem.id.toString(),
+            title = packageItem.title,
+            location = "Ubicación", // TODO: Obtener de packageItem
+            price = "S/ ${packageItem.price.toInt()}",
+            duration = "${packageItem.durationDays} día(s)",
+            rating = 4.5,
+            imageUrl = packageItem.imageUrl
+        )
+    }
     
     Column(
         modifier = Modifier
@@ -50,7 +69,38 @@ fun WishlistScreen() {
             )
         }
         
-        if (wishlistItems.isEmpty()) {
+        // Mostrar estado de carga o error
+        if (isLoading) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        } else if (error != null) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Error al cargar datos: $error",
+                        color = Color.Red,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                    Button(
+                        onClick = { viewModel.loadPackages() },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFFE53E3E)
+                        )
+                    ) {
+                        Text("Reintentar")
+                    }
+                }
+            }
+        } else if (wishlistItems.isEmpty()) {
             // Empty state
             Column(
                 modifier = Modifier

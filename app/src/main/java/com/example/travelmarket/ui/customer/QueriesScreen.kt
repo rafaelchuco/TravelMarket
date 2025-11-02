@@ -10,6 +10,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Chat
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -25,13 +26,15 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun MyQueriesScreen() {
     var queries by remember { mutableStateOf(getSampleQueries()) }
+    var selectedTab by remember { mutableStateOf(0) }
+    val tabTitles = listOf("Próximas", "Pasadas", "Canceladas")
     
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
     ) {
-        // Header
+        // Header con botón Nueva
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -39,29 +42,79 @@ fun MyQueriesScreen() {
                 .padding(16.dp)
         ) {
             Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(
-                    onClick = { /* TODO: Navegar hacia atrás */ }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowBack,
-                        contentDescription = "Atrás",
-                        tint = Color.White
-                    )
+                    IconButton(
+                        onClick = { /* TODO: Navegar hacia atrás */ }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Atrás",
+                            tint = Color.White
+                        )
+                    }
+                    
+                    Column {
+                        Text(
+                            text = "Mis Consultas",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                            modifier = Modifier.padding(start = 8.dp)
+                        )
+                        Text(
+                            text = "Gestiona tus consultas al soporte",
+                            fontSize = 12.sp,
+                            color = Color.White.copy(alpha = 0.9f),
+                            modifier = Modifier.padding(start = 8.dp, top = 2.dp)
+                        )
+                    }
                 }
                 
-                Text(
-                    text = "Mis Consultas",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White,
-                    modifier = Modifier.padding(start = 8.dp)
+                // Botón Nueva Consulta
+                OutlinedButton(
+                    onClick = { /* TODO: Navegar a Nueva Consulta */ },
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = Color.White
+                    ),
+                    border = ButtonDefaults.outlinedButtonBorder.copy(
+                        brush = androidx.compose.ui.graphics.SolidColor(Color.White)
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Send,
+                        contentDescription = "Nueva",
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Nueva", fontSize = 14.sp)
+                }
+            }
+        }
+        
+        // Tabs
+        TabRow(
+            selectedTabIndex = selectedTab,
+            containerColor = Color.White,
+            contentColor = Color(0xFFE53E3E)
+        ) {
+            tabTitles.forEachIndexed { index, title ->
+                Tab(
+                    selected = selectedTab == index,
+                    onClick = { selectedTab = index },
+                    text = { Text("$title (${getQueriesByStatus(queries, index).size})") }
                 )
             }
         }
         
-        if (queries.isEmpty()) {
+        val filteredQueries = getQueriesByStatus(queries, selectedTab)
+        
+        if (filteredQueries.isEmpty()) {
             // Empty state
             Column(
                 modifier = Modifier
@@ -102,7 +155,7 @@ fun MyQueriesScreen() {
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                items(queries) { query ->
+                items(filteredQueries) { query ->
                     QueryCard(
                         query = query,
                         onViewDetails = { /* TODO: Ver detalles de la consulta */ }
@@ -141,13 +194,16 @@ fun QueryCard(
                     modifier = Modifier.weight(1f)
                 )
                 
+                // Estado badge
+                val statusColor = when (query.status) {
+                    "Respondida" -> Color(0xFF10B981)
+                    "En Proceso" -> Color(0xFFF59E0B)
+                    else -> Color(0xFF6B7280)
+                }
+                
                 Card(
                     colors = CardDefaults.cardColors(
-                        containerColor = when (query.status) {
-                            "Respondida" -> Color(0xFF10B981).copy(alpha = 0.1f)
-                            "Pendiente" -> Color(0xFFF59E0B).copy(alpha = 0.1f)
-                            else -> Color(0xFF6B7280).copy(alpha = 0.1f)
-                        }
+                        containerColor = statusColor.copy(alpha = 0.1f)
                     ),
                     shape = RoundedCornerShape(16.dp)
                 ) {
@@ -155,11 +211,7 @@ fun QueryCard(
                         text = query.status,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Medium,
-                        color = when (query.status) {
-                            "Respondida" -> Color(0xFF10B981)
-                            "Pendiente" -> Color(0xFFF59E0B)
-                            else -> Color(0xFF6B7280)
-                        },
+                        color = statusColor,
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
                     )
                 }
@@ -167,51 +219,102 @@ fun QueryCard(
             
             Spacer(modifier = Modifier.height(8.dp))
             
-            // Descripción de la consulta
+            // Fecha
             Text(
-                text = query.description,
-                fontSize = 14.sp,
-                color = Color.Gray,
-                maxLines = 2,
-                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                text = query.date,
+                fontSize = 12.sp,
+                color = Color.Gray
             )
             
             Spacer(modifier = Modifier.height(12.dp))
             
-            // Información adicional
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = "Paquete: ${query.packageName}",
-                    fontSize = 12.sp,
-                    color = Color.Gray
-                )
-                
-                Text(
-                    text = query.date,
-                    fontSize = 12.sp,
-                    color = Color.Gray
-                )
+            // Paquete relacionado (si existe)
+            if (query.packageName.isNotEmpty()) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.LocationOn,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = Color(0xFFE53E3E)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = query.packageName,
+                        fontSize = 14.sp,
+                        color = Color.Black,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+                Spacer(modifier = Modifier.height(12.dp))
             }
             
-            if (query.status == "Respondida") {
-                Spacer(modifier = Modifier.height(12.dp))
-                
-                Button(
-                    onClick = onViewDetails,
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFE53E3E)
-                    ),
-                    shape = RoundedCornerShape(8.dp)
+            // Consulta del usuario
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFF9FAFB)),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(12.dp)
                 ) {
                     Text(
-                        text = "Ver Respuesta",
+                        text = query.description,
                         fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = Color.White
+                        color = Color.Black
+                    )
+                }
+            }
+            
+            // Respuesta del equipo (si existe)
+            if (query.status == "Respondida") {
+                Spacer(modifier = Modifier.height(12.dp))
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFECFDF5)),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(12.dp)
+                    ) {
+                        Text(
+                            text = "Respuesta del equipo:",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF10B981),
+                            modifier = Modifier.padding(bottom = 4.dp)
+                        )
+                        Text(
+                            text = "Hola Juan, si incluye entrada a Machu Picchu. Para grupos de +5 personas hay 10% de descuento. ¿Necesitas más información?",
+                            fontSize = 14.sp,
+                            color = Color.Black
+                        )
+                        Text(
+                            text = "Respondido: 19 de octubre de 2024, 02:22 p.m.",
+                            fontSize = 12.sp,
+                            color = Color.Gray,
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
+                    }
+                }
+            } else if (query.status == "En Proceso") {
+                Spacer(modifier = Modifier.height(12.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowBack,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = Color(0xFFF59E0B)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = "Esperando respuesta del equipo",
+                        fontSize = 14.sp,
+                        color = Color(0xFFF59E0B),
+                        fontWeight = FontWeight.Medium
                     )
                 }
             }
@@ -222,27 +325,21 @@ fun QueryCard(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewQueryScreen() {
-    var selectedPackage by remember { mutableStateOf("") }
-    var queryTitle by remember { mutableStateOf("") }
-    var queryDescription by remember { mutableStateOf("") }
-    var selectedCategory by remember { mutableStateOf("") }
+    var fullName by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var phone by remember { mutableStateOf("") }
+    var selectedPackage by remember { mutableStateOf<String?>(null) }
+    var subject by remember { mutableStateOf("") }
+    var message by remember { mutableStateOf("") }
+    var isPackageExpanded by remember { mutableStateOf(false) }
     
     val packages = listOf(
-        "Machu Picchu Full Day",
+        "Tour Machu Picchu 3D/2N",
         "Valle Sagrado + Ollantaytambo",
         "Montaña de Colores",
         "Laguna Humantay",
         "City Tour Cusco",
         "Salineras de Maras"
-    )
-    
-    val categories = listOf(
-        "Información general",
-        "Precios y promociones",
-        "Disponibilidad",
-        "Requisitos y documentos",
-        "Cancelaciones",
-        "Otros"
     )
     
     Column(
@@ -257,25 +354,33 @@ fun NewQueryScreen() {
                 .background(Color(0xFFE53E3E))
                 .padding(16.dp)
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(
-                    onClick = { /* TODO: Navegar hacia atrás */ }
+            Column {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowBack,
-                        contentDescription = "Atrás",
-                        tint = Color.White
+                    IconButton(
+                        onClick = { /* TODO: Navegar hacia atrás */ }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Atrás",
+                            tint = Color.White
+                        )
+                    }
+                    
+                    Text(
+                        text = "Nueva consulta",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                        modifier = Modifier.padding(start = 8.dp)
                     )
                 }
-                
                 Text(
-                    text = "Nueva Consulta",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White,
-                    modifier = Modifier.padding(start = 8.dp)
+                    text = "Enviános tu pregunta",
+                    fontSize = 14.sp,
+                    color = Color.White.copy(alpha = 0.9f),
+                    modifier = Modifier.padding(start = 48.dp, top = 4.dp)
                 )
             }
         }
@@ -286,38 +391,72 @@ fun NewQueryScreen() {
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            Text(
-                text = "Haz tu consulta",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black,
-                modifier = Modifier.padding(bottom = 16.dp)
+            // Nombre Completo
+            OutlinedTextField(
+                value = fullName,
+                onValueChange = { fullName = it },
+                label = { Text("Nombre Completo") },
+                modifier = Modifier.fillMaxWidth()
             )
             
-            // Selector de paquete
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            // Email
+            OutlinedTextField(
+                value = email,
+                onValueChange = { email = it },
+                label = { Text("Email") },
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = { Text("tu@email.com") }
+            )
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            // Teléfono (Perú)
+            OutlinedTextField(
+                value = phone,
+                onValueChange = { phone = it },
+                label = { Text("Teléfono") },
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = { Text("+51 000-000-000") }
+            )
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            // Paquete Relacionado (Opcional)
             ExposedDropdownMenuBox(
-                expanded = false,
-                onExpandedChange = { }
+                expanded = isPackageExpanded,
+                onExpandedChange = { isPackageExpanded = it }
             ) {
                 OutlinedTextField(
-                    value = selectedPackage,
+                    value = selectedPackage ?: "",
                     onValueChange = { },
-                    label = { Text("Seleccionar paquete") },
+                    label = { Text("Paquete Relacionado (Opcional)") },
                     readOnly = true,
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = false) },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isPackageExpanded) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .menuAnchor()
                 )
                 
                 ExposedDropdownMenu(
-                    expanded = false,
-                    onDismissRequest = { }
+                    expanded = isPackageExpanded,
+                    onDismissRequest = { isPackageExpanded = false }
                 ) {
+                    DropdownMenuItem(
+                        text = { Text("Ninguno") },
+                        onClick = { 
+                            selectedPackage = null
+                            isPackageExpanded = false
+                        }
+                    )
                     packages.forEach { packageName ->
                         DropdownMenuItem(
                             text = { Text(packageName) },
-                            onClick = { selectedPackage = packageName }
+                            onClick = { 
+                                selectedPackage = packageName
+                                isPackageExpanded = false
+                            }
                         )
                     }
                 }
@@ -325,145 +464,56 @@ fun NewQueryScreen() {
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            // Categoría de consulta
-            ExposedDropdownMenuBox(
-                expanded = false,
-                onExpandedChange = { }
-            ) {
-                OutlinedTextField(
-                    value = selectedCategory,
-                    onValueChange = { },
-                    label = { Text("Categoría de consulta") },
-                    readOnly = true,
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = false) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .menuAnchor()
-                )
-                
-                ExposedDropdownMenu(
-                    expanded = false,
-                    onDismissRequest = { }
-                ) {
-                    categories.forEach { category ->
-                        DropdownMenuItem(
-                            text = { Text(category) },
-                            onClick = { selectedCategory = category }
-                        )
-                    }
-                }
-            }
-            
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            // Título de la consulta
+            // Asunto
             OutlinedTextField(
-                value = queryTitle,
-                onValueChange = { queryTitle = it },
-                label = { Text("Título de tu consulta") },
+                value = subject,
+                onValueChange = { subject = it },
+                label = { Text("Asunto") },
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("Ej: ¿Incluye almuerzo?") }
+                placeholder = { Text("Ej: Consulta sobre disponibilidad") }
             )
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            // Descripción detallada
+            // Mensaje
             OutlinedTextField(
-                value = queryDescription,
-                onValueChange = { queryDescription = it },
-                label = { Text("Describe tu consulta en detalle") },
+                value = message,
+                onValueChange = { message = it },
+                label = { Text("Mensaje") },
                 modifier = Modifier.fillMaxWidth(),
-                minLines = 4,
-                maxLines = 8,
-                placeholder = { 
-                    Text(
-                        text = "Proporciona todos los detalles necesarios para que podamos ayudarte mejor...",
-                        color = Color.Gray
-                    )
-                }
+                minLines = 5,
+                maxLines = 10,
+                placeholder = { Text("Describe tu consulta...") }
             )
-            
-            Spacer(modifier = Modifier.height(24.dp))
-            
-            // Información adicional
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFF9FAFB)),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Text(
-                        text = "Información importante",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Black,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-                    
-                    Text(
-                        text = "• Responderemos tu consulta en un plazo máximo de 24 horas\n" +
-                                "• Si tu consulta es urgente, puedes contactarnos por WhatsApp\n" +
-                                "• Asegúrate de proporcionar información precisa para una mejor respuesta",
-                        fontSize = 12.sp,
-                        color = Color.Gray,
-                        lineHeight = 16.sp
-                    )
-                }
-            }
             
             Spacer(modifier = Modifier.height(32.dp))
             
-            // Botones de acción
-            Row(
+            // Botón Enviar
+            Button(
+                onClick = { /* TODO: Enviar consulta */ },
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFE53E3E)
+                ),
+                shape = RoundedCornerShape(8.dp),
+                enabled = fullName.isNotEmpty() && 
+                         email.isNotEmpty() && 
+                         phone.isNotEmpty() &&
+                         subject.isNotEmpty() && 
+                         message.isNotEmpty()
             ) {
-                OutlinedButton(
-                    onClick = { /* TODO: Cancelar consulta */ },
-                    modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = Color(0xFFE53E3E)
-                    ),
-                    border = ButtonDefaults.outlinedButtonBorder.copy(
-                        brush = androidx.compose.ui.graphics.SolidColor(Color(0xFFE53E3E))
-                    )
-                ) {
-                    Text(
-                        text = "Cancelar",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-                
-                Button(
-                    onClick = { /* TODO: Enviar consulta */ },
-                    modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFE53E3E)
-                    ),
-                    shape = RoundedCornerShape(8.dp),
-                    enabled = selectedPackage.isNotEmpty() && 
-                             selectedCategory.isNotEmpty() && 
-                             queryTitle.isNotEmpty() && 
-                             queryDescription.isNotEmpty()
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Send,
-                        contentDescription = "Enviar",
-                        modifier = Modifier.size(18.dp)
-                    )
-                    
-                    Spacer(modifier = Modifier.width(8.dp))
-                    
-                    Text(
-                        text = "Enviar Consulta",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
-                }
+                Icon(
+                    imageVector = Icons.Default.Send,
+                    contentDescription = "Enviar",
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Enviar Consulta",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
             }
         }
     }
@@ -482,27 +532,28 @@ fun getSampleQueries(): List<Query> {
     return listOf(
         Query(
             id = "1",
-            title = "¿Incluye almuerzo en Machu Picchu?",
-            description = "Quiero saber si el paquete incluye almuerzo y qué tipo de comida ofrecen.",
-            packageName = "Machu Picchu Full Day",
+            title = "Consulta sobre paquete a Cusco",
+            description = "Tu consulta: ¿El paquete incluye entrada a Machu Picchu? ¿Hay descuentos para grupos?",
+            packageName = "Tour Machu Picchu 3D/2N",
             status = "Respondida",
-            date = "10 Dic 2024"
+            date = "18 de Octubre de 2024, 10:30 a. m."
         ),
         Query(
             id = "2",
-            title = "Disponibilidad para el 25 de diciembre",
-            description = "Necesito confirmar si hay disponibilidad para el tour del Valle Sagrado el 25 de diciembre.",
-            packageName = "Valle Sagrado + Ollantaytambo",
-            status = "Pendiente",
-            date = "12 Dic 2024"
-        ),
-        Query(
-            id = "3",
-            title = "Requisitos para Montaña de Colores",
-            description = "¿Qué nivel de condición física se requiere para hacer el trekking a la Montaña de Colores?",
-            packageName = "Montaña de Colores",
-            status = "Respondida",
-            date = "08 Dic 2024"
+            title = "Cambio de fecha de reserva",
+            description = "Tu consulta: Necesito cambiar la fecha de mi reserva PERU12345678 del 25 de noviembre al 2 de diciembre",
+            packageName = "",
+            status = "En Proceso",
+            date = "18 de Octubre de 2024, 10:30 a. m."
         )
     )
+}
+
+fun getQueriesByStatus(queries: List<Query>, tabIndex: Int): List<Query> {
+    return when (tabIndex) {
+        0 -> queries.filter { it.status == "En Proceso" || it.status == "Pendiente" }
+        1 -> queries.filter { it.status == "Respondida" }
+        2 -> queries.filter { it.status == "Cancelada" }
+        else -> emptyList()
+    }
 }

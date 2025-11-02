@@ -22,9 +22,15 @@ import androidx.compose.ui.tooling.preview.Preview
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateReviewScreen() {
-    var rating by remember { mutableStateOf(0) }
-    var reviewText by remember { mutableStateOf("") }
-    var isAnonymous by remember { mutableStateOf(false) }
+    var overallRating by remember { mutableStateOf(0) }
+    var accommodationRating by remember { mutableStateOf(0) }
+    var transportRating by remember { mutableStateOf(0) }
+    var guideRating by remember { mutableStateOf(0) }
+    var valueRating by remember { mutableStateOf(0) }
+    var title by remember { mutableStateOf("") }
+    var comment by remember { mutableStateOf("") }
+    var pros by remember { mutableStateOf("") }
+    var cons by remember { mutableStateOf("") }
     
     Column(
         modifier = Modifier
@@ -102,9 +108,37 @@ fun CreateReviewScreen() {
             
             Spacer(modifier = Modifier.height(24.dp))
             
-            // Calificación
+            // Título de la reseña (mínimo 10 caracteres)
             Text(
-                text = "¿Cómo calificarías esta experiencia?",
+                text = "Título de tu reseña",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            
+            OutlinedTextField(
+                value = title,
+                onValueChange = { title = it },
+                label = { Text("Título (mínimo 10 caracteres)") },
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = { Text("Ej: Una experiencia increíble en Machu Picchu") }
+            )
+            
+            if (title.isNotEmpty() && title.length < 10) {
+                Text(
+                    text = "El título debe tener al menos 10 caracteres",
+                    fontSize = 12.sp,
+                    color = Color.Red,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
+            
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            // Calificación general (overall_rating 1-5)
+            Text(
+                text = "Calificación general",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.Black,
@@ -117,40 +151,23 @@ fun CreateReviewScreen() {
             ) {
                 for (i in 1..5) {
                     IconButton(
-                        onClick = { rating = i }
+                        onClick = { overallRating = i }
                     ) {
                         Icon(
                             imageVector = Icons.Default.Star,
                             contentDescription = "Estrella $i",
-                            tint = if (i <= rating) Color(0xFFFFD700) else Color.Gray,
+                            tint = if (i <= overallRating) Color(0xFFFFD700) else Color.Gray,
                             modifier = Modifier.size(40.dp)
                         )
                     }
                 }
             }
             
-            if (rating > 0) {
-                Text(
-                    text = when (rating) {
-                        1 -> "Muy malo"
-                        2 -> "Malo"
-                        3 -> "Regular"
-                        4 -> "Bueno"
-                        5 -> "Excelente"
-                        else -> ""
-                    },
-                    fontSize = 14.sp,
-                    color = Color.Gray,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
+            Spacer(modifier = Modifier.height(24.dp))
             
-            Spacer(modifier = Modifier.height(32.dp))
-            
-            // Comentario
+            // Comentario (mínimo 20 caracteres)
             Text(
-                text = "Comparte tu experiencia",
+                text = "Comentario",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.Black,
@@ -158,23 +175,32 @@ fun CreateReviewScreen() {
             )
             
             OutlinedTextField(
-                value = reviewText,
-                onValueChange = { reviewText = it },
-                label = { Text("Escribe tu reseña aquí...") },
+                value = comment,
+                onValueChange = { comment = it },
+                label = { Text("Comentario (mínimo 20 caracteres)") },
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 5,
                 maxLines = 10,
                 placeholder = { 
                     Text(
-                        text = "Cuéntanos sobre tu experiencia: ¿Qué te gustó más? ¿Hubo algo que podría mejorar?",
+                        text = "Describe tu experiencia detalladamente...",
                         color = Color.Gray
                     )
                 }
             )
             
+            if (comment.isNotEmpty() && comment.length < 20) {
+                Text(
+                    text = "El comentario debe tener al menos 20 caracteres",
+                    fontSize = 12.sp,
+                    color = Color.Red,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
+            
             Spacer(modifier = Modifier.height(24.dp))
             
-            // Aspectos específicos
+            // Aspectos específicos (accommodation, transport, guide, value)
             Text(
                 text = "Califica aspectos específicos",
                 fontSize = 16.sp,
@@ -184,10 +210,10 @@ fun CreateReviewScreen() {
             )
             
             AspectRatingCard(
-                title = "Guía turístico",
-                subtitle = "Conocimiento y atención",
-                rating = rating,
-                onRatingChange = { /* TODO: Manejar calificación específica */ }
+                title = "Alojamiento",
+                subtitle = "Comodidad y calidad",
+                rating = accommodationRating,
+                onRatingChange = { accommodationRating = it }
             )
             
             Spacer(modifier = Modifier.height(12.dp))
@@ -195,17 +221,68 @@ fun CreateReviewScreen() {
             AspectRatingCard(
                 title = "Transporte",
                 subtitle = "Comodidad y puntualidad",
-                rating = rating,
-                onRatingChange = { /* TODO: Manejar calificación específica */ }
+                rating = transportRating,
+                onRatingChange = { transportRating = it }
             )
             
             Spacer(modifier = Modifier.height(12.dp))
             
             AspectRatingCard(
-                title = "Alimentación",
-                subtitle = "Calidad y variedad",
-                rating = rating,
-                onRatingChange = { /* TODO: Manejar calificación específica */ }
+                title = "Guía",
+                subtitle = "Conocimiento y atención",
+                rating = guideRating,
+                onRatingChange = { guideRating = it }
+            )
+            
+            Spacer(modifier = Modifier.height(12.dp))
+            
+            AspectRatingCard(
+                title = "Valor",
+                subtitle = "Relación precio-calidad",
+                rating = valueRating,
+                onRatingChange = { valueRating = it }
+            )
+            
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            // Pros
+            Text(
+                text = "Puntos positivos (opcional)",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            
+            OutlinedTextField(
+                value = pros,
+                onValueChange = { pros = it },
+                label = { Text("¿Qué te gustó más?") },
+                modifier = Modifier.fillMaxWidth(),
+                minLines = 2,
+                maxLines = 4,
+                placeholder = { Text("Ej: El guía fue excelente, la comida muy buena...") }
+            )
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            // Cons
+            Text(
+                text = "Aspectos a mejorar (opcional)",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            
+            OutlinedTextField(
+                value = cons,
+                onValueChange = { cons = it },
+                label = { Text("¿Qué podría mejorar?") },
+                modifier = Modifier.fillMaxWidth(),
+                minLines = 2,
+                maxLines = 4,
+                placeholder = { Text("Ej: El transporte podría ser más cómodo...") }
             )
             
             Spacer(modifier = Modifier.height(24.dp))
@@ -227,25 +304,12 @@ fun CreateReviewScreen() {
                         modifier = Modifier.padding(bottom = 12.dp)
                     )
                     
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Checkbox(
-                            checked = isAnonymous,
-                            onCheckedChange = { isAnonymous = it },
-                            colors = CheckboxDefaults.colors(
-                                checkedColor = Color(0xFFE53E3E)
-                            )
-                        )
-                        
-                        Text(
-                            text = "Publicar reseña de forma anónima",
-                            fontSize = 14.sp,
-                            color = Color.Black,
-                            modifier = Modifier.padding(start = 8.dp)
-                        )
-                    }
+                    Text(
+                        text = "Recuerda: Solo puedes crear reseñas para reservas completadas (status = completed)",
+                        fontSize = 12.sp,
+                        color = Color(0xFFF59E0B),
+                        fontWeight = FontWeight.Medium
+                    )
                 }
             }
             
@@ -280,7 +344,13 @@ fun CreateReviewScreen() {
                         containerColor = Color(0xFFE53E3E)
                     ),
                     shape = RoundedCornerShape(8.dp),
-                    enabled = rating > 0 && reviewText.isNotEmpty()
+                    enabled = overallRating > 0 && 
+                             accommodationRating > 0 && 
+                             transportRating > 0 && 
+                             guideRating > 0 && 
+                             valueRating > 0 &&
+                             title.length >= 10 && 
+                             comment.length >= 20
                 ) {
                     Text(
                         text = "Publicar Reseña",

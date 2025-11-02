@@ -34,9 +34,13 @@ class PackagesViewModel : ViewModel() {
             
             try {
                 val response = packagesApiService.getPackages()
-                _packages.value = response
+                if (response.isSuccessful && response.body() != null) {
+                    _packages.value = response.body()!!.results
+                } else {
+                    _error.value = "Error al cargar paquetes: ${response.code()}"
+                }
             } catch (e: Exception) {
-                _error.value = e.message
+                _error.value = e.message ?: "Error desconocido"
             } finally {
                 _isLoading.value = false
             }

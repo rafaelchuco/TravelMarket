@@ -182,11 +182,7 @@ fun ChangePasswordScreen() {
                     )
                     
                     Text(
-                        text = "• Mínimo 8 caracteres\n" +
-                                "• Al menos una letra mayúscula\n" +
-                                "• Al menos una letra minúscula\n" +
-                                "• Al menos un número\n" +
-                                "• Al menos un carácter especial",
+                        text = "Mínimo 8 caracteres, incluye mayúsculas, minúsculas, números y símbolos.",
                         fontSize = 12.sp,
                         color = Color.Gray,
                         lineHeight = 16.sp

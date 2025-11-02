@@ -20,12 +20,27 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.travelmarket.ui.viewmodels.BookingsViewModel
+import com.example.travelmarket.domain.models.Booking
+import kotlinx.coroutines.flow.collectAsState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ReservationsScreen() {
+fun ReservationsScreen(
+    viewModel: BookingsViewModel = viewModel()
+) {
     var selectedTab by remember { mutableStateOf(0) }
     val tabTitles = listOf("Próximas", "Pasadas", "Canceladas")
+    
+    val bookings by viewModel.bookings.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+    val error by viewModel.error.collectAsState()
+    
+    // Calcular contadores dinámicos
+    val upcomingCount = bookings.count { it.status == "confirmed" || it.status == "pending" }
+    val pastCount = bookings.count { it.status == "completed" || it.status == "finished" }
+    val cancelledCount = bookings.count { it.status == "cancelled" || it.status == "canceled" }
     
     Column(
         modifier = Modifier
@@ -47,7 +62,7 @@ fun ReservationsScreen() {
             )
         }
         
-        // Tabs con contadores según el Figma
+        // Tabs con contadores dinámicos según datos de la API
         TabRow(
             selectedTabIndex = selectedTab,
             containerColor = Color.White,
@@ -64,7 +79,7 @@ fun ReservationsScreen() {
                 onClick = { selectedTab = 0 },
                 text = {
                     Text(
-                        text = "Próximas (2)",
+                        text = "Próximas ($upcomingCount)",
                         fontWeight = if (selectedTab == 0) FontWeight.Bold else FontWeight.Normal,
                         color = if (selectedTab == 0) Color(0xFFE53E3E) else Color.Gray
                     )
@@ -75,7 +90,7 @@ fun ReservationsScreen() {
                 onClick = { selectedTab = 1 },
                 text = {
                     Text(
-                        text = "Pasadas (2)",
+                        text = "Pasadas ($pastCount)",
                         fontWeight = if (selectedTab == 1) FontWeight.Bold else FontWeight.Normal,
                         color = if (selectedTab == 1) Color(0xFFE53E3E) else Color.Gray
                     )
@@ -86,7 +101,7 @@ fun ReservationsScreen() {
                 onClick = { selectedTab = 2 },
                 text = {
                     Text(
-                        text = "Canceladas (1)",
+                        text = "Canceladas ($cancelledCount)",
                         fontWeight = if (selectedTab == 2) FontWeight.Bold else FontWeight.Normal,
                         color = if (selectedTab == 2) Color(0xFFE53E3E) else Color.Gray
                     )
@@ -94,111 +109,171 @@ fun ReservationsScreen() {
             )
         }
         
-        // Content based on selected tab
-        when (selectedTab) {
-            0 -> UpcomingReservations()
-            1 -> PastReservations()
-            2 -> CancelledReservations()
+        // Mostrar estado de carga o error
+        if (isLoading) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        } else if (error != null) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Error al cargar datos: $error",
+                        color = Color.Red,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                    Button(
+                        onClick = { viewModel.loadBookings() },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFFE53E3E)
+                        )
+                    ) {
+                        Text("Reintentar")
+                    }
+                }
+            }
+        } else {
+            // Content based on selected tab
+            when (selectedTab) {
+                0 -> UpcomingReservations(bookings)
+                1 -> PastReservations(bookings)
+                2 -> CancelledReservations(bookings)
+            }
         }
     }
 }
 
 @Composable
-fun UpcomingReservations() {
+fun UpcomingReservations(bookings: List<Booking>) {
+    val upcomingBookings = bookings.filter {
+        it.status == "confirmed" || it.status == "pending"
+    }
+    
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
             .verticalScroll(rememberScrollState())
     ) {
-        ReservationCardFigma(
-            title = "Tour Machu Picchu 3D/2N",
-            location = "Cusco",
-            date = "14 dic. 2025",
-            passengers = "2 pasajero(s)",
-            bookingNumber = "#PERU12345678",
-            status = "Próxima",
-            statusColor = Color(0xFF10B981),
-            price = "S/. 1700",
-            onViewDetails = { /* TODO: Ver detalles */ },
-            onCancel = { /* TODO: Cancelar reserva */ }
-        )
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        ReservationCardFigma(
-            title = "Amazonía 4D/3N",
-            location = "Iquitos",
-            date = "9 feb. 2026",
-            passengers = "3 pasajero(s)",
-            bookingNumber = "#PERU12345679",
-            status = "Próxima",
-            statusColor = Color(0xFF10B981),
-            price = "S/. 2160",
-            onViewDetails = { /* TODO: Ver detalles */ },
-            onCancel = { /* TODO: Cancelar reserva */ }
-        )
+        if (upcomingBookings.isEmpty()) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "No hay reservas próximas",
+                    color = Color.Gray
+                )
+            }
+        } else {
+            upcomingBookings.forEach { booking ->
+                ReservationCardFigma(
+                    title = booking.bookingNumber, // TODO: Obtener nombre del paquete
+                    location = "Ubicación", // TODO: Obtener de booking
+                    date = booking.travelDate ?: "Fecha no disponible",
+                    passengers = "${booking.numAdults + booking.numChildren + booking.numInfants} pasajero(s)",
+                    bookingNumber = "#${booking.bookingNumber}",
+                    status = booking.status,
+                    statusColor = Color(0xFF10B981),
+                    price = booking.totalAmount,
+                    onViewDetails = { /* TODO: Ver detalles */ },
+                    onCancel = { /* TODO: Cancelar reserva */ }
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+        }
     }
 }
 
 @Composable
-fun PastReservations() {
+fun PastReservations(bookings: List<Booking>) {
+    val pastBookings = bookings.filter {
+        it.status == "completed" || it.status == "finished"
+    }
+    
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
             .verticalScroll(rememberScrollState())
     ) {
-        ReservationCardFigma(
-            title = "Montaña de Colores",
-            location = "Cusco",
-            date = "10 Nov 2024",
-            passengers = "2 pasajero(s)",
-            bookingNumber = "#PERU12345680",
-            status = "Completada",
-            statusColor = Color(0xFF6B7280),
-            price = "S/ 200.00",
-            onViewDetails = { /* TODO: Ver detalles */ },
-            onCancel = { /* TODO: Cancelar reserva */ }
-        )
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        ReservationCardFigma(
-            title = "Laguna Humantay",
-            location = "Cusco",
-            date = "05 Oct 2024",
-            passengers = "1 pasajero(s)",
-            bookingNumber = "#PERU12345681",
-            status = "Completada",
-            statusColor = Color(0xFF6B7280),
-            price = "S/ 150.00",
-            onViewDetails = { /* TODO: Ver detalles */ },
-            onCancel = { /* TODO: Cancelar reserva */ }
-        )
+        if (pastBookings.isEmpty()) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "No hay reservas pasadas",
+                    color = Color.Gray
+                )
+            }
+        } else {
+            pastBookings.forEach { booking ->
+                ReservationCardFigma(
+                    title = booking.bookingNumber, // TODO: Obtener nombre del paquete
+                    location = "Ubicación", // TODO: Obtener de booking
+                    date = booking.travelDate ?: "Fecha no disponible",
+                    passengers = "${booking.numAdults + booking.numChildren + booking.numInfants} pasajero(s)",
+                    bookingNumber = "#${booking.bookingNumber}",
+                    status = "Completada",
+                    statusColor = Color(0xFF6B7280),
+                    price = booking.totalAmount,
+                    onViewDetails = { /* TODO: Ver detalles */ },
+                    onCancel = { /* TODO: Cancelar reserva */ }
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+        }
     }
 }
 
 @Composable
-fun CancelledReservations() {
+fun CancelledReservations(bookings: List<Booking>) {
+    val cancelledBookings = bookings.filter {
+        it.status == "cancelled" || it.status == "canceled"
+    }
+    
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
             .verticalScroll(rememberScrollState())
     ) {
-        ReservationCardFigma(
-            title = "Salineras de Maras",
-            location = "Cusco",
-            date = "20 Nov 2024",
-            passengers = "2 pasajero(s)",
-            bookingNumber = "#PERU12345682",
-            status = "Cancelada",
-            statusColor = Color(0xFFEF4444),
-            price = "S/ 100.00",
-            onViewDetails = { /* TODO: Ver detalles */ },
-            onCancel = { /* TODO: Cancelar reserva */ }
-        )
+        if (cancelledBookings.isEmpty()) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "No hay reservas canceladas",
+                    color = Color.Gray
+                )
+            }
+        } else {
+            cancelledBookings.forEach { booking ->
+                ReservationCardFigma(
+                    title = booking.bookingNumber, // TODO: Obtener nombre del paquete
+                    location = "Ubicación", // TODO: Obtener de booking
+                    date = booking.travelDate ?: "Fecha no disponible",
+                    passengers = "${booking.numAdults + booking.numChildren + booking.numInfants} pasajero(s)",
+                    bookingNumber = "#${booking.bookingNumber}",
+                    status = "Cancelada",
+                    statusColor = Color(0xFFEF4444),
+                    price = booking.totalAmount,
+                    onViewDetails = { /* TODO: Ver detalles */ },
+                    onCancel = { /* TODO: Cancelar reserva */ }
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+        }
     }
 }
 

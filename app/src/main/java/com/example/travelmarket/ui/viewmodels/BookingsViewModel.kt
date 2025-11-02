@@ -34,9 +34,13 @@ class BookingsViewModel : ViewModel() {
             
             try {
                 val response = bookingsApiService.getMyBookings()
-                _bookings.value = response
+                if (response.isSuccessful && response.body() != null) {
+                    _bookings.value = response.body()!!.results
+                } else {
+                    _error.value = "Error al cargar reservas: ${response.code()}"
+                }
             } catch (e: Exception) {
-                _error.value = e.message
+                _error.value = e.message ?: "Error desconocido"
             } finally {
                 _isLoading.value = false
             }
