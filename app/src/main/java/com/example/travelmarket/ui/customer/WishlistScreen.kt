@@ -25,16 +25,23 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import coil.compose.AsyncImage
 import com.example.travelmarket.ui.viewmodels.PackagesViewModel
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 
 @Composable
 fun WishlistScreen(
-    viewModel: PackagesViewModel = viewModel()
+    viewModel: PackagesViewModel = viewModel(),
+    onViewDetails: (String) -> Unit = {},
+    onBookNow: (String) -> Unit = {}
 ) {
     val packages by viewModel.packages.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
+    var selectedFilter by remember { mutableStateOf("Todos") }
     
     // Convertir Package a WishlistItem para mantener compatibilidad
     val wishlistItems = packages.map { packageItem ->
@@ -45,7 +52,12 @@ fun WishlistScreen(
             price = "S/ ${packageItem.price.toInt()}",
             duration = "${packageItem.durationDays} día(s)",
             rating = 4.5,
-            imageUrl = packageItem.imageUrl
+            imageUrl = packageItem.imageUrl,
+            region = when ((packageItem.destinationId ?: 0L).toInt() % 3) {
+                0 -> "Costa"
+                1 -> "Sierra"
+                else -> "Selva"
+            }
         )
     }
     
@@ -67,6 +79,23 @@ fun WishlistScreen(
                 fontWeight = FontWeight.Bold,
                 color = Color.White
             )
+        }
+        
+        // Filtros Costa / Sierra / Selva
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            val filters = listOf("Todos", "Costa", "Sierra", "Selva")
+            filters.forEach { label ->
+                FilterChip(
+                    selected = selectedFilter == label,
+                    onClick = { selectedFilter = label },
+                    label = { Text(label) }
+                )
+            }
         }
         
         // Mostrar estado de carga o error
@@ -134,25 +163,45 @@ fun WishlistScreen(
                 )
             }
         } else {
-            // Grid de paquetes
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
+            val sections = listOf("Costa", "Sierra", "Selva")
+            val filteredSections = if (selectedFilter == "Todos") sections else listOf(selectedFilter)
+            LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    .padding(horizontal = 16.dp)
             ) {
-                items(wishlistItems) { item ->
-                    WishlistItemCard(
-                        item = item,
-                        onRemoveFromWishlist = { 
-                            wishlistItems = wishlistItems.filter { it.id != item.id }
-                        },
-                        onViewDetails = { /* TODO: Ver detalles del paquete */ },
-                        onBookNow = { /* TODO: Reservar paquete */ }
-                    )
+                items(filteredSections) { section ->
+                    val itemsInSection = wishlistItems.filter { it.region == section }
+                    if (itemsInSection.isNotEmpty()) {
+                        Text(
+                            text = section,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black,
+                            modifier = Modifier
+                                .padding(top = 8.dp, bottom = 8.dp)
+                        )
+                        LazyVerticalGrid(
+                            columns = GridCells.Fixed(2),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(min = 0.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp),
+                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            items(itemsInSection) { item ->
+                                WishlistItemCard(
+                                    item = item,
+                                    onRemoveFromWishlist = { },
+                                    onViewDetails = { onViewDetails(item.id) },
+                                    onBookNow = { onBookNow(item.id) }
+                                )
+                            }
+                        }
+                        Spacer(Modifier.height(8.dp))
+                    }
                 }
+                item { Spacer(Modifier.height(16.dp)) }
             }
         }
     }
@@ -317,7 +366,8 @@ data class WishlistItem(
     val price: String,
     val duration: String,
     val rating: Double,
-    val imageUrl: String
+    val imageUrl: String,
+    val region: String
 )
 
 fun getSampleWishlistItems(): List<WishlistItem> {

@@ -22,6 +22,9 @@ import com.example.travelmarket.ui.customer.ReservationDetailScreen
 import com.example.travelmarket.ui.customer.ChangePasswordScreen
 import com.example.travelmarket.ui.customer.EditProfileScreen
 import com.example.travelmarket.ui.theme.TravelMarketTheme
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,8 +33,27 @@ class MainActivity : ComponentActivity() {
         setContent {
             TravelMarketTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    // Cambia esta línea para ver diferentes pantallas
-                    WishlistScreen()
+                    val navController = rememberNavController()
+                    NavHost(
+                        navController = navController,
+                        startDestination = "wishlist"
+                    ) {
+                        composable("wishlist") {
+                            WishlistScreen(
+                                onViewDetails = { /* TODO: navegar a detalle de paquete cuando esté listo */ },
+                                onBookNow = { _ -> navController.navigate("booking") }
+                            )
+                        }
+                        composable("booking") { BookingFlowScreen() }
+                        composable("reservations") { ReservationsScreen() }
+                        composable("reservationDetail") { ReservationDetailScreen() }
+                        composable("profile") { ProfileScreen() }
+                        composable("editProfile") { EditProfileScreen() }
+                        composable("changePassword") { ChangePasswordScreen() }
+                        composable("createReview") { CreateReviewScreen() }
+                        composable("myQueries") { MyQueriesScreen() }
+                        composable("newQuery") { NewQueryScreen() }
+                    }
                 }
             }
         }
