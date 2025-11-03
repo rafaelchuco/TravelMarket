@@ -18,8 +18,8 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
-     # Grappelli primero
-    path('grappelli/', include('grappelli.urls')),
+    # Grappelli (comentado por problemas de instalación en Windows)
+    # path('grappelli/', include('grappelli.urls')),
 
     # Admin de Django
     path('admin/', admin.site.urls),

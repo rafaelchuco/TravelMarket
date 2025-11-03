@@ -11,7 +11,7 @@ ALLOWED_HOSTS = ['*']
 
 # Applications
 INSTALLED_APPS = [
-    'jazzmin',
+    # 'jazzmin',  # Comentado por problemas de rutas largas en Windows
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -75,11 +75,14 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DB_NAME'),
-        'USER': config('DB_USER'),
-        'PASSWORD': config('DB_PASSWORD'),
+        'NAME': config('DB_NAME', default='agencia_turismo'),
+        'USER': config('DB_USER', default='postgres'),
+        'PASSWORD': config('DB_PASSWORD', default='Lopez2003'),
         'HOST': config('DB_HOST', default='localhost'),
         'PORT': config('DB_PORT', default='5432'),
+        'OPTIONS': {
+            'client_encoding': 'UTF8',
+        }
     }
 }
 
