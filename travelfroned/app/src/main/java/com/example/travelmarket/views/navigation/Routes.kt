@@ -59,4 +59,7 @@ sealed class Routes(val route: String) {
     object PromotionDetail : Routes("promotion_detail/{promotionId}") {
         fun createRoute(promotionId: Int) = "promotion_detail/$promotionId"
     }
+
+    // ========== INQUIRIES (Alex) ==========
+    object CreateInquiry : Routes("create_inquiry")
 }

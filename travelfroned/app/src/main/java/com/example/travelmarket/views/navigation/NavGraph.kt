@@ -21,6 +21,7 @@ import com.example.travelmarket.views.ui.bookings.list.BookingsListScreen
 import com.example.travelmarket.views.ui.bookings.update.UpdateBookingScreen
 import com.example.travelmarket.views.ui.categories.CategoriesTestScreen
 import com.example.travelmarket.views.ui.home.HomeScreen
+import com.example.travelmarket.views.ui.inquiries.CreateInquiryScreen
 import com.example.travelmarket.views.ui.promotions.PromotionDetailScreen
 import com.example.travelmarket.views.ui.promotions.PromotionsListScreen
 import com.example.travelmarket.views.ui.reviews.CreateReviewScreen
@@ -32,12 +33,12 @@ import com.example.travelmarket.views.ui.test.FlightsTestScreen
 import com.example.travelmarket.views.ui.test.HotelsTestScreen
 import com.example.travelmarket.views.ui.test.InquiriesTestScreen
 import com.example.travelmarket.views.ui.test.PackagesTestScreen
-import com.example.travelmarket.views.ui.welcome.WelcomeScreen  // ✅ IMPORTAR
+import com.example.travelmarket.views.ui.welcome.WelcomeScreen
 
 @Composable
 fun NavGraph(
     navController: NavHostController,
-    startDestination: String = Routes.Welcome.route,  // ✅ CAMBIAR A WELCOME
+    startDestination: String = Routes.Welcome.route,
     modifier: Modifier = Modifier
 ) {
     NavHost(
@@ -45,15 +46,10 @@ fun NavGraph(
         startDestination = startDestination,
         modifier = modifier
     ) {
-        // ✅ PANTALLA DE BIENVENIDA (PRIMERA PANTALLA)
         composable(Routes.Welcome.route) {
             WelcomeScreen(
-                onStartClick = {
-                    navController.navigate(Routes.Login.route)
-                },
-                onRegisterClick = {
-                    navController.navigate(Routes.Register.route)
-                },
+                onStartClick = { navController.navigate(Routes.Login.route) },
+                onRegisterClick = { navController.navigate(Routes.Register.route) },
                 onSkipClick = {
                     navController.navigate(Routes.Home.route) {
                         popUpTo(Routes.Welcome.route) { inclusive = true }
@@ -122,7 +118,8 @@ fun NavGraph(
 
         composable(Routes.InquiriesTest.route) {
             InquiriesTestScreen(
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                navController = navController
             )
         }
 
@@ -236,6 +233,10 @@ fun NavGraph(
         ) { backStackEntry ->
             val promotionId = backStackEntry.arguments?.getInt("promotionId") ?: 0
             PromotionDetailScreen(promotionId = promotionId)
+        }
+
+        composable(Routes.CreateInquiry.route) {
+            CreateInquiryScreen(navController = navController)
         }
     }
 }

@@ -1,7 +1,7 @@
 package com.example.travelmarket.core.utils
 
 object Constants {
-    const val BASE_URL = "http://10.200.172.102:8000/api/" // ✅ AGREGADO :8080
+    const val BASE_URL = "http://10.0.2.2:8000/api/" // ✅ AGREGADO :8080
     const val TIMEOUT_SECONDS = 30L
 
     const val DEFAULT_PAGE_SIZE = 20

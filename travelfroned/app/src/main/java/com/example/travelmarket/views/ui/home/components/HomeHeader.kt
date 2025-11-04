@@ -30,12 +30,13 @@ fun HomeHeader(
         modifier = Modifier
             .fillMaxWidth()
             .background(Color(0xFFE53935))
-            .padding(bottom = 16.dp)
+            .statusBarsPadding()
+            .padding(bottom = 24.dp, top = 16.dp) // ✅ CORRECCIÓN
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 16.dp),
+                .padding(horizontal = 16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -63,6 +64,8 @@ fun HomeHeader(
                 )
             }
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         // ✅ BARRA DE BÚSQUEDA FUNCIONAL
         Card(
