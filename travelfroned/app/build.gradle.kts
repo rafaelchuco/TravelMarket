@@ -96,6 +96,10 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
     implementation("io.coil-kt:coil-compose:2.5.0")
+    
+    // QR Code
+    implementation("com.google.zxing:core:3.5.2")
+    implementation("com.journeyapps:zxing-android-embedded:4.3.0")
 
     // Retrofit + Moshi + Gson
     implementation("com.squareup.retrofit2:retrofit:2.11.0")

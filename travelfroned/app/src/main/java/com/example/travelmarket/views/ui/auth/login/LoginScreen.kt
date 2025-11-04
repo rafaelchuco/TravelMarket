@@ -26,14 +26,14 @@ import com.example.travelmarket.views.ui.auth.components.AuthButton
 import com.example.travelmarket.views.ui.auth.components.AuthHeader
 import com.example.travelmarket.views.ui.auth.components.AuthTextField
 import com.example.travelmarket.views.ui.auth.components.AuthTextButton
-import org.koin.androidx.compose.koinViewModel
-import org.koin.compose.koinInject
+import androidx.hilt.navigation.compose.hiltViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
 
 @Composable
 fun LoginScreen(
     navController: NavController,
-    viewModel: LoginViewModel = koinViewModel(),
-    tokenManager: TokenManager = koinInject()
+    viewModel: LoginViewModel = hiltViewModel(),
+    tokenManager: TokenManager
 ) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }

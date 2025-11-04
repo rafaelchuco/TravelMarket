@@ -4,12 +4,13 @@ import com.example.travelmarket.core.base.BaseUseCaseWithParams
 import com.example.travelmarket.core.network.NetworkResult
 import com.example.travelmarket.logic.domain.models.BookingDetail
 import com.example.travelmarket.logic.domain.repositories.BookingsRepository
+import javax.inject.Inject
 
 data class GetBookingByIdParams(
     val id: Int
 )
 
-class GetBookingByIdUseCase(
+class GetBookingByIdUseCase @Inject constructor(
     private val repository: BookingsRepository
 ) : BaseUseCaseWithParams<GetBookingByIdParams, NetworkResult<BookingDetail>>() {
 

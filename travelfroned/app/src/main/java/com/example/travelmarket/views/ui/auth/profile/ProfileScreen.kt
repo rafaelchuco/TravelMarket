@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.clickable
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -25,13 +26,13 @@ import com.example.travelmarket.logic.viewmodels.auth.ProfileViewModel
 import com.example.travelmarket.views.navigation.Routes
 import com.example.travelmarket.views.ui.auth.components.AuthButton
 import kotlinx.coroutines.flow.collectLatest
-import org.koin.androidx.compose.koinViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
     navController: NavController,
-    viewModel: ProfileViewModel = koinViewModel()
+    viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val profileState by viewModel.profileState.collectAsState()
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -169,6 +170,30 @@ fun ProfileScreen(
                             )
                         }
 
+                        // ✅ ACCIONES RÁPIDAS
+                        ProfileCard(title = "Acciones Rápidas") {
+                            ProfileActionButton(
+                                icon = Icons.Default.Favorite,
+                                label = "Mi Wishlist",
+                                onClick = { navController.navigate(Routes.Wishlist.route) }
+                            )
+                            ProfileActionButton(
+                                icon = Icons.Default.DateRange,
+                                label = "Mis Reservas",
+                                onClick = { navController.navigate(Routes.MyReservations.route) }
+                            )
+                            ProfileActionButton(
+                                icon = Icons.Default.Chat,
+                                label = "Mis Consultas",
+                                onClick = { navController.navigate(Routes.MyQueries.route) }
+                            )
+                            ProfileActionButton(
+                                icon = Icons.Default.Lock,
+                                label = "Cambiar Contraseña",
+                                onClick = { navController.navigate(Routes.ChangePassword.route) }
+                            )
+                        }
+
                         // ✅ BOTÓN EDITAR
                         AuthButton(
                             text = "Editar Perfil",
@@ -215,6 +240,43 @@ fun ProfileScreen(
                 else -> {}
             }
         }
+    }
+}
+
+// ✅ COMPONENTE: Botón de acción rápida
+@Composable
+private fun ProfileActionButton(
+    icon: ImageVector,
+    label: String,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = Color(0xFFDC143C),
+            modifier = Modifier.size(24.dp)
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Medium,
+            color = Color(0xFF212121),
+            modifier = Modifier.weight(1f)
+        )
+        Icon(
+            imageVector = Icons.Default.ChevronRight,
+            contentDescription = null,
+            tint = Color.Gray,
+            modifier = Modifier.size(20.dp)
+        )
     }
 }
 

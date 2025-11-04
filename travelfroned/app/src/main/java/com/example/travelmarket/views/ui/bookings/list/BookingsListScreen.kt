@@ -22,13 +22,13 @@ import com.example.travelmarket.core.network.NetworkResult
 import com.example.travelmarket.logic.domain.models.Booking
 import com.example.travelmarket.logic.viewmodels.bookings.MyBookingsViewModel
 import com.example.travelmarket.views.navigation.Routes
-import org.koin.androidx.compose.koinViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BookingsListScreen(
     navController: NavController,
-    viewModel: MyBookingsViewModel = koinViewModel()
+    viewModel: MyBookingsViewModel = hiltViewModel()
 ) {
     val bookingsState by viewModel.myBookingsState.collectAsState()
 

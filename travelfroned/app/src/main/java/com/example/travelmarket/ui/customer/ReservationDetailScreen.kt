@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,11 +26,80 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.hilt.navigation.compose.hiltViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ReservationDetailScreen() {
-    val reservation = getSampleReservation()
+fun ReservationDetailScreen(
+    reservationId: Long = 0L,
+    navController: androidx.navigation.NavController? = null,
+    viewModel: com.example.travelmarket.logic.viewmodels.bookings.BookingDetailViewModel = androidx.hilt.navigation.compose.hiltViewModel()
+) {
+    val bookingDetailState by viewModel.bookingDetailState.collectAsState()
+    
+    LaunchedEffect(reservationId) {
+        if (reservationId > 0) {
+            viewModel.getBookingById(reservationId.toInt())
+        }
+    }
+    
+    val reservation = when (val state = bookingDetailState) {
+        is com.example.travelmarket.core.network.NetworkResult.Success -> {
+            // Convertir BookingDetail a ReservationDetail usando solo propiedades disponibles
+            state.data.let { booking ->
+                ReservationDetail(
+                    bookingNumber = booking.bookingNumber,
+                    packageName = "Paquete #${booking.packageId ?: "N/A"}", // TODO: obtener nombre del paquete
+                    destination = "", // TODO: obtener del paquete
+                    travelDate = booking.travelDate ?: "",
+                    numAdults = booking.numAdults,
+                    numChildren = booking.numChildren,
+                    status = booking.status,
+                    totalAmount = "S/. ${booking.totalAmount}",
+                    passengers = emptyList(), // TODO: mapear pasajeros desde API
+                    itinerary = emptyList(), // TODO: mapear itinerario desde paquete
+                    emergencyContacts = emptyList(),
+                    hotelBooking = HotelBooking(
+                        hotelName = "", // TODO: obtener del paquete
+                        destination = "",
+                        checkInDate = booking.travelDate ?: "",
+                        checkOutDate = booking.returnDate ?: "",
+                        numRooms = 1, // TODO: obtener del booking
+                        roomType = "",
+                        totalNights = 0,
+                        pricePerNight = "0.00",
+                        totalPrice = "0.00",
+                        confirmationNumber = ""
+                    ),
+                    flightBooking = FlightBooking(
+                        bookingType = "outbound",
+                        airline = "", // TODO: obtener del paquete
+                        flightNumber = "",
+                        origin = "",
+                        originAirport = "",
+                        destination = "",
+                        destinationAirport = "",
+                        departureTime = "",
+                        arrivalTime = "",
+                        numPassengers = booking.numAdults + booking.numChildren,
+                        seatNumbers = "",
+                        pricePerPerson = "0.00",
+                        totalPrice = "0.00",
+                        pnrNumber = ""
+                    )
+                )
+            }
+        }
+        is com.example.travelmarket.core.network.NetworkResult.Loading -> {
+            getSampleReservation() // Mostrar placeholder mientras carga
+        }
+        is com.example.travelmarket.core.network.NetworkResult.Error -> {
+            getSampleReservation() // Mostrar placeholder en caso de error
+        }
+    }
     
     Column(
         modifier = Modifier
@@ -47,7 +117,7 @@ fun ReservationDetailScreen() {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(
-                    onClick = { /* TODO: Navegar hacia atrás */ }
+                    onClick = { navController?.popBackStack() }
                 ) {
                     Icon(
                         imageVector = Icons.Default.ArrowBack,
@@ -580,64 +650,314 @@ fun HotelFlightInfoCard(
 @Composable
 fun HotelBookingItem(hotelBooking: HotelBooking) {
     Column {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Hotel Reservado",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black
+            )
+            
+            if (hotelBooking.confirmationNumber.isNotEmpty()) {
+                Text(
+                    text = "Conf: ${hotelBooking.confirmationNumber}",
+                    fontSize = 10.sp,
+                    color = Color.Gray,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        // RF-090: Mostrar hotel nested con departamento
         Text(
-            text = "Hotel Reservado",
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Bold,
+            text = hotelBooking.hotelName,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Medium,
             color = Color.Black
         )
         
-        Spacer(modifier = Modifier.height(4.dp))
+        if (hotelBooking.destination.isNotEmpty()) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.LocationOn,
+                    contentDescription = null,
+                    modifier = Modifier.size(12.dp),
+                    tint = Color.Gray
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = hotelBooking.destination,
+                    fontSize = 11.sp,
+                    color = Color.Gray
+                )
+            }
+        }
         
-        Text(
-            text = hotelBooking.hotelName,
-            fontSize = 12.sp,
-            color = Color.Gray
-        )
+        Spacer(modifier = Modifier.height(8.dp))
         
-        Text(
-            text = "Check-in: ${hotelBooking.checkInDate}",
-            fontSize = 12.sp,
-            color = Color.Gray
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column {
+                Text(
+                    text = "Check-in",
+                    fontSize = 11.sp,
+                    color = Color.Gray
+                )
+                Text(
+                    text = hotelBooking.checkInDate,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = Color.Black
+                )
+            }
+            
+            Column {
+                Text(
+                    text = "Check-out",
+                    fontSize = 11.sp,
+                    color = Color.Gray
+                )
+                Text(
+                    text = hotelBooking.checkOutDate,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = Color.Black
+                )
+            }
+        }
         
-        Text(
-            text = "Check-out: ${hotelBooking.checkOutDate}",
-            fontSize = 12.sp,
-            color = Color.Gray
-        )
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        // RF-090: Mostrar detalles de habitaciones
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "${hotelBooking.numRooms} habitación(es)",
+                fontSize = 11.sp,
+                color = Color.Gray
+            )
+            Text(
+                text = "${hotelBooking.totalNights} noche(s)",
+                fontSize = 11.sp,
+                color = Color.Gray
+            )
+        }
+        
+        if (hotelBooking.roomType.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "Tipo: ${hotelBooking.roomType}",
+                fontSize = 11.sp,
+                color = Color.Gray
+            )
+        }
+        
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        Divider()
+        
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "Total",
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Black
+            )
+            Text(
+                text = "S/ ${hotelBooking.totalPrice}",
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFFE53E3E)
+            )
+        }
     }
 }
 
 @Composable
 fun FlightBookingItem(flightBooking: FlightBooking) {
     Column {
-        Text(
-            text = "Vuelo Reservado",
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.Black
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Vuelo ${if (flightBooking.bookingType == "outbound") "Ida" else "Vuelta"}",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black
+            )
+            
+            if (flightBooking.pnrNumber.isNotEmpty()) {
+                Text(
+                    text = "PNR: ${flightBooking.pnrNumber}",
+                    fontSize = 10.sp,
+                    color = Color.Gray,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+        }
         
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(8.dp))
         
-        Text(
-            text = "${flightBooking.airline} - ${flightBooking.flightNumber}",
-            fontSize = 12.sp,
-            color = Color.Gray
-        )
+        // RF-091: Mostrar vuelo nested con ruta nacional
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = flightBooking.origin,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
+                Text(
+                    text = flightBooking.originAirport,
+                    fontSize = 11.sp,
+                    color = Color.Gray
+                )
+            }
+            
+            Icon(
+                imageVector = Icons.Default.ArrowForward,
+                contentDescription = null,
+                tint = Color.Gray,
+                modifier = Modifier.padding(horizontal = 8.dp)
+            )
+            
+            Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.End) {
+                Text(
+                    text = flightBooking.destination,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black,
+                    textAlign = TextAlign.End
+                )
+                Text(
+                    text = flightBooking.destinationAirport,
+                    fontSize = 11.sp,
+                    color = Color.Gray,
+                    textAlign = TextAlign.End
+                )
+            }
+        }
         
-        Text(
-            text = "${flightBooking.origin} → ${flightBooking.destination}",
-            fontSize = 12.sp,
-            color = Color.Gray
-        )
+        Spacer(modifier = Modifier.height(8.dp))
         
-        Text(
-            text = "Salida: ${flightBooking.departureTime}",
-            fontSize = 12.sp,
-            color = Color.Gray
-        )
+        Divider()
+        
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column {
+                Text(
+                    text = "Aerolínea",
+                    fontSize = 11.sp,
+                    color = Color.Gray
+                )
+                Text(
+                    text = "${flightBooking.airline} ${flightBooking.flightNumber}",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = Color.Black
+                )
+            }
+            
+            Column(horizontalAlignment = Alignment.End) {
+                Text(
+                    text = "Salida",
+                    fontSize = 11.sp,
+                    color = Color.Gray
+                )
+                Text(
+                    text = flightBooking.departureTime,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = Color.Black
+                )
+            }
+        }
+        
+        if (flightBooking.arrivalTime.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(4.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                Text(
+                    text = "Llegada: ${flightBooking.arrivalTime}",
+                    fontSize = 11.sp,
+                    color = Color.Gray
+                )
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "${flightBooking.numPassengers} pasajero(s)",
+                fontSize = 11.sp,
+                color = Color.Gray
+            )
+            
+            if (flightBooking.seatNumbers.isNotEmpty()) {
+                Text(
+                    text = "Asientos: ${flightBooking.seatNumbers}",
+                    fontSize = 11.sp,
+                    color = Color.Gray
+                )
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        Divider()
+        
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "Total",
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Black
+            )
+            Text(
+                text = "S/ ${flightBooking.totalPrice}",
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFFE53E3E)
+            )
+        }
     }
 }
 
@@ -679,18 +999,36 @@ data class EmergencyContact(
     val phone: String
 )
 
+// RF-090: Datos completos de hotel booking
 data class HotelBooking(
     val hotelName: String,
+    val destination: String, // departamento
     val checkInDate: String,
-    val checkOutDate: String
+    val checkOutDate: String,
+    val numRooms: Int,
+    val roomType: String,
+    val totalNights: Int,
+    val pricePerNight: String,
+    val totalPrice: String,
+    val confirmationNumber: String
 )
 
+// RF-091: Datos completos de flight booking
 data class FlightBooking(
+    val bookingType: String, // "outbound" o "return"
     val airline: String,
     val flightNumber: String,
     val origin: String,
+    val originAirport: String,
     val destination: String,
-    val departureTime: String
+    val destinationAirport: String,
+    val departureTime: String,
+    val arrivalTime: String,
+    val numPassengers: Int,
+    val seatNumbers: String,
+    val pricePerPerson: String,
+    val totalPrice: String,
+    val pnrNumber: String
 )
 
 fun getSampleReservation(): ReservationDetail {
@@ -751,15 +1089,31 @@ fun getSampleReservation(): ReservationDetail {
         ),
         hotelBooking = HotelBooking(
             hotelName = "Hotel San Blas",
+            destination = "Cusco",
             checkInDate = "14 dic. 2025",
-            checkOutDate = "17 dic. 2025"
+            checkOutDate = "17 dic. 2025",
+            numRooms = 1,
+            roomType = "Doble",
+            totalNights = 3,
+            pricePerNight = "150.00",
+            totalPrice = "450.00",
+            confirmationNumber = "HOTEL-123456"
         ),
         flightBooking = FlightBooking(
+            bookingType = "outbound",
             airline = "LATAM Perú",
             flightNumber = "LA 2025",
             origin = "Lima",
+            originAirport = "Aeropuerto Internacional Jorge Chávez",
             destination = "Cusco",
-            departureTime = "08:30"
+            destinationAirport = "Aeropuerto Internacional Alejandro Velasco Astete",
+            departureTime = "08:30",
+            arrivalTime = "10:00",
+            numPassengers = 2,
+            seatNumbers = "12A, 12B",
+            pricePerPerson = "350.00",
+            totalPrice = "700.00",
+            pnrNumber = "ABC123"
         )
     )
 }

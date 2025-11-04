@@ -62,12 +62,12 @@ fun HomeScreen(
             AppDrawerContent(
                 userName = userName,
                 onCloseDrawer = { scope.launch { drawerState.close() } },
-                onNavigateToFavorites = { navController.navigate(Routes.Profile.route) },
+                onNavigateToFavorites = { navController.navigate(Routes.Wishlist.route) },
                 onNavigateToHotels = { navController.navigate(Routes.HotelsTest.route) },
                 onNavigateToFlights = { navController.navigate(Routes.FlightsTest.route) },
                 onNavigateToActivities = { navController.navigate(Routes.ActivitiesList.route) },
                 onNavigateToCoupons = { navController.navigate(Routes.PromotionsList.route) },
-                onNavigateToMessages = { navController.navigate(Routes.InquiriesTest.route) },
+                onNavigateToMessages = { navController.navigate(Routes.MyQueries.route) },
                 onNavigateToPeruInfo = { },
                 onNavigateToSettings = { navController.navigate(Routes.Profile.route) },
                 onNavigateToSupport = { },
@@ -82,7 +82,7 @@ fun HomeScreen(
                     onInicioClick = { },
                     onDestinosClick = { navController.navigate(Routes.DestinationsTest.route) },
                     onPaquetesClick = { navController.navigate(Routes.PackagesTest.route) },
-                    onReservasClick = { navController.navigate(Routes.BookingsList.route) },
+                    onReservasClick = { navController.navigate(Routes.MyReservations.route) },
                     onPerfilClick = { navController.navigate(Routes.Profile.route) }
                 )
             }

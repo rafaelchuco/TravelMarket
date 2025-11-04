@@ -1,207 +1,174 @@
 package com.example.travelmarket.ui.customer
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import coil.compose.AsyncImage
-import com.example.travelmarket.ui.viewmodels.PackagesViewModel
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import com.example.travelmarket.core.network.NetworkResult
+import com.example.travelmarket.logic.domain.models.WishlistItem
+import com.example.travelmarket.logic.viewmodels.wishlist.WishlistViewModel
+import com.example.travelmarket.ui.components.EmptyState
+import com.example.travelmarket.ui.components.PackageCard
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WishlistScreen(
-    viewModel: PackagesViewModel = viewModel(),
+    navController: NavController? = null,
+    viewModel: WishlistViewModel = hiltViewModel(),
     onViewDetails: (String) -> Unit = {},
     onBookNow: (String) -> Unit = {}
 ) {
-    val packages by viewModel.packages.collectAsState()
+    val wishlistState by viewModel.wishlistState.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
+
     var selectedFilter by remember { mutableStateOf("Todos") }
-    
-    // Convertir Package a WishlistItem para mantener compatibilidad
-    val wishlistItems = packages.map { packageItem ->
-        WishlistItem(
-            id = packageItem.id.toString(),
-            title = packageItem.title,
-            location = "Ubicación", // TODO: Obtener de packageItem
-            price = "S/ ${packageItem.price.toInt()}",
-            duration = "${packageItem.durationDays} día(s)",
-            rating = 4.5,
-            imageUrl = packageItem.imageUrl,
-            region = when ((packageItem.destinationId ?: 0L).toInt() % 3) {
-                0 -> "Costa"
-                1 -> "Sierra"
-                else -> "Selva"
-            }
-        )
+    val filters = listOf("Todos", "Costa", "Sierra", "Selva")
+
+    LaunchedEffect(Unit) {
+        viewModel.loadWishlist()
     }
-    
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)
-    ) {
-        // Header
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color(0xFFE53E3E))
-                .padding(16.dp)
-        ) {
-            Text(
-                text = "Mi Wishlist",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Mi Wishlist") },
+                navigationIcon = {
+                    IconButton(onClick = { navController?.popBackStack() }) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Atrás")
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color(0xFFE53E3E),
+                    titleContentColor = Color.White,
+                    navigationIconContentColor = Color.White
+                )
             )
         }
-        
-        // Filtros Costa / Sierra / Selva
-        Row(
+    ) { paddingValues ->
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                .fillMaxSize()
+                .padding(paddingValues)
+                .background(Color.White)
         ) {
-            val filters = listOf("Todos", "Costa", "Sierra", "Selva")
-            filters.forEach { label ->
-                FilterChip(
-                    selected = selectedFilter == label,
-                    onClick = { selectedFilter = label },
-                    label = { Text(label) }
-                )
-            }
-        }
-        
-        // Mostrar estado de carga o error
-        if (isLoading) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
+            // Filtros por región
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                CircularProgressIndicator()
-            }
-        } else if (error != null) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "Error al cargar datos: $error",
-                        color = Color.Red,
-                        modifier = Modifier.padding(16.dp)
-                    )
-                    Button(
-                        onClick = { viewModel.loadPackages() },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFFE53E3E)
+                filters.forEach { filter ->
+                    FilterChip(
+                        selected = selectedFilter == filter,
+                        onClick = { selectedFilter = filter },
+                        label = { Text(filter) },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = Color(0xFFE53E3E),
+                            selectedLabelColor = Color.White
                         )
-                    ) {
-                        Text("Reintentar")
-                    }
+                    )
                 }
             }
-        } else if (wishlistItems.isEmpty()) {
-            // Empty state
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(32.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.FavoriteBorder,
-                    contentDescription = "Wishlist vacía",
-                    modifier = Modifier.size(64.dp),
-                    tint = Color.Gray
-                )
-                
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                Text(
-                    text = "Tu wishlist está vacía",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Gray
-                )
-                
-                Text(
-                    text = "Explora nuestros paquetes y guarda tus favoritos",
-                    fontSize = 14.sp,
-                    color = Color.Gray,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
-            }
-        } else {
-            val sections = listOf("Costa", "Sierra", "Selva")
-            val filteredSections = if (selectedFilter == "Todos") sections else listOf(selectedFilter)
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp)
-            ) {
-                items(filteredSections) { section ->
-                    val itemsInSection = wishlistItems.filter { it.region == section }
-                    if (itemsInSection.isNotEmpty()) {
-                        Text(
-                            text = section,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.Black,
-                            modifier = Modifier
-                                .padding(top = 8.dp, bottom = 8.dp)
+
+            // Contenido
+            when (val state = wishlistState) {
+                is NetworkResult.Loading -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+
+                is NetworkResult.Success -> {
+                    val wishlistItems = state.data
+                    val filteredItems = if (selectedFilter == "Todos") {
+                        wishlistItems
+                    } else {
+                        wishlistItems.filter { 
+                            // Por ahora, como no tenemos región en el modelo, agrupamos todos
+                            // TODO: Agregar región al modelo cuando esté disponible en el backend
+                            true
+                        }
+                    }
+
+                    if (filteredItems.isEmpty()) {
+                        EmptyState(
+                            icon = Icons.Default.Favorite,
+                            title = "No hay favoritos",
+                            description = if (selectedFilter == "Todos") {
+                                "Tu lista de deseos está vacía. Explora paquetes y agrega tus favoritos."
+                            } else {
+                                "No hay favoritos en la región seleccionada."
+                            }
                         )
-                        LazyVerticalGrid(
-                            columns = GridCells.Fixed(2),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .heightIn(min = 0.dp),
-                            verticalArrangement = Arrangement.spacedBy(16.dp),
-                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    } else {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            items(itemsInSection) { item ->
+                            items(filteredItems, key = { it.id }) { item ->
                                 WishlistItemCard(
                                     item = item,
-                                    onRemoveFromWishlist = { },
-                                    onViewDetails = { onViewDetails(item.id) },
-                                    onBookNow = { onBookNow(item.id) }
+                                    onRemove = { viewModel.removeFromWishlist(item.id) },
+                                    onViewDetails = { onViewDetails(item.packageId.toString()) },
+                                    onBookNow = { onBookNow(item.packageId.toString()) }
                                 )
                             }
                         }
-                        Spacer(Modifier.height(8.dp))
                     }
                 }
-                item { Spacer(Modifier.height(16.dp)) }
+
+                is NetworkResult.Error -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.padding(16.dp)
+                        ) {
+                            Text(
+                                text = "Error al cargar wishlist",
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.Red
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = error ?: state.message ?: "Error desconocido",
+                                fontSize = 14.sp,
+                                color = Color.Gray,
+                                textAlign = TextAlign.Center
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Button(onClick = { viewModel.loadWishlist() }) {
+                                Text("Reintentar")
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -210,246 +177,74 @@ fun WishlistScreen(
 @Composable
 fun WishlistItemCard(
     item: WishlistItem,
-    onRemoveFromWishlist: () -> Unit,
+    onRemove: () -> Unit,
     onViewDetails: () -> Unit,
     onBookNow: () -> Unit
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(280.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+            .clickable { onViewDetails() },
         shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Column {
-            // Imagen del paquete
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(120.dp)
-            ) {
-                AsyncImage(
-                    model = item.imageUrl,
-                    contentDescription = item.title,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp)),
-                    contentScale = ContentScale.Crop
-                )
-                
-                // Botón de favorito
-                IconButton(
-                    onClick = onRemoveFromWishlist,
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(8.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Favorite,
-                        contentDescription = "Quitar de favoritos",
-                        tint = Color(0xFFE53E3E),
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-                
-                // Duración
-                Card(
-                    colors = CardDefaults.cardColors(containerColor = Color.Black.copy(alpha = 0.7f)),
-                    shape = RoundedCornerShape(8.dp),
-                    modifier = Modifier
-                        .align(Alignment.BottomStart)
-                        .padding(8.dp)
-                ) {
-                    Text(
-                        text = item.duration,
-                        fontSize = 10.sp,
-                        color = Color.White,
-                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                    )
-                }
-            }
-            
-            // Contenido de la card
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(12.dp)
+                modifier = Modifier.weight(1f)
             ) {
                 Text(
-                    text = item.title,
-                    fontSize = 14.sp,
+                    text = item.packageName,
+                    fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.Black,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
+                    color = Color.Black
                 )
-                
                 Spacer(modifier = Modifier.height(4.dp))
-                
                 Text(
-                    text = item.location,
+                    text = "S/ ${item.packagePrice}",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = Color(0xFFE53E3E)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Agregado el ${item.addedAt}",
                     fontSize = 12.sp,
                     color = Color.Gray
                 )
-                
-                Spacer(modifier = Modifier.height(8.dp))
-                
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+            }
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                OutlinedButton(
+                    onClick = onBookNow,
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = Color(0xFFE53E3E)
+                    )
                 ) {
-                    Text(
-                        text = item.price,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFFE53E3E)
-                    )
-                    
-                    Text(
-                        text = "${item.rating}★",
-                        fontSize = 12.sp,
-                        color = Color.Gray
-                    )
+                    Text("Reservar", fontSize = 12.sp)
                 }
                 
-                Spacer(modifier = Modifier.height(8.dp))
-                
-                // Botones de acción
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                IconButton(
+                    onClick = onRemove,
+                    modifier = Modifier.size(48.dp)
                 ) {
-                    OutlinedButton(
-                        onClick = onViewDetails,
-                        modifier = Modifier.weight(1f),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = Color(0xFFE53E3E)
-                        ),
-                        border = ButtonDefaults.outlinedButtonBorder.copy(
-                            brush = androidx.compose.ui.graphics.SolidColor(Color(0xFFE53E3E))
-                        )
-                    ) {
-                        Text(
-                            text = "Ver",
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
-                    
-                    Button(
-                        onClick = onBookNow,
-                        modifier = Modifier.weight(1f),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFFE53E3E)
-                        ),
-                        shape = RoundedCornerShape(8.dp)
-                    ) {
-                        Text(
-                            text = "Reservar",
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = Color.White
-                        )
-                    }
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Eliminar",
+                        tint = Color.Red,
+                        modifier = Modifier.size(24.dp)
+                    )
                 }
             }
         }
     }
 }
 
-data class WishlistItem(
-    val id: String,
-    val title: String,
-    val location: String,
-    val price: String,
-    val duration: String,
-    val rating: Double,
-    val imageUrl: String,
-    val region: String
-)
-
-fun getSampleWishlistItems(): List<WishlistItem> {
-    return listOf(
-        WishlistItem(
-            id = "1",
-            title = "Machu Picchu Full Day",
-            location = "Cusco, Perú",
-            price = "S/ 250",
-            duration = "1 día",
-            rating = 4.8,
-            imageUrl = "https://images.unsplash.com/photo-1587595431973-160d0d94add1?w=400"
-        ),
-        WishlistItem(
-            id = "2",
-            title = "Valle Sagrado + Ollantaytambo",
-            location = "Cusco, Perú",
-            price = "S/ 180",
-            duration = "1 día",
-            rating = 4.6,
-            imageUrl = "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400"
-        ),
-        WishlistItem(
-            id = "3",
-            title = "Montaña de Colores",
-            location = "Cusco, Perú",
-            price = "S/ 200",
-            duration = "1 día",
-            rating = 4.9,
-            imageUrl = "https://images.unsplash.com/photo-1551524164-6cf2ac5313c2?w=400"
-        ),
-        WishlistItem(
-            id = "4",
-            title = "Laguna Humantay",
-            location = "Cusco, Perú",
-            price = "S/ 150",
-            duration = "1 día",
-            rating = 4.7,
-            imageUrl = "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400"
-        ),
-        WishlistItem(
-            id = "5",
-            title = "City Tour Cusco",
-            location = "Cusco, Perú",
-            price = "S/ 120",
-            duration = "1 día",
-            rating = 4.5,
-            imageUrl = "https://images.unsplash.com/photo-1587595431973-160d0d94add1?w=400"
-        ),
-        WishlistItem(
-            id = "6",
-            title = "Salineras de Maras",
-            location = "Cusco, Perú",
-            price = "S/ 100",
-            duration = "1 día",
-            rating = 4.4,
-            imageUrl = "https://images.unsplash.com/photo-1551524164-6cf2ac5313c2?w=400"
-        )
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun WishlistScreenPreview() {
-    WishlistScreen()
-}
-
-@Preview(showBackground = true)
-@Composable
-fun WishlistItemCardPreview() {
-    WishlistItemCard(
-        item = WishlistItem(
-            id = "1",
-            title = "Machu Picchu Full Day",
-            location = "Cusco, Perú",
-            price = "S/ 250",
-            duration = "1 día",
-            rating = 4.8,
-            imageUrl = "https://images.unsplash.com/photo-1587595431973-160d0d94add1?w=400"
-        ),
-        onRemoveFromWishlist = { },
-        onViewDetails = { },
-        onBookNow = { }
-    )
-}

@@ -1,7 +1,7 @@
 package com.example.travelmarket.views.navigation
 
 sealed class Routes(val route: String) {
-    // ========== AUTH & BIENVENIDA ==========
+    // ========== AUTH & BIENVENIDA ===========
     object Welcome : Routes("welcome")  // ✅ NUEVA RUTA
     object Home : Routes("home")
     object Login : Routes("login")
@@ -59,4 +59,19 @@ sealed class Routes(val route: String) {
     object PromotionDetail : Routes("promotion_detail/{promotionId}") {
         fun createRoute(promotionId: Int) = "promotion_detail/$promotionId"
     }
+
+    // ========== CUSTOMER (Deivid) ==========
+    object Wishlist : Routes("wishlist")
+    object MyReservations : Routes("my_reservations")
+    object ReservationDetail : Routes("reservation_detail/{reservationId}") {
+        fun createRoute(reservationId: Long) = "reservation_detail/$reservationId"
+    }
+    object BookingFlow {
+        const val route = "booking_flow/{packageId}"
+        const val routeWithoutId = "booking_flow"
+        fun createRoute(packageId: Long = 0L) = "booking_flow/$packageId"
+    }
+    object ChangePassword : Routes("change_password")
+    object MyQueries : Routes("my_queries")
+    object NewQuery : Routes("new_query")
 }

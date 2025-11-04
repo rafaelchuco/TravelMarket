@@ -24,7 +24,9 @@ import androidx.compose.ui.unit.sp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyQueriesScreen() {
+fun MyQueriesScreen(
+    navController: androidx.navigation.NavController? = null
+) {
     var queries by remember { mutableStateOf(getSampleQueries()) }
     var selectedTab by remember { mutableStateOf(0) }
     val tabTitles = listOf("Próximas", "Pasadas", "Canceladas")
@@ -50,7 +52,7 @@ fun MyQueriesScreen() {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(
-                        onClick = { /* TODO: Navegar hacia atrás */ }
+                        onClick = { navController?.popBackStack() }
                     ) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
@@ -78,7 +80,7 @@ fun MyQueriesScreen() {
                 
                 // Botón Nueva Consulta
                 OutlinedButton(
-                    onClick = { /* TODO: Navegar a Nueva Consulta */ },
+                    onClick = { navController?.navigate(com.example.travelmarket.views.navigation.Routes.NewQuery.route) },
                     colors = ButtonDefaults.outlinedButtonColors(
                         contentColor = Color.White
                     ),
@@ -324,7 +326,9 @@ fun QueryCard(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NewQueryScreen() {
+fun NewQueryScreen(
+    navController: androidx.navigation.NavController? = null
+) {
     var fullName by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var phone by remember { mutableStateOf("") }
@@ -359,7 +363,7 @@ fun NewQueryScreen() {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(
-                        onClick = { /* TODO: Navegar hacia atrás */ }
+                        onClick = { navController?.popBackStack() }
                     ) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,

@@ -3,6 +3,7 @@ package com.example.travelmarket.logic.data.repositories
 import com.example.travelmarket.core.base.BaseRepository
 import com.example.travelmarket.core.network.NetworkResult
 import com.example.travelmarket.core.network.PaginatedResponse
+import com.example.travelmarket.core.network.getItems
 import com.example.travelmarket.logic.data.mappers.ActivityMapper
 import com.example.travelmarket.logic.data.models.response.activities.ActivityResponse
 import com.example.travelmarket.logic.data.remote.activities.ActivitiesApiService
@@ -10,11 +11,12 @@ import com.example.travelmarket.logic.domain.models.Activity
 import com.example.travelmarket.logic.domain.repositories.ActivitiesRepository
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import javax.inject.Inject
 
-class ActivitiesRepositoryImpl(
-    private val apiService: ActivitiesApiService,
-    private val mapper: ActivityMapper = ActivityMapper
+class ActivitiesRepositoryImpl @Inject constructor(
+    private val apiService: ActivitiesApiService
 ) : BaseRepository(), ActivitiesRepository {
+    private val mapper = ActivityMapper
 
     @Suppress("UNCHECKED_CAST", "USELESS_IS_CHECK")
     override suspend fun getActivities(

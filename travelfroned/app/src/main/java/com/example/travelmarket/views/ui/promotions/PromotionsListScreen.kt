@@ -17,15 +17,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.travelmarket.core.network.NetworkResult
+import com.example.travelmarket.core.network.getItems
 import com.example.travelmarket.logic.viewmodels.promotions.PromotionsListViewModel
-import org.koin.androidx.compose.koinViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PromotionsListScreen(
     navController: NavHostController,
     modifier: Modifier = Modifier,
-    viewModel: PromotionsListViewModel = koinViewModel()
+    viewModel: PromotionsListViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -75,7 +76,7 @@ fun PromotionsListScreen(
                 }
 
                 is NetworkResult.Success -> {
-                    val promotions = state.data.getItems()
+                    val promotions = state.data.results
 
                     Column(
                         modifier = Modifier

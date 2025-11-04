@@ -6,12 +6,15 @@ import com.example.travelmarket.core.network.NetworkResult
 import com.example.travelmarket.logic.data.models.response.auth.LoginResponse
 import com.example.travelmarket.logic.domain.usecases.auth.LoginParams
 import com.example.travelmarket.logic.domain.usecases.auth.LoginUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class LoginViewModel(
+@HiltViewModel
+class LoginViewModel @Inject constructor(
     private val loginUseCase: LoginUseCase
 ) : ViewModel() {
 

@@ -7,11 +7,12 @@ import com.example.travelmarket.logic.data.mappers.PromotionMapper
 import com.example.travelmarket.logic.data.remote.promotions.PromotionsApiService
 import com.example.travelmarket.logic.domain.models.Promotion
 import com.example.travelmarket.logic.domain.repositories.PromotionsRepository
+import javax.inject.Inject
 
-class PromotionsRepositoryImpl(
-    private val apiService: PromotionsApiService,
-    private val mapper: PromotionMapper = PromotionMapper
+class PromotionsRepositoryImpl @Inject constructor(
+    private val apiService: PromotionsApiService
 ) : BaseRepository(), PromotionsRepository {
+    private val mapper = PromotionMapper
 
     override suspend fun getPromotions(
         search: String?,

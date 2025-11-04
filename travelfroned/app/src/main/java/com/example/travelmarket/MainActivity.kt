@@ -12,10 +12,16 @@ import androidx.navigation.compose.rememberNavController
 import com.example.travelmarket.ui.theme.TravelMarketTheme
 import com.example.travelmarket.views.navigation.NavGraph
 import com.example.travelmarket.views.navigation.Routes
+import com.example.travelmarket.core.storage.TokenManager
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    
+    @Inject
+    lateinit var tokenManager: TokenManager
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -25,6 +31,7 @@ class MainActivity : ComponentActivity() {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     NavGraph(
                         navController = navController,
+                        tokenManager = tokenManager,
                         startDestination = Routes.Welcome.route,
                         modifier = Modifier.padding(innerPadding)
                     )

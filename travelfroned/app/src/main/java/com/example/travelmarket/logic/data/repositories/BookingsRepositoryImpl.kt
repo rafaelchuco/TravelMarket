@@ -9,8 +9,9 @@ import com.example.travelmarket.logic.data.remote.bookings.BookingsApiService
 import com.example.travelmarket.logic.domain.models.Booking
 import com.example.travelmarket.logic.domain.models.BookingDetail
 import com.example.travelmarket.logic.domain.repositories.BookingsRepository
+import javax.inject.Inject
 
-class BookingsRepositoryImpl(
+class BookingsRepositoryImpl @Inject constructor(
     private val apiService: BookingsApiService
 ) : BaseRepository(), BookingsRepository {
 

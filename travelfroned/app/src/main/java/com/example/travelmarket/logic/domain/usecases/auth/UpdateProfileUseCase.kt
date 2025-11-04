@@ -4,6 +4,7 @@ import com.example.travelmarket.core.base.BaseUseCaseWithParams
 import com.example.travelmarket.core.network.NetworkResult
 import com.example.travelmarket.logic.domain.models.User
 import com.example.travelmarket.logic.domain.repositories.AuthRepository
+import javax.inject.Inject
 
 data class UpdateProfileParams(
     val firstName: String?,
@@ -16,7 +17,7 @@ data class UpdateProfileParams(
     val country: String?
 )
 
-class UpdateProfileUseCase(
+class UpdateProfileUseCase @Inject constructor(
     private val repository: AuthRepository
 ) : BaseUseCaseWithParams<UpdateProfileParams, NetworkResult<User>>() {
 

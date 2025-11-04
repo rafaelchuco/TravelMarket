@@ -5,12 +5,15 @@ import androidx.lifecycle.viewModelScope
 import com.example.travelmarket.core.network.NetworkResult
 import com.example.travelmarket.logic.domain.models.Booking
 import com.example.travelmarket.logic.domain.usecases.bookings.GetMyBookingsUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class MyBookingsViewModel(
+@HiltViewModel
+class MyBookingsViewModel @Inject constructor(
     private val getMyBookingsUseCase: GetMyBookingsUseCase
 ) : ViewModel() {
 

@@ -23,25 +23,44 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import com.example.travelmarket.ui.viewmodels.BookingsViewModel
-import com.example.travelmarket.domain.models.Booking
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.travelmarket.logic.viewmodels.bookings.MyBookingsViewModel
+import com.example.travelmarket.logic.domain.models.Booking
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReservationsScreen(
-    viewModel: BookingsViewModel = viewModel()
+    navController: androidx.navigation.NavController? = null,
+    viewModel: MyBookingsViewModel = hiltViewModel()
 ) {
     var selectedTab by remember { mutableStateOf(0) }
     val tabTitles = listOf("Próximas", "Pasadas", "Canceladas")
     
-    val bookings by viewModel.bookings.collectAsState()
-    val isLoading by viewModel.isLoading.collectAsState()
-    val error by viewModel.error.collectAsState()
+    val bookingsState by viewModel.myBookingsState.collectAsState()
+    
+    val bookings = when (val state = bookingsState) {
+        is com.example.travelmarket.core.network.NetworkResult.Success -> state.data
+        is com.example.travelmarket.core.network.NetworkResult.Loading -> emptyList()
+        else -> emptyList()
+    }
+    
+    val isLoading = bookingsState is com.example.travelmarket.core.network.NetworkResult.Loading
+    
+    // Guardar el estado en una variable local para evitar smart cast issues
+    val currentState = bookingsState
+    val error = when (currentState) {
+        is com.example.travelmarket.core.network.NetworkResult.Error -> currentState.message
+        else -> null
+    }
     
     // Calcular contadores dinámicos
     val upcomingCount = bookings.count { it.status == "confirmed" || it.status == "pending" }
     val pastCount = bookings.count { it.status == "completed" || it.status == "finished" }
     val cancelledCount = bookings.count { it.status == "cancelled" || it.status == "canceled" }
+    
+    LaunchedEffect(Unit) {
+        viewModel.getMyBookings()
+    }
     
     Column(
         modifier = Modifier
@@ -132,7 +151,7 @@ fun ReservationsScreen(
                         modifier = Modifier.padding(16.dp)
                     )
                     Button(
-                        onClick = { viewModel.loadBookings() },
+                        onClick = { viewModel.getMyBookings() },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFFE53E3E)
                         )
@@ -144,16 +163,19 @@ fun ReservationsScreen(
         } else {
             // Content based on selected tab
             when (selectedTab) {
-                0 -> UpcomingReservations(bookings)
-                1 -> PastReservations(bookings)
-                2 -> CancelledReservations(bookings)
+                0 -> UpcomingReservations(bookings, navController)
+                1 -> PastReservations(bookings, navController)
+                2 -> CancelledReservations(bookings, navController)
             }
         }
     }
 }
 
 @Composable
-fun UpcomingReservations(bookings: List<Booking>) {
+fun UpcomingReservations(
+    bookings: List<Booking>,
+    navController: androidx.navigation.NavController? = null
+) {
     val upcomingBookings = bookings.filter {
         it.status == "confirmed" || it.status == "pending"
     }
@@ -185,7 +207,11 @@ fun UpcomingReservations(bookings: List<Booking>) {
                     status = booking.status,
                     statusColor = Color(0xFF10B981),
                     price = booking.totalAmount,
-                    onViewDetails = { /* TODO: Ver detalles */ },
+                    onViewDetails = { 
+                        navController?.navigate(
+                            com.example.travelmarket.views.navigation.Routes.ReservationDetail.createRoute(booking.id.toLong())
+                        )
+                    },
                     onCancel = { /* TODO: Cancelar reserva */ }
                 )
                 Spacer(modifier = Modifier.height(16.dp))
@@ -195,7 +221,10 @@ fun UpcomingReservations(bookings: List<Booking>) {
 }
 
 @Composable
-fun PastReservations(bookings: List<Booking>) {
+fun PastReservations(
+    bookings: List<Booking>,
+    navController: androidx.navigation.NavController? = null
+) {
     val pastBookings = bookings.filter {
         it.status == "completed" || it.status == "finished"
     }
@@ -227,7 +256,11 @@ fun PastReservations(bookings: List<Booking>) {
                     status = "Completada",
                     statusColor = Color(0xFF6B7280),
                     price = booking.totalAmount,
-                    onViewDetails = { /* TODO: Ver detalles */ },
+                    onViewDetails = { 
+                        navController?.navigate(
+                            com.example.travelmarket.views.navigation.Routes.ReservationDetail.createRoute(booking.id.toLong())
+                        )
+                    },
                     onCancel = { /* TODO: Cancelar reserva */ }
                 )
                 Spacer(modifier = Modifier.height(16.dp))
@@ -237,7 +270,10 @@ fun PastReservations(bookings: List<Booking>) {
 }
 
 @Composable
-fun CancelledReservations(bookings: List<Booking>) {
+fun CancelledReservations(
+    bookings: List<Booking>,
+    navController: androidx.navigation.NavController? = null
+) {
     val cancelledBookings = bookings.filter {
         it.status == "cancelled" || it.status == "canceled"
     }
@@ -269,7 +305,11 @@ fun CancelledReservations(bookings: List<Booking>) {
                     status = "Cancelada",
                     statusColor = Color(0xFFEF4444),
                     price = booking.totalAmount,
-                    onViewDetails = { /* TODO: Ver detalles */ },
+                    onViewDetails = { 
+                        navController?.navigate(
+                            com.example.travelmarket.views.navigation.Routes.ReservationDetail.createRoute(booking.id.toLong())
+                        )
+                    },
                     onCancel = { /* TODO: Cancelar reserva */ }
                 )
                 Spacer(modifier = Modifier.height(16.dp))

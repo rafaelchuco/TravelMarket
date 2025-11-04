@@ -25,7 +25,9 @@ import androidx.compose.ui.tooling.preview.Preview
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChangePasswordScreen() {
+fun ChangePasswordScreen(
+    navController: androidx.navigation.NavController? = null
+) {
     var currentPassword by remember { mutableStateOf("") }
     var newPassword by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
@@ -49,7 +51,7 @@ fun ChangePasswordScreen() {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(
-                    onClick = { /* TODO: Navegar hacia atrás */ }
+                    onClick = { navController?.popBackStack() }
                 ) {
                     Icon(
                         imageVector = Icons.Default.ArrowBack,
@@ -198,7 +200,7 @@ fun ChangePasswordScreen() {
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 OutlinedButton(
-                    onClick = { /* TODO: Cancelar cambio */ },
+                    onClick = { navController?.popBackStack() },
                     modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.outlinedButtonColors(
                         contentColor = Color(0xFFE53E3E)

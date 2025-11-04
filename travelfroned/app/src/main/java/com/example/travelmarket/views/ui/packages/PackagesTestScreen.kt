@@ -192,18 +192,12 @@ fun PackagesTestScreen(
                             PackageCard(
                                 packageItem = pkg,
                                 onReserve = {
-                                    bookingVm.createBooking(
-                                        packageId = pkg.id.toInt(),  // ✅ CONVERTIR Long a Int
-                                        travelDate = "2025-12-25",
-                                        returnDate = "2025-12-30",
-                                        numAdults = 2,
-                                        numChildren = 0,
-                                        numInfants = 0,
-                                        totalAmount = pkg.price * 2,
-                                        specialRequests = "Reserva desde app móvil"
+                                    // Navegar a BookingFlow con el packageId
+                                    navController.navigate(
+                                        com.example.travelmarket.views.navigation.Routes.BookingFlow.createRoute(pkg.id)
                                     )
                                 },
-                                isLoading = createBookingState is NetworkResult.Loading
+                                isLoading = false
                             )
                         }
                     }

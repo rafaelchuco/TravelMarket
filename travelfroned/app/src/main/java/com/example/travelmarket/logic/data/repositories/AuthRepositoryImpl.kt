@@ -12,8 +12,9 @@ import com.example.travelmarket.logic.data.models.response.auth.RefreshTokenResp
 import com.example.travelmarket.logic.data.remote.auth.AuthApiService
 import com.example.travelmarket.logic.domain.models.User
 import com.example.travelmarket.logic.domain.repositories.AuthRepository
+import javax.inject.Inject
 
-class AuthRepositoryImpl(
+class AuthRepositoryImpl @Inject constructor(
     private val apiService: AuthApiService
 ) : BaseRepository(), AuthRepository {
 

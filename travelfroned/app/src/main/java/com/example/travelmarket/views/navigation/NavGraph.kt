@@ -33,10 +33,19 @@ import com.example.travelmarket.views.ui.test.HotelsTestScreen
 import com.example.travelmarket.views.ui.test.InquiriesTestScreen
 import com.example.travelmarket.views.ui.test.PackagesTestScreen
 import com.example.travelmarket.views.ui.welcome.WelcomeScreen  // ✅ IMPORTAR
+import com.example.travelmarket.ui.customer.WishlistScreen
+import com.example.travelmarket.ui.customer.ReservationsScreen
+import com.example.travelmarket.ui.customer.ReservationDetailScreen
+import com.example.travelmarket.ui.customer.BookingFlowScreen
+import com.example.travelmarket.ui.customer.ChangePasswordScreen
+import com.example.travelmarket.ui.customer.MyQueriesScreen
+import com.example.travelmarket.ui.customer.NewQueryScreen
+import com.example.travelmarket.core.storage.TokenManager
 
 @Composable
 fun NavGraph(
     navController: NavHostController,
+    tokenManager: TokenManager,
     startDestination: String = Routes.Welcome.route,  // ✅ CAMBIAR A WELCOME
     modifier: Modifier = Modifier
 ) {
@@ -67,7 +76,10 @@ fun NavGraph(
         }
 
         composable(Routes.Login.route) {
-            LoginScreen(navController = navController)
+            LoginScreen(
+                navController = navController,
+                tokenManager = tokenManager
+            )
         }
 
         composable(Routes.Register.route) {
@@ -110,7 +122,8 @@ fun NavGraph(
 
         composable(Routes.FlightsTest.route) {
             FlightsTestScreen(
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                navController = navController
             )
         }
 
@@ -236,6 +249,62 @@ fun NavGraph(
         ) { backStackEntry ->
             val promotionId = backStackEntry.arguments?.getInt("promotionId") ?: 0
             PromotionDetailScreen(promotionId = promotionId)
+        }
+
+        // ========== CUSTOMER (Deivid) ==========
+        composable(Routes.Wishlist.route) {
+            WishlistScreen(
+                navController = navController,
+                onViewDetails = { packageId -> 
+                    // TODO: Navegar a detalle de paquete cuando esté disponible
+                    // navController.navigate(Routes.PackageDetail.createRoute(packageId.toInt()))
+                },
+                onBookNow = { packageId -> 
+                    navController.navigate(Routes.BookingFlow.route) 
+                }
+            )
+        }
+
+        composable(Routes.MyReservations.route) {
+            ReservationsScreen(navController = navController)
+        }
+
+        composable(
+            route = Routes.ReservationDetail.route,
+            arguments = listOf(
+                navArgument("reservationId") { type = NavType.LongType }
+            )
+        ) { backStackEntry ->
+            val reservationId = backStackEntry.arguments?.getLong("reservationId") ?: 0L
+            ReservationDetailScreen(
+                reservationId = reservationId,
+                navController = navController
+            )
+        }
+
+        composable(
+            route = Routes.BookingFlow.route,
+            arguments = listOf(
+                navArgument("packageId") { 
+                    type = NavType.LongType
+                    defaultValue = 0L
+                }
+            )
+        ) { backStackEntry ->
+            val packageId = backStackEntry.arguments?.getLong("packageId") ?: 0L
+            BookingFlowScreen(
+                packageId = if (packageId > 0) packageId else null,
+                navController = navController
+            )
+        }
+        composable(Routes.ChangePassword.route) { 
+            ChangePasswordScreen(navController = navController) 
+        }
+        composable(Routes.MyQueries.route) { 
+            MyQueriesScreen(navController = navController) 
+        }
+        composable(Routes.NewQuery.route) { 
+            NewQueryScreen(navController = navController) 
         }
     }
 }

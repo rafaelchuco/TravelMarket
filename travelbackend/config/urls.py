@@ -32,6 +32,7 @@ urlpatterns = [
     path('api/bookings/', include('applications.bookings.urls')),
     path('api/reviews/', include('applications.reviews.urls')),
     path('api/promotions/', include('applications.promotions.urls')),
+    path('api/wishlist/', include('applications.promotions.urls')),  # Wishlist endpoint
     path('api/inquiries/', include('applications.inquiries.urls')),
 
     # Swagger/OpenAPI

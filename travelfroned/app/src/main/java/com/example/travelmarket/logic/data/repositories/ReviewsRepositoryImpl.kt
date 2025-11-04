@@ -2,6 +2,7 @@ package com.example.travelmarket.logic.data.repositories
 
 import com.example.travelmarket.core.base.BaseRepository
 import com.example.travelmarket.core.network.NetworkResult
+import com.example.travelmarket.core.network.getItems
 import com.example.travelmarket.logic.data.mappers.ReviewMapper
 import com.example.travelmarket.logic.data.models.request.reviews.CreateReviewRequest
 import com.example.travelmarket.logic.data.models.request.reviews.UpdateReviewRequest
@@ -9,8 +10,9 @@ import com.example.travelmarket.logic.data.models.response.bookings.BookingSimpl
 import com.example.travelmarket.logic.data.remote.reviews.ReviewsApiService
 import com.example.travelmarket.logic.domain.models.Review
 import com.example.travelmarket.logic.domain.repositories.ReviewsRepository
+import javax.inject.Inject
 
-class ReviewsRepositoryImpl(
+class ReviewsRepositoryImpl @Inject constructor(
     private val apiService: ReviewsApiService
 ) : BaseRepository(), ReviewsRepository {
 

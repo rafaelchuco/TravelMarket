@@ -1,0 +1,52 @@
+warning: in the working copy of 'travelfroned/app/src/main/java/com/example/travelmarket/MainActivity.kt', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'travelfroned/app/src/main/java/com/example/travelmarket/logic/data/remote/destinations/DestinationsApiService.kt', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'travelfroned/app/src/main/java/com/example/travelmarket/logic/data/repositories/ActivitiesRepositoryImpl.kt', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'travelfroned/app/src/main/java/com/example/travelmarket/logic/data/repositories/AuthRepositoryImpl.kt', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'travelfroned/app/src/main/java/com/example/travelmarket/logic/data/repositories/BookingsRepositoryImpl.kt', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'travelfroned/app/src/main/java/com/example/travelmarket/logic/data/repositories/DestinationsRepositoryImpl.kt', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'travelfroned/app/src/main/java/com/example/travelmarket/logic/domain/usecases/auth/GetProfileUseCase.kt', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'travelfroned/app/src/main/java/com/example/travelmarket/logic/domain/usecases/auth/LoginUseCase.kt', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'travelfroned/app/src/main/java/com/example/travelmarket/logic/domain/usecases/auth/UpdateProfileUseCase.kt', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'travelfroned/app/src/main/java/com/example/travelmarket/logic/domain/usecases/bookings/GetMyBookingsUseCase.kt', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'travelfroned/app/src/main/java/com/example/travelmarket/logic/viewmodels/auth/LoginViewModel.kt', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'travelfroned/app/src/main/java/com/example/travelmarket/logic/viewmodels/auth/ProfileViewModel.kt', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'travelfroned/app/src/main/java/com/example/travelmarket/logic/viewmodels/bookings/CreateBookingViewModel.kt', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'travelfroned/app/src/main/java/com/example/travelmarket/logic/viewmodels/bookings/MyBookingsViewModel.kt', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'travelfroned/app/src/main/java/com/example/travelmarket/ui/customer/WishlistScreen.kt', LF will be replaced by CRLF the next time Git touches it
+travelbackend/applications/promotions/urls.py
+travelbackend/config/urls.py
+travelfroned/app/build.gradle.kts
+travelfroned/app/src/main/java/com/example/travelmarket/MainActivity.kt
+travelfroned/app/src/main/java/com/example/travelmarket/TravelMarketApplication.kt
+travelfroned/app/src/main/java/com/example/travelmarket/logic/data/remote/destinations/DestinationsApiService.kt
+travelfroned/app/src/main/java/com/example/travelmarket/logic/data/repositories/ActivitiesRepositoryImpl.kt
+travelfroned/app/src/main/java/com/example/travelmarket/logic/data/repositories/AuthRepositoryImpl.kt
+travelfroned/app/src/main/java/com/example/travelmarket/logic/data/repositories/BookingsRepositoryImpl.kt
+travelfroned/app/src/main/java/com/example/travelmarket/logic/data/repositories/DestinationsRepositoryImpl.kt
+travelfroned/app/src/main/java/com/example/travelmarket/logic/data/repositories/PromotionsRepositoryImpl.kt
+travelfroned/app/src/main/java/com/example/travelmarket/logic/data/repositories/ReviewsRepositoryImpl.kt
+travelfroned/app/src/main/java/com/example/travelmarket/logic/domain/usecases/auth/GetProfileUseCase.kt
+travelfroned/app/src/main/java/com/example/travelmarket/logic/domain/usecases/auth/LoginUseCase.kt
+travelfroned/app/src/main/java/com/example/travelmarket/logic/domain/usecases/auth/UpdateProfileUseCase.kt
+travelfroned/app/src/main/java/com/example/travelmarket/logic/domain/usecases/bookings/GetBookingByIdUseCase.kt
+travelfroned/app/src/main/java/com/example/travelmarket/logic/domain/usecases/bookings/GetMyBookingsUseCase.kt
+travelfroned/app/src/main/java/com/example/travelmarket/logic/viewmodels/auth/LoginViewModel.kt
+travelfroned/app/src/main/java/com/example/travelmarket/logic/viewmodels/auth/ProfileViewModel.kt
+travelfroned/app/src/main/java/com/example/travelmarket/logic/viewmodels/bookings/BookingDetailViewModel.kt
+travelfroned/app/src/main/java/com/example/travelmarket/logic/viewmodels/bookings/CreateBookingViewModel.kt
+travelfroned/app/src/main/java/com/example/travelmarket/logic/viewmodels/bookings/MyBookingsViewModel.kt
+travelfroned/app/src/main/java/com/example/travelmarket/ui/customer/BookingFlowScreen.kt
+travelfroned/app/src/main/java/com/example/travelmarket/ui/customer/ChangePasswordScreen.kt
+travelfroned/app/src/main/java/com/example/travelmarket/ui/customer/QueriesScreen.kt
+travelfroned/app/src/main/java/com/example/travelmarket/ui/customer/ReservationDetailScreen.kt
+travelfroned/app/src/main/java/com/example/travelmarket/ui/customer/ReservationsScreen.kt
+travelfroned/app/src/main/java/com/example/travelmarket/ui/customer/WishlistScreen.kt
+travelfroned/app/src/main/java/com/example/travelmarket/views/navigation/NavGraph.kt
+travelfroned/app/src/main/java/com/example/travelmarket/views/navigation/Routes.kt
+travelfroned/app/src/main/java/com/example/travelmarket/views/ui/auth/login/LoginScreen.kt
+travelfroned/app/src/main/java/com/example/travelmarket/views/ui/auth/profile/ProfileScreen.kt
+travelfroned/app/src/main/java/com/example/travelmarket/views/ui/bookings/list/BookingsListScreen.kt
+travelfroned/app/src/main/java/com/example/travelmarket/views/ui/flights/FlightsTestScreen.kt
+travelfroned/app/src/main/java/com/example/travelmarket/views/ui/home/HomeScreen.kt
+travelfroned/app/src/main/java/com/example/travelmarket/views/ui/packages/PackagesTestScreen.kt
+travelfroned/app/src/main/java/com/example/travelmarket/views/ui/promotions/PromotionsListScreen.kt

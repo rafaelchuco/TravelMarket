@@ -7,12 +7,15 @@ import com.example.travelmarket.logic.domain.models.User
 import com.example.travelmarket.logic.domain.usecases.auth.GetProfileUseCase
 import com.example.travelmarket.logic.domain.usecases.auth.UpdateProfileParams
 import com.example.travelmarket.logic.domain.usecases.auth.UpdateProfileUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class ProfileViewModel(
+@HiltViewModel
+class ProfileViewModel @Inject constructor(
     private val getProfileUseCase: GetProfileUseCase,
     private val updateProfileUseCase: UpdateProfileUseCase
 ) : ViewModel() {

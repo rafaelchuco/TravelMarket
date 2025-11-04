@@ -27,6 +27,7 @@ import com.example.travelmarket.logic.viewmodels.flights.FlightsListViewModel
 @Composable
 fun FlightsTestScreen(
     onBack: () -> Unit,
+    navController: androidx.navigation.NavController? = null,
     viewModel: FlightsListViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
@@ -161,7 +162,16 @@ fun FlightsTestScreen(
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
                             items(currentState.flights) { flight ->
-                                FlightCard(flight = flight)
+                                FlightCard(
+                                    flight = flight,
+                                    onReserve = {
+                                        // Navegar a BookingFlow - los vuelos no tienen packageId directo
+                                        // Por ahora navegamos sin packageId, el usuario puede seleccionar después
+                                        navController?.navigate(
+                                            com.example.travelmarket.views.navigation.Routes.BookingFlow.createRoute(0L)
+                                        )
+                                    }
+                                )
                             }
                         }
                     }
@@ -172,7 +182,10 @@ fun FlightsTestScreen(
 }
 
 @Composable
-private fun FlightCard(flight: Flight) {
+private fun FlightCard(
+    flight: Flight,
+    onReserve: () -> Unit = {}
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -358,7 +371,7 @@ private fun FlightCard(flight: Flight) {
 
                 HorizontalDivider(color = Color(0xFFE0E0E0))
 
-                // Precio
+                // Precio y botón reservar
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -412,6 +425,31 @@ private fun FlightCard(flight: Flight) {
                             )
                         }
                     }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Botón Reservar
+                Button(
+                    onClick = onReserve,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFDC143C)
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Icon(
+                        Icons.Default.BookOnline,
+                        contentDescription = null,
+                        tint = Color.White
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        text = "Reservar Vuelo",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
                 }
             }
         }
